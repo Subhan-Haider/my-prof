@@ -686,6 +686,178 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ================= FEATURED EXTENSIONS ================= */}
+      <section className="border-t border-white/[0.08] bg-[#07080e] px-6 py-24 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <Reveal>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono text-[#8A2BE2]">
+                  <Globe size={14} />
+                  <span>BROWSER EXTENSIONS &amp; APPS</span>
+                </div>
+                <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
+                  FEATURED EXTENSIONS<span className="text-[#34d399]">.</span>
+                </h2>
+                <p className="mt-4 max-w-lg text-base text-[#94a3b8] leading-relaxed">
+                  Cross-browser tools and apps published on the Chrome Web Store, Edge Add-ons, Firefox AMO, and Microsoft Store.
+                </p>
+              </div>
+              <a
+                href="https://chromewebstore.google.com/u/0/search/Subhan%20Haider"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs font-mono text-[#34d399] hover:underline whitespace-nowrap"
+              >
+                <span>View on Chrome Store</span>
+                <ArrowUpRight size={14} />
+              </a>
+            </div>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {([
+              {
+                name: "LootOps",
+                url: "https://lootops.me",
+                role: "Tactical Gaming HUD",
+                desc: "Free game radar that tracks Epic & Steam giveaways in real time.",
+                color: "#34d399",
+                platforms: [
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/fbapdcgkainjgpgmopmgofaiieamenmi", color: "#E34F26" },
+                  { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/lfgnmjjplgmbkbcbinoioclbmjkbejoe", color: "#0078D7" },
+                  { label: "Firefox",href: "https://addons.mozilla.org/en-US/firefox/addon/lootops-epic-steam-games/", color: "#FF7139" },
+                ],
+              },
+              {
+                name: "GhostType AI",
+                url: "https://subhan.tech",
+                role: "AI Typing Automation",
+                desc: "AI-powered typing assistant that humanizes text and automates repetitive input.",
+                color: "#8A2BE2",
+                platforms: [
+                  { label: "Chrome",    href: "https://chromewebstore.google.com/detail/oailoanlpoofglbaechjhohmbbhpeifi", color: "#E34F26" },
+                  { label: "MS Store",  href: "https://apps.microsoft.com/store/detail/9P7BBQK6ZN58?cid=DevShareMCLPCS", color: "#0078D7" },
+                ],
+              },
+              {
+                name: "BlizFlow",
+                url: "https://blizflow.online",
+                role: "Business Management",
+                desc: "All-in-one AI business suite for automation, invoicing, and workflow management.",
+                color: "#3B82F6",
+                platforms: [
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/ipjbcbidibofdlpabpdghkkcmlpamffm", color: "#E34F26" },
+                  { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/iokecnjjfjjcopopcbaobmahmfhmkkha", color: "#0078D7" },
+                ],
+              },
+              {
+                name: "CodeLens",
+                url: "https://codelens.site",
+                role: "Extension Explorer",
+                desc: "Instant source auditing tool — explore and analyze any browser extension.",
+                color: "#F59E0B",
+                platforms: [
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/ehaocblggffmileeoeoiafpfjegonhjj", color: "#E34F26" },
+                  { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/dmgopgfalpffbbkfnjmmaophkkedaclg", color: "#0078D7" },
+                ],
+              },
+              {
+                name: "Hosh Solver",
+                url: "https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod",
+                role: "Canvas Assistant",
+                desc: "Smart assistant that helps solve Canvas LMS assignments and quizzes.",
+                color: "#34d399",
+                platforms: [
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod", color: "#E34F26" },
+                ],
+              },
+              {
+                name: "Image Converter Pro",
+                url: "https://lootops.website",
+                role: "Batch Image Processing",
+                desc: "Convert, resize, and optimize images in bulk — WebP, JPEG, PNG, AVIF.",
+                color: "#6366f1",
+                platforms: [
+                  { label: "MS Store", href: "https://apps.microsoft.com/store/detail/9N258RP6WM0Z?cid=DevShareMCLPCS", color: "#0078D7" },
+                  { label: "Edge",     href: "https://microsoftedge.microsoft.com/addons/detail/image-converter-pro/lgfkmndaibcbheaamhllbffifjlaabmm", color: "#0078D7" },
+                ],
+              },
+              {
+                name: "Emoji Smuggle",
+                url: "https://emoji.subhan.tech",
+                role: "Hidden Messenger",
+                desc: "Hide secret messages inside emoji — steganography for everyday chat.",
+                color: "#ec4899",
+                platforms: [
+                  { label: "Web",    href: "https://emoji.subhan.tech", color: "#ffffff" },
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/ckpmnmlhinfjjlgahbcfobmbcdjlomia", color: "#E34F26" },
+                  { label: "Chrome", href: "https://chromewebstore.google.com/detail/jphedandnaodohpddnilfloedkmogboa", color: "#E34F26" },
+                ],
+              },
+            ] as Array<{ name: string; url: string; role: string; desc: string; color: string; platforms: Array<{ label: string; href: string; color: string }> }>).map((ext, i) => (
+              <Reveal key={ext.name} delay={i * 0.07}>
+                <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 backdrop-blur-md hover:border-white/20 hover:bg-[#15192c]/80 transition-all">
+                  {/* Accent glow */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    style={{ boxShadow: `inset 0 0 30px ${ext.color}10` }}
+                  />
+
+                  <div>
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span
+                          className="text-[10px] font-mono uppercase tracking-widest"
+                          style={{ color: ext.color }}
+                        >
+                          {ext.role}
+                        </span>
+                        <h3 className="mt-1 font-display text-lg font-bold text-white group-hover:text-white transition-colors">
+                          {ext.name}
+                        </h3>
+                      </div>
+                      <a
+                        href={ext.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Visit ${ext.name}`}
+                        className="shrink-0 mt-1 w-7 h-7 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center text-[#64748b] hover:text-white hover:border-white/30 transition-colors"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    </div>
+
+                    <p className="mt-3 text-xs text-[#94a3b8] leading-relaxed">{ext.desc}</p>
+                  </div>
+
+                  {/* Platform badges */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {ext.platforms.map((p, pi) => (
+                      <a
+                        key={pi}
+                        href={p.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono text-[#94a3b8] hover:text-white hover:border-white/25 hover:bg-white/[0.08] transition-all"
+                        style={{ borderColor: `${p.color}30` }}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: p.color }}
+                        />
+                        {p.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ================= LIVE GITHUB REPOS ================= */}
       <section className="border-t border-white/[0.08] bg-[#090a12] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
