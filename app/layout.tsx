@@ -87,8 +87,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const savedTheme = localStorage.getItem('theme');
-                const theme = savedTheme === 'light' ? 'light' : 'dark';
+                const saved = localStorage.getItem('theme');
+                let theme = saved;
+                if (theme !== 'light' && theme !== 'dark') {
+                  theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
                 document.documentElement.classList.remove('light', 'dark');
                 document.documentElement.classList.add(theme);
                 document.documentElement.setAttribute('data-theme', theme);

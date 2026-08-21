@@ -9,32 +9,59 @@ interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
+  isSystem: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
   toggleTheme: () => {},
   setTheme: () => {},
+  isSystem: true,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
+  const [isSystem, setIsSystem] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    let initialTheme: Theme = "dark";
     try {
       const saved = localStorage.getItem("theme") as Theme | null;
       if (saved === "light" || saved === "dark") {
-        setThemeState(saved);
-        applyTheme(saved);
+        initialTheme = saved;
+        setIsSystem(false);
       } else {
-        // Default to dark
-        applyTheme("dark");
+        // Automatically check user device OS preference
+        const isSystemLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+        initialTheme = isSystemLight ? "light" : "dark";
+        setIsSystem(true);
       }
     } catch (e) {
-      applyTheme("dark");
+      initialTheme = "dark";
     }
+
+    setThemeState(initialTheme);
+    applyTheme(initialTheme);
     setMounted(true);
+
+    // Listen to device system theme changes in real-time
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+    const handleSystemChange = (e: MediaQueryListEvent) => {
+      const saved = localStorage.getItem("theme");
+      // If user hasn't explicitly overridden, follow device
+      if (!saved) {
+        const sysTheme: Theme = e.matches ? "light" : "dark";
+        setThemeState(sysTheme);
+        applyTheme(sysTheme);
+        setIsSystem(true);
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleSystemChange);
+      return () => mediaQuery.removeEventListener("change", handleSystemChange);
+    }
   }, []);
 
   const applyTheme = (t: Theme) => {
@@ -54,6 +81,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
+    setIsSystem(false);
     try {
       localStorage.setItem("theme", newTheme);
     } catch (e) {}
@@ -66,7 +94,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, isSystem }}>
       {children}
     </ThemeContext.Provider>
   );
