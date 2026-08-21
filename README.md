@@ -1,181 +1,82 @@
-# Subhan Haider — Personal Portfolio
+# <p align="center">👋 Hi there! I'm Subhan Haider</p>
 
-A modern, full-stack personal portfolio and project showcase built with **Next.js 15**, **React 19**, **Tailwind CSS v4**, and **Supabase** — fully mobile-responsive and powered by a custom CMS admin studio.
-
----
-
-## ✨ Features
-
-- **Animated Hero** — Framer Motion scroll reveals, glow effects, and a live GitHub stats counter
-- **Projects Archive** — Filterable, searchable project cards with slug-based case study pages
-- **Android Spotlight** — Dedicated section for native mobile engineering work
-- **Tech Stack Matrix** — Auto-animating marquee of tools and technologies
-- **Journey Timeline** — Education, internships, and milestones
-- **Resume Page** — Downloadable PDF CV with inline contact details
-- **Contact Form** — Topic-based inquiry form with live feedback
-- **Admin CMS** — Password-protected `/admin` studio to manage projects, skills, journey entries, and inbox messages — no external CMS needed
-- **100% Mobile Responsive** — Tested at 375 × 812 px (iPhone SE) across all routes
+<p align="center">
+  <a href="https://subhan.tech">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=35&pause=1000&color=8A2BE2&center=true&vCenter=true&width=600&lines=AI+%26+Automation+Engineer;Frontend+Developer;Digital+Ecosystem+Builder;Building+the+Future+of+Business" alt="Typing SVG" />
+  </a>
+</p>
 
 ---
 
-## 🛠 Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | [Next.js 15](https://nextjs.org/) (App Router) |
-| UI Library | [React 19](https://react.dev/) |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
-| Animations | [Framer Motion 12](https://www.framer.com/motion/) |
-| Icons | [Lucide React](https://lucide.dev/) |
-| Database | [Supabase](https://supabase.com/) (PostgreSQL + Auth) |
-| Fonts | Outfit · Plus Jakarta Sans · JetBrains Mono (Google Fonts) |
-| Language | TypeScript 5 |
-| Deployment | [Vercel](https://vercel.com/) |
+### 🚀 About Me
+Building tools that simplify business. I'm a **Frontend Developer** from **Canada** 🇨🇦 who focuses on **AI Integration** and **Ultra-Fast Automation**.
 
 ---
 
-## 📁 Project Structure
+### 🌐 Digital Ecosystem
 
-```
-.
-├── app/
-│   ├── page.tsx              # Homepage — hero, projects spotlight, android section, tech stack
-│   ├── projects/
-│   │   ├── page.tsx          # Projects archive — filter, search, grid/list view
-│   │   └── [slug]/page.tsx   # Individual case study page
-│   ├── resume/page.tsx       # CV / resume page with download
-│   ├── contact/page.tsx      # Contact form
-│   ├── admin/page.tsx        # Admin CMS dashboard (password-protected)
-│   ├── layout.tsx            # Root layout with font loading
-│   └── globals.css           # Global CSS, design tokens, utility classes
-│
-├── components/
-│   ├── site.tsx              # Shared Nav + Footer components
-│   └── providers.tsx         # Client providers (if any)
-│
-├── lib/
-│   ├── data.ts               # Static project & skill data (local seed)
-│   └── supabase.ts           # Supabase client initialisation
-│
-├── public/                   # Static assets (CV PDF, OG image, favicon)
-├── supabase/                 # Supabase schema / migrations
-├── .env.example              # Environment variable template
-└── next.config.ts
-```
+#### 🧠 AI & Intelligence
+<p align="left">
+  <a href="https://subhan.tech"><img src="https://img.shields.io/badge/Subhan.tech-Neural_Humanizer-8A2BE2?style=for-the-badge&logo=openai&logoColor=white" /></a>
+  <a href="https://blizflow.online"><img src="https://img.shields.io/badge/BlizFlow-AI_Business_Suite-3B82F6?style=for-the-badge&logo=fastapi&logoColor=white" /></a>
+  <a href="https://codiner.online"><img src="https://img.shields.io/badge/Codiner-Local_AI_Engine-10B981?style=for-the-badge&logo=codeforces&logoColor=white" /></a>
+</p>
+
+#### 🔐 Security & Architecture
+<p align="left">
+  <a href="https://codelens.site"><img src="https://img.shields.io/badge/CodeLens-Source_Auditing-F59E0B?style=for-the-badge&logo=visual-studio-code&logoColor=white" /></a>
+  <a href="https://upzy.store"><img src="https://img.shields.io/badge/Upzy.store-Secret_Management-6366F1?style=for-the-badge&logo=storefront&logoColor=white" /></a>
+</p>
+
+#### 🛠️ Utility & Gaming
+<p align="left">
+  <a href="https://lootops.me"><img src="https://img.shields.io/badge/LootOps-Free_Game_Radar-000000?style=for-the-badge&logo=world&logoColor=white" /></a>
+  <a href="https://lootops.website"><img src="https://img.shields.io/badge/LootOps_Utility-Image_Converter-000000?style=for-the-badge&logo=world&logoColor=white" /></a>
+  <a href="https://santabox.shop"><img src="https://img.shields.io/badge/SantaBox-PDF_Editor_Pro-EF4444?style=for-the-badge&logo=shopify&logoColor=white" /></a>
+</p>
 
 ---
 
-## 🚀 Getting Started
+### 🧩 Featured Extensions
+<div align="center">
 
-### Prerequisites
+| Tool | Platforms | Role |
+| :--- | :---: | :--- |
+| [**LootOps**](https://lootops.me) | [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/fbapdcgkainjgpgmopmgofaiieamenmi) [![Edge](https://img.shields.io/badge/-Edge-0078D7?logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/lfgnmjjplgmbkbcbinoioclbmjkbejoe) [![Firefox](https://img.shields.io/badge/-Firefox-FF7139?logo=firefox-browser&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/lootops-epic-steam-games/) | Tactical Gaming HUD |
+| [**GhostType AI**](https://subhan.tech) | [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/oailoanlpoofglbaechjhohmbbhpeifi) <a href="https://apps.microsoft.com/store/detail/9P7BBQK6ZN58?cid=DevShareMCLPCS" target="_blank"><img src="https://get.microsoft.com/images/en-us%20dark.svg" height="25" alt="Download from the Microsoft Store" /></a> | AI Typing Automation |
+| [**BlizFlow**](https://blizflow.online) | [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/ipjbcbidibofdlpabpdghkkcmlpamffm?utm_source=item-share-cb) [![Edge](https://img.shields.io/badge/-Edge-0078D7?logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/iokecnjjfjjcopopcbaobmahmfhmkkha) | Business Management |
+| [**CodeLens**](https://codelens.site) | [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/ehaocblggffmileeoeoiafpfjegonhjj) [![Edge](https://img.shields.io/badge/-Edge-0078D7?logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/dmgopgfalpffbbkfnjmmaophkkedaclg) | Extension Explorer |
+| [**Hosh Solver**](https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod) | [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod) | Canvas Assistant |
+| [**Image Converter Pro**](https://lootops.website) | <a href="https://apps.microsoft.com/store/detail/9N258RP6WM0Z?cid=DevShareMCLPCS" target="_blank"><img src="https://get.microsoft.com/images/en-us%20dark.svg" height="25" alt="Download from the Microsoft Store" /></a> [![Edge](https://img.shields.io/badge/-Edge-0078D7?logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/image-converter-pro/lgfkmndaibcbheaamhllbffifjlaabmm) | Batch Image Processing |
+| [**Emoji Smuggle**](https://emoji.subhan.tech) | [![Web](https://img.shields.io/badge/-Web-000000?logo=vercel&logoColor=white)](https://emoji.subhan.tech) [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/ckpmnmlhinfjjlgahbcfobmbcdjlomia?utm_source=item-share-cb) [![Chrome](https://img.shields.io/badge/-Chrome-E34F26?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/jphedandnaodohpddnilfloedkmogboa?utm_source=item-share-cb) | Hidden Messenger |
 
-- Node.js 20+
-- npm / pnpm
-- A [Supabase](https://supabase.com/) project (free tier is sufficient)
-
-### 1 — Clone & install
-
-```bash
-git clone https://github.com/Subhan-Haider/portfolio.git
-cd portfolio
-npm install
-```
-
-### 2 — Configure environment variables
-
-Copy the example file and fill in your values:
-
-```bash
-cp .env.example .env.local
-```
-
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase `anon` public key |
-| `ADMIN_PASSWORD` | Password to unlock `/admin` (stored only in server env) |
-
-### 3 — Run the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+</div>
 
 ---
 
-## 🔐 Admin CMS
-
-Navigate to `/admin` and enter the `ADMIN_PASSWORD` to access the studio.
-
-### Capabilities
-
-| Section | Actions |
-|---|---|
-| **Projects** | Create, edit, delete — title, stack, links, featured toggle |
-| **Skills** | Add / remove skills by category |
-| **Journey** | Manage timeline entries (education & experience) |
-| **Inbox** | View and delete contact form submissions |
-
-Admin state is persisted in Supabase and reflected live on all public pages.
+### 🛠️ Core Stack
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=js,ts,react,nextjs,py,nodejs,docker,git,vscode,figma,tailwind" />
+</p>
 
 ---
 
-## 📦 Scripts
-
-```bash
-npm run dev      # Start local dev server (http://localhost:3000)
-npm run build    # Build production bundle
-npm run start    # Serve production build locally
-npm run lint     # Run ESLint
-```
-
----
-
-## 🎨 Design System
-
-All design tokens live in `app/globals.css` as CSS custom properties:
-
-```css
---accent-emerald: #34d399;   /* primary CTA */
---accent-indigo:  #6366f1;   /* secondary accent */
---bg-main:        #090a12;   /* page background */
---font-display:   'Outfit';
---font-sans:      'Plus Jakarta Sans';
---font-mono:      'JetBrains Mono';
-```
-
-Key utility classes: `.glass-panel`, `.display-title`, `.gradient-text-mint`, `.glow-emerald`, `.scrollbar-none`, `.marquee-track`.
+### 🌐 Socials
+<p align="center">
+  <a href="https://subhan.tech" target="_blank"><img src="https://img.shields.io/badge/PORTFOLIO-8A2BE2?style=for-the-badge&logo=vercel&logoColor=white" /></a>
+  <a href="https://discordapp.com/users/subhan_haid" target="_blank"><img src="https://img.shields.io/badge/DISCORD-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
+  <a href="https://www.instagram.com/subhan_haid" target="_blank"><img src="https://img.shields.io/badge/INSTAGRAM-E4405F?style=for-the-badge&logo=instagram&logoColor=white" /></a>
+  <a href="https://www.tiktok.com/@s.subhan.haider" target="_blank"><img src="https://img.shields.io/badge/TIKTOK-000000?style=for-the-badge&logo=tiktok&logoColor=white" /></a>
+  <a href="mailto:contact@subhan.tech" target="_blank"><img src="https://img.shields.io/badge/EMAIL-D14836?style=for-the-badge&logo=gmail&logoColor=white" /></a>
+  <a href="https://www.youtube.com/@ImgConvertPro" target="_blank"><img src="https://img.shields.io/badge/YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
+  <a href="https://paypal.me/Subhanhaide" target="_blank"><img src="https://img.shields.io/badge/PAYPAL-00457C?style=for-the-badge&logo=paypal&logoColor=white" /></a>
+  <a href="https://x.com/Subhan_haide" target="_blank"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
+  <a href="https://discord.gg/MmRfqXqvC2" target="_blank"><img src="https://img.shields.io/badge/DISCORD_SERVER-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
+  <a href="https://www.linkedin.com/in/subhan-haider" target="_blank"><img src="https://img.shields.io/badge/LINKEDIN-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
+</p>
 
 ---
 
-## 📱 Mobile Responsiveness
-
-All routes are optimised for viewports from **320 px** to **1920 px**:
-
-- Filter chips and admin tabs use `overflow-x-auto scrollbar-none` for horizontal swipe
-- CTA button groups use `flex-col sm:flex-row` — stacked on mobile, inline on tablet+
-- Floating decorative elements use `hidden sm:flex` / `hidden md:flex` to prevent clipping
-- Inputs and selects enforce `font-size: 16px` on mobile to prevent iOS Safari auto-zoom
-- `overflow-x: hidden` on `body` prevents horizontal bleed from glow spheres
-
----
-
-## 🚢 Deployment
-
-The easiest way to deploy is [Vercel](https://vercel.com/new):
-
-1. Import the GitHub repo in Vercel
-2. Set the environment variables under **Project Settings → Environment Variables**
-3. Deploy — Vercel auto-detects Next.js and handles everything
-
----
-
-## 📄 License
-
-This project is open-sourced under the [MIT License](LICENSE). Feel free to fork, adapt, and build your own portfolio from it — attribution appreciated but not required.
-
----
-
-> Built with ❤️ by [Subhan Haider](https://github.com/Subhan-Haider)
+<p align="center">
+  <i>"Automating the present, inventing the future."</i>
+</p>
