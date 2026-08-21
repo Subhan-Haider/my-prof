@@ -102,6 +102,65 @@ export async function updateAdminPassword(newPassword: string): Promise<boolean>
   }
 }
 
+// Store and verify OTP in data.json (or fallback memory)
+export async function createAndSaveAdminOtp(email: string): Promise<string> {
+  const normalizedEmail = email.toLowerCase().trim();
+  if (normalizedEmail !== AUTHORIZED_ADMIN_EMAIL) {
+    throw new Error(`Unauthorized email: ${email}`);
+  }
+
+  // Generate 6 digit numeric code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const codeHash = crypto.createHmac("sha256", AUTH_SECRET).update(`${code}:${normalizedEmail}`).digest("hex");
+
+  try {
+    const fileContents = await fs.readFile(DATA_FILE_PATH, "utf8");
+    const data = JSON.parse(fileContents);
+    data.adminOtp = {
+      email: normalizedEmail,
+      codeHash,
+      expiresAt,
+      createdAt: new Date().toISOString(),
+    };
+    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error("Error storing OTP:", err);
+  }
+
+  return code;
+}
+
+export async function verifyAdminOtp(email: string, enteredCode: string): Promise<boolean> {
+  const normalizedEmail = email.toLowerCase().trim();
+  if (normalizedEmail !== AUTHORIZED_ADMIN_EMAIL) {
+    return false;
+  }
+
+  try {
+    const fileContents = await fs.readFile(DATA_FILE_PATH, "utf8");
+    const data = JSON.parse(fileContents);
+
+    if (!data.adminOtp) return false;
+    const { codeHash, expiresAt, email: storedEmail } = data.adminOtp;
+
+    if (storedEmail !== normalizedEmail) return false;
+    if (Date.now() > expiresAt) return false;
+
+    const attemptHash = crypto.createHmac("sha256", AUTH_SECRET).update(`${enteredCode.trim()}:${normalizedEmail}`).digest("hex");
+    if (crypto.timingSafeEqual(Buffer.from(attemptHash), Buffer.from(codeHash))) {
+      // Clear OTP after successful verification (one-time use)
+      delete data.adminOtp;
+      await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error verifying OTP:", err);
+    return false;
+  }
+}
+
 // Server-side helper to verify request authentication
 export async function isRequestAuthorized(request?: Request): Promise<boolean> {
   // 1. Check Authorization header
@@ -128,3 +187,5 @@ export async function isRequestAuthorized(request?: Request): Promise<boolean> {
 
   return false;
 }
+
+

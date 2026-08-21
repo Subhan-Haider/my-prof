@@ -52,6 +52,9 @@ import {
   UserCheck,
   ShieldCheck,
   AlertTriangle,
+  Send,
+  MailCheck,
+  ArrowRight,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -129,11 +132,26 @@ export default function AdminPage() {
   // Auth State
   const [authStatus, setAuthStatus] = useState<"checking" | "authenticated" | "unauthenticated">("checking");
   const [adminUser, setAdminUser] = useState<{ email: string; role?: string } | null>(null);
+  const [loginMode, setLoginMode] = useState<"otp" | "password">("otp");
   const [loginEmail, setLoginEmail] = useState("setupg98@gmail.com");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Email OTP Verification State
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpResendCountdown, setOtpResendCountdown] = useState(0);
+
+  // Timer for resend OTP
+  useEffect(() => {
+    if (otpResendCountdown > 0) {
+      const timer = setTimeout(() => setOtpResendCountdown((c) => c - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpResendCountdown]);
 
   // Security password change in settings
   const [currentPasswordInput, setCurrentPasswordInput] = useState("");
@@ -207,7 +225,92 @@ export default function AdminPage() {
     checkAuth();
   }, []);
 
-  // Login handler
+  // Send OTP Email Handler
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setLoginError(null);
+
+    const normalizedEmail = loginEmail.trim().toLowerCase();
+    if (normalizedEmail !== "setupg98@gmail.com") {
+      setLoginError("Access Denied: Only setupg98@gmail.com is authorized to receive verification codes.");
+      return;
+    }
+
+    try {
+      setOtpSending(true);
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "send-otp",
+          email: normalizedEmail,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setOtpSent(true);
+        setOtpResendCountdown(60);
+        showToast("6-digit verification code sent to setupg98@gmail.com!");
+      } else {
+        setLoginError(data.error || "Failed to send verification code. Please check SMTP configuration.");
+      }
+    } catch {
+      setLoginError("Network error while requesting verification code.");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  // Verify OTP & Login Handler
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+
+    const normalizedEmail = loginEmail.trim().toLowerCase();
+    const cleanCode = otpCode.trim();
+
+    if (!cleanCode || cleanCode.length < 6) {
+      setLoginError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+
+    try {
+      setLoginLoading(true);
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify-otp",
+          email: normalizedEmail,
+          otp: cleanCode,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.token) {
+          try {
+            localStorage.setItem("admin_auth_token", data.token);
+          } catch {}
+        }
+        setAuthStatus("authenticated");
+        setAdminUser(data.user || { email: "setupg98@gmail.com", role: "Superadmin" });
+        showToast("Verification successful! Welcome to Admin Studio.");
+        fetchData();
+      } else {
+        setLoginError(data.error || "Invalid or expired verification code.");
+      }
+    } catch {
+      setLoginError("Network connection error. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // Password Login handler
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
@@ -1016,11 +1119,48 @@ export default function AdminPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setLoginEmail("setupg98@gmail.com")}
+                onClick={() => {
+                  setLoginEmail("setupg98@gmail.com");
+                  setOtpSent(false);
+                }}
                 className="shrink-0 px-2.5 py-1 rounded-lg bg-[#34d399]/15 text-[#34d399] text-[10px] font-mono hover:bg-[#34d399]/25 transition-colors cursor-pointer"
                 title="Fill authorized email"
               >
                 Auto-fill
+              </button>
+            </div>
+
+            {/* Mode Switcher: Email OTP vs Password */}
+            <div className="mt-5 grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginMode("otp");
+                  setLoginError(null);
+                }}
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                  loginMode === "otp"
+                    ? "bg-[#34d399] text-[#090a12] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Mail size={13} />
+                <span>Email Code</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginMode("password");
+                  setLoginError(null);
+                }}
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                  loginMode === "password"
+                    ? "bg-[#34d399] text-[#090a12] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Key size={13} />
+                <span>Password</span>
               </button>
             </div>
 
@@ -1032,79 +1172,213 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="mt-6 space-y-4">
-              <div>
-                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
-                  <span>Administrator Email</span>
-                  {!isAuthorizedEmail && loginEmail.length > 0 && (
-                    <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com authorized</span>
-                  )}
-                </label>
-                <div className="relative">
-                  <input
-                    required
-                    type="email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="setupg98@gmail.com"
-                    className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
-                      !isAuthorizedEmail && loginEmail.length > 0
-                        ? "border-amber-500/60 focus:border-amber-400"
-                        : "border-[var(--border-medium)] focus:border-[#34d399]"
-                    }`}
-                  />
-                  {isAuthorizedEmail && (
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
-                      <CheckCircle2 size={16} />
+            {/* MODE 1: EMAIL OTP VERIFICATION */}
+            {loginMode === "otp" && (
+              <div className="mt-5 space-y-4">
+                {!otpSent ? (
+                  <form onSubmit={handleSendOtp} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
+                        <span>Administrator Email</span>
+                        {!isAuthorizedEmail && loginEmail.length > 0 && (
+                          <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com</span>
+                        )}
+                      </label>
+                      <div className="relative">
+                        <input
+                          required
+                          type="email"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          placeholder="setupg98@gmail.com"
+                          className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
+                            !isAuthorizedEmail && loginEmail.length > 0
+                              ? "border-amber-500/60 focus:border-amber-400"
+                              : "border-[var(--border-medium)] focus:border-[#34d399]"
+                          }`}
+                        />
+                        {isAuthorizedEmail && (
+                          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
+                            <CheckCircle2 size={16} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[var(--text-muted)] mt-1.5">
+                        A secure 6-digit verification code will be sent via SMTP to this inbox.
+                      </p>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
-                  Admin Password
-                </label>
-                <div className="relative">
-                  <input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="Enter admin password"
-                    className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] transition-colors focus:border-[#34d399] focus:outline-none pr-11 font-mono"
-                  />
+                    <button
+                      type="submit"
+                      disabled={otpSending}
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg shadow-[#34d399]/20 hover:bg-[#6ee7b7] hover:shadow-[#34d399]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {otpSending ? (
+                        <>
+                          <RefreshCw size={14} className="animate-spin" />
+                          <span>Dispatching Verification Email...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send size={14} />
+                          <span>Send 6-Digit Code</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in">
+                    <div className="p-3 rounded-2xl border border-[#34d399]/30 bg-[#34d399]/10 text-xs font-mono text-[#34d399] flex items-center gap-2">
+                      <MailCheck size={16} className="shrink-0" />
+                      <div className="min-w-0">
+                        <span className="font-semibold block">Code Dispatched!</span>
+                        <span className="text-[11px] text-[var(--text-secondary)] truncate block">
+                          Check {loginEmail} for the 6-digit passcode.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                        Enter 6-Digit Verification Code
+                      </label>
+                      <input
+                        required
+                        autoFocus
+                        type="text"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                        placeholder="••••••"
+                        className="w-full rounded-2xl border border-[#34d399]/40 bg-[var(--bg-surface-elevated)] px-4 py-3.5 text-center text-xl font-bold font-mono tracking-[0.5em] text-[#34d399] transition-colors focus:border-[#34d399] focus:outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loginLoading || otpCode.length !== 6}
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg shadow-[#34d399]/20 hover:bg-[#6ee7b7] hover:shadow-[#34d399]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {loginLoading ? (
+                        <>
+                          <RefreshCw size={14} className="animate-spin" />
+                          <span>Verifying Code...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck size={15} />
+                          <span>Verify &amp; Enter Studio</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center justify-between text-xs font-mono pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpSent(false);
+                          setOtpCode("");
+                        }}
+                        className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                      >
+                        ← Change Email
+                      </button>
+
+                      {otpResendCountdown > 0 ? (
+                        <span className="text-[11px] text-[var(--text-muted)]">
+                          Resend code in {otpResendCountdown}s
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSendOtp()}
+                          disabled={otpSending}
+                          className="text-[#34d399] hover:underline cursor-pointer"
+                        >
+                          Resend Code
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* MODE 2: ADMIN PASSWORD */}
+            {loginMode === "password" && (
+              <form onSubmit={handleLogin} className="mt-5 space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
+                    <span>Administrator Email</span>
+                    {!isAuthorizedEmail && loginEmail.length > 0 && (
+                      <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com authorized</span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      required
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="setupg98@gmail.com"
+                      className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
+                        !isAuthorizedEmail && loginEmail.length > 0
+                          ? "border-amber-500/60 focus:border-amber-400"
+                          : "border-[var(--border-medium)] focus:border-[#34d399]"
+                      }`}
+                    />
+                    {isAuthorizedEmail && (
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
+                        <CheckCircle2 size={16} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                    Admin Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      required
+                      type={showPassword ? "text" : "password"}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="Enter admin password"
+                      className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] transition-colors focus:border-[#34d399] focus:outline-none pr-11 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2">
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                    type="submit"
+                    disabled={loginLoading}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg shadow-[#34d399]/20 hover:bg-[#6ee7b7] hover:shadow-[#34d399]/30 transition-all cursor-pointer disabled:opacity-50"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {loginLoading ? (
+                      <>
+                        <RefreshCw size={14} className="animate-spin" />
+                        <span>Authenticating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={14} />
+                        <span>Sign In with Password</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loginLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg shadow-[#34d399]/20 hover:bg-[#6ee7b7] hover:shadow-[#34d399]/30 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {loginLoading ? (
-                    <>
-                      <RefreshCw size={14} className="animate-spin" />
-                      <span>Authenticating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={14} />
-                      <span>Sign In to Admin Studio</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+              </form>
+            )}
 
             {/* Back link & help */}
             <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
