@@ -193,58 +193,25 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Right Column: Interactive Real Screenshot & App Showcase */}
+          {/* Right Column: Pure Real Screenshot Showcase */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.95, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="relative lg:h-[620px] flex items-center justify-center w-full"
           >
-            {/* Ambient Background Box with Glass border */}
+            {/* Floating Device Showcase - ONLY Pure Images */}
             <motion.div
-              animate={{ y: [0, -6, 0] }}
+              animate={{ y: [0, -8, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/85 to-[#0c0e17]/95 p-4 sm:p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
+              className="relative flex flex-col items-center justify-center group"
             >
-              {/* Window Bar & Screen Tabs */}
-              <div className="flex flex-wrap items-center justify-between pb-3.5 mb-3 sm:mb-4 border-b border-white/10 text-xs font-mono gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
-                  <span className="ml-2 text-white/80 font-semibold font-mono text-[11px] truncate max-w-[140px] sm:max-w-none">
-                    {currentHero.file}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-2.5 py-0.5 text-[11px] text-[#34d399]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
-                  <span>{currentHero.tag}</span>
-                </div>
-              </div>
-
-              {/* Screenshots Carousel Selector Tabs */}
-              <div className="flex items-center gap-1.5 mb-3 sm:mb-4 p-1 bg-black/40 border border-white/5 rounded-full overflow-x-auto scrollbar-none">
-                {safeScreenshots.map((item, idx) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveHeroIndex(idx)}
-                    className={`flex-1 min-w-[70px] py-1.5 px-2.5 rounded-full text-[11px] font-mono transition-all text-center truncate ${
-                      currentIdx === idx
-                        ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_12px_rgba(52,211,153,0.35)]"
-                        : "text-[#94a3b8] hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    {item.title}
-                  </button>
-                ))}
-              </div>
-
-              {/* Smartphone Simulator with Real Screenshot */}
-              <div className="relative mx-auto w-full max-w-[270px] sm:max-w-[310px] aspect-[9/18.5] rounded-[2.2rem] border-[6px] sm:border-[7px] border-[#1e2238] bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between group">
+              {/* Smartphone Simulator */}
+              <div className="relative mx-auto w-full max-w-[280px] sm:max-w-[320px] aspect-[9/18.5] rounded-[2.5rem] border-[8px] border-[#1e2238] bg-[#07080e] shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col justify-between">
                 {/* Speaker Notch & Camera */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 h-3.5 sm:h-4 w-20 sm:w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center">
-                  <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
-                  <div className="w-4 sm:w-5 h-1 rounded-full bg-[#0d0f1a]" />
+                <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center pointer-events-none">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
+                  <div className="w-5 h-1 rounded-full bg-[#0d0f1a]" />
                 </div>
 
                 {/* Left/Right Quick Navigation Arrows */}
@@ -255,9 +222,9 @@ export default function Home() {
                     )
                   }
                   aria-label="Previous screenshot"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={18} />
                 </button>
 
                 <button
@@ -265,49 +232,39 @@ export default function Home() {
                     setActiveHeroIndex((prev) => (prev + 1) % safeScreenshots.length)
                   }
                   aria-label="Next screenshot"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={18} />
                 </button>
 
-                {/* Real High-Res Screenshot Image */}
+                {/* Real High-Res Screenshot Image (Pure, no overlay text) */}
                 <div className="relative w-full h-full overflow-hidden">
                   <img
                     key={currentHero.image}
                     src={currentHero.image}
-                    alt={currentHero.title}
+                    alt={currentHero.title || "App Screenshot"}
                     className="w-full h-full object-cover object-top transition-opacity duration-300 select-none pointer-events-none"
                   />
                   {/* Subtle glass reflection overlay */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent pointer-events-none" />
                 </div>
-
-                {/* Floating Bottom Screenshot Info Bar */}
-                <div className="absolute bottom-2.5 inset-x-2.5 rounded-xl bg-[#090a12]/90 border border-white/10 p-2.5 backdrop-blur-md z-20 flex items-center justify-between text-left">
-                  <div>
-                    <span className="text-[10px] font-mono text-[#34d399] uppercase tracking-wider block">
-                      {currentHero.badge}
-                    </span>
-                    <h5 className="text-xs font-bold text-white leading-tight">
-                      {currentHero.title}
-                    </h5>
-                  </div>
-                  <div className="flex gap-1">
-                    {safeScreenshots.map((_, i) => (
-                      <span
-                        key={i}
-                        onClick={() => setActiveHeroIndex(i)}
-                        className={`cursor-pointer rounded-full transition-all ${
-                          currentIdx === i
-                            ? "w-4 h-1.5 bg-[#34d399]"
-                            : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
               </div>
 
+              {/* Minimal Dot Indicators */}
+              <div className="mt-5 flex items-center gap-2">
+                {safeScreenshots.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveHeroIndex(i)}
+                    aria-label={`Slide ${i + 1}`}
+                    className={`rounded-full transition-all ${
+                      currentIdx === i
+                        ? "w-6 h-2 bg-[#34d399] shadow-[0_0_10px_rgba(52,211,153,0.5)]"
+                        : "w-2 h-2 bg-white/20 hover:bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
             </motion.div>
           </motion.div>
         </div>
