@@ -135,16 +135,17 @@ export default function ResumePage() {
               {techCategories.map((cat) => (
                 <div
                   key={cat.category}
-                  className="rounded-xl border border-white/5 bg-white/[0.02] p-5"
+                  className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5"
                 >
-                  <h3 className="text-sm font-bold text-white font-display mb-3">
-                    {cat.category}
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] font-display mb-3 flex items-center justify-between">
+                    <span>{cat.category}</span>
+                    <span className="text-xs font-mono text-emerald-600 dark:text-[#34d399] font-medium">{cat.items.length} skills</span>
                   </h3>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {cat.items.map((item) => (
                       <span
                         key={item.name}
-                        className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-mono text-[#cbd5e1]"
+                        className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1 text-xs font-mono text-[var(--text-primary)] shadow-sm"
                       >
                         {item.name}
                       </span>

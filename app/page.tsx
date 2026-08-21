@@ -846,23 +846,23 @@ export default function Home() {
                     href={repo.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 hover:bg-[#15192c]/80 transition-all"
+                    className="group flex h-full flex-col justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[var(--border-active)] hover:shadow-md shadow-sm dark:shadow-none transition-all"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-[#64748b] group-hover:text-white transition-colors">
+                      <div className="flex items-center justify-between text-[#64748b] group-hover:text-[var(--text-primary)] transition-colors">
                         <FolderGit2 size={16} />
                         <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <h4 className="mt-3 font-display font-bold text-white text-base truncate">
+                      <h4 className="mt-3 font-display font-bold text-[var(--text-primary)] text-base truncate">
                         {repo.name}
                       </h4>
-                      <p className="mt-2 text-xs text-[#94a3b8] line-clamp-2 leading-relaxed">
+                      <p className="mt-2 text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
                         {repo.description || "Open source experiment and code shared on GitHub."}
                       </p>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
-                      <span className="text-[#34d399]">{repo.language || "Code"}</span>
+                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-[var(--border-subtle)] text-[11px] font-mono text-[#64748b]">
+                      <span className="text-emerald-600 dark:text-[#34d399] font-medium">{repo.language || "Code"}</span>
                       <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1">
                           <Star size={11} /> {repo.stars}
@@ -883,20 +883,20 @@ export default function Home() {
                     href="https://github.com/Subhan-Haider"
                     target="_blank"
                     rel="noreferrer"
-                    className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 transition-all"
+                    className="group flex h-full flex-col justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[var(--border-active)] hover:shadow-md shadow-sm dark:shadow-none transition-all"
                   >
                     <div>
                       <div className="flex items-center justify-between text-[#64748b]">
                         <FolderGit2 size={16} />
                         <ArrowUpRight size={14} />
                       </div>
-                      <h4 className="mt-3 font-display font-bold text-white text-base">
+                      <h4 className="mt-3 font-display font-bold text-[var(--text-primary)] text-base">
                         {item.name}
                       </h4>
-                      <p className="mt-2 text-xs text-[#94a3b8] leading-relaxed">{item.desc}</p>
+                      <p className="mt-2 text-xs text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
                     </div>
-                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
-                      <span className="text-[#34d399]">{item.lang}</span>
+                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-[var(--border-subtle)] text-[11px] font-mono text-[#64748b]">
+                      <span className="text-emerald-600 dark:text-[#34d399] font-medium">{item.lang}</span>
                       <span>Open Source</span>
                     </div>
                   </a>
