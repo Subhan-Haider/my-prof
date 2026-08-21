@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Send,
   Mail,
@@ -81,7 +82,11 @@ export default function ContactPage() {
 
           <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] items-start">
             {/* Left Column: Direct Info */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
 
               <h1 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 START A <br />
@@ -129,10 +134,15 @@ export default function ContactPage() {
                   </div>
                 </a>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right Column: Interactive Form */}
-            <div className="rounded-3xl border border-white/10 bg-[#0f111d]/90 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl">
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="rounded-3xl border border-white/10 bg-[#0f111d]/90 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl"
+            >
               <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] pb-4 mb-6 border-b border-white/10">
                 <MessageSquare size={15} />
                 <span>DIRECT MESSAGE FORM</span>
@@ -277,7 +287,7 @@ export default function ContactPage() {
                   </button>
                 </form>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
