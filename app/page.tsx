@@ -29,37 +29,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Nav, Footer, Reveal, GlowBadge } from "@/components/site";
-import type { projects as _projects, technologies as _technologies, techCategories as _techCategories, journey as _journey, stats as _stats, extensions as _extensions } from "@/lib/data";
-
-const heroScreenshots = [
-  {
-    id: "dashboard",
-    title: "Daily Finance",
-    file: "DailyFinance.kt",
-    tag: "Native Compose",
-    image: "/images/daily-finance-dashboard.jpg",
-    badge: "Android App",
-    desc: "Jetpack Compose Dashboard with dynamic budget breakdown & transactions",
-  },
-  {
-    id: "analytics",
-    title: "Analytics & Budget",
-    file: "AnalyticsViewModel.kt",
-    tag: "Reactive Flow",
-    image: "/images/daily-finance-analytics.jpg",
-    badge: "Room DB & Charts",
-    desc: "Monthly trend analysis, goal tracking, and category metrics",
-  },
-  {
-    id: "app-tester",
-    title: "App Tester Hub",
-    file: "ApkDistribution.tsx",
-    tag: "Next.js / APK",
-    image: "/images/app-tester-hub.jpg",
-    badge: "Release Portal",
-    desc: "Real-time APK release portal with changelog and direct install",
-  },
-];
+import {
+  heroScreenshots as defaultHeroScreenshots,
+  HeroScreenshot,
+  projects as _projects,
+  technologies as _technologies,
+  techCategories as _techCategories,
+  journey as _journey,
+  stats as _stats,
+  extensions as _extensions,
+} from "@/lib/data";
 
 interface GitHubRepo {
   name: string;
@@ -83,13 +62,15 @@ export default function Home() {
     journey: typeof _journey;
     stats: typeof _stats;
     extensions: typeof _extensions;
+    heroScreenshots: HeroScreenshot[];
   }>({
     projects: [],
     technologies: [],
     techCategories: [],
     journey: [],
     stats: [],
-    extensions: []
+    extensions: [],
+    heroScreenshots: defaultHeroScreenshots,
   } as any);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -101,9 +82,6 @@ export default function Home() {
           setRepos(data.slice(0, 4));
         }
       })
-      .catch(() => { })
-      .finally(() => setLoadingRepos(false));
-
     fetch("/api/data")
       .then((res) => res.json())
       .then((resData) => {
@@ -115,7 +93,19 @@ export default function Home() {
       .finally(() => setLoadingData(false));
   }, []);
 
-  const { projects = [], technologies = [], techCategories = [], journey = [], stats = [], extensions = [] } = data;
+  const {
+    projects = [],
+    technologies = [],
+    techCategories = [],
+    journey = [],
+    stats = [],
+    extensions = [],
+    heroScreenshots = defaultHeroScreenshots,
+  } = data;
+
+  const safeScreenshots = heroScreenshots && heroScreenshots.length > 0 ? heroScreenshots : defaultHeroScreenshots;
+  const currentIdx = activeHeroIndex >= safeScreenshots.length ? 0 : activeHeroIndex;
+  const currentHero = safeScreenshots[currentIdx] || defaultHeroScreenshots[0];
 
   return (
     <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
@@ -225,23 +215,23 @@ export default function Home() {
                   <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
                   <span className="ml-2 text-white/80 font-semibold font-mono text-[11px]">
-                    {heroScreenshots[activeHeroIndex].file}
+                    {currentHero.file}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-2.5 py-0.5 text-[11px] text-[#34d399]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
-                  <span>{heroScreenshots[activeHeroIndex].tag}</span>
+                  <span>{currentHero.tag}</span>
                 </div>
               </div>
 
               {/* Screenshots Carousel Selector Tabs */}
               <div className="flex items-center justify-center gap-1.5 mb-4 p-1 bg-black/40 border border-white/5 rounded-full">
-                {heroScreenshots.map((item, idx) => (
+                {safeScreenshots.map((item, idx) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveHeroIndex(idx)}
                     className={`flex-1 py-1.5 px-3 rounded-full text-[11px] font-mono transition-all text-center truncate ${
-                      activeHeroIndex === idx
+                      currentIdx === idx
                         ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_12px_rgba(52,211,153,0.35)]"
                         : "text-[#94a3b8] hover:text-white hover:bg-white/5"
                     }`}
@@ -263,7 +253,7 @@ export default function Home() {
                 <button
                   onClick={() =>
                     setActiveHeroIndex((prev) =>
-                      prev === 0 ? heroScreenshots.length - 1 : prev - 1
+                      prev === 0 ? safeScreenshots.length - 1 : prev - 1
                     )
                   }
                   aria-label="Previous Screenshot"
@@ -274,7 +264,7 @@ export default function Home() {
                 <button
                   onClick={() =>
                     setActiveHeroIndex((prev) =>
-                      prev === heroScreenshots.length - 1 ? 0 : prev + 1
+                      prev === safeScreenshots.length - 1 ? 0 : prev + 1
                     )
                   }
                   aria-label="Next Screenshot"
@@ -286,9 +276,9 @@ export default function Home() {
                 {/* Real High-Res Screenshot Image */}
                 <div className="relative w-full h-full overflow-hidden">
                   <img
-                    key={heroScreenshots[activeHeroIndex].image}
-                    src={heroScreenshots[activeHeroIndex].image}
-                    alt={heroScreenshots[activeHeroIndex].title}
+                    key={currentHero.image}
+                    src={currentHero.image}
+                    alt={currentHero.title}
                     className="w-full h-full object-cover object-top transition-opacity duration-300 select-none pointer-events-none"
                   />
                   {/* Subtle glass reflection overlay */}
@@ -299,19 +289,19 @@ export default function Home() {
                 <div className="absolute bottom-2.5 inset-x-2.5 rounded-xl bg-[#090a12]/90 border border-white/10 p-2.5 backdrop-blur-md z-20 flex items-center justify-between text-left">
                   <div>
                     <span className="text-[10px] font-mono text-[#34d399] uppercase tracking-wider block">
-                      {heroScreenshots[activeHeroIndex].badge}
+                      {currentHero.badge}
                     </span>
                     <h5 className="text-xs font-bold text-white leading-tight">
-                      {heroScreenshots[activeHeroIndex].title}
+                      {currentHero.title}
                     </h5>
                   </div>
                   <div className="flex gap-1">
-                    {heroScreenshots.map((_, i) => (
+                    {safeScreenshots.map((_, i) => (
                       <span
                         key={i}
                         onClick={() => setActiveHeroIndex(i)}
                         className={`cursor-pointer rounded-full transition-all ${
-                          activeHeroIndex === i
+                          currentIdx === i
                             ? "w-4 h-1.5 bg-[#34d399]"
                             : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
                         }`}
@@ -324,7 +314,7 @@ export default function Home() {
               {/* Bottom Interactive Feature Label */}
               <p className="mt-4 text-center text-xs text-[#94a3b8] font-mono flex items-center justify-center gap-2">
                 <Sparkles size={13} className="text-[#34d399]" />
-                <span>{heroScreenshots[activeHeroIndex].desc}</span>
+                <span>{currentHero.desc}</span>
               </p>
             </motion.div>
           </motion.div>

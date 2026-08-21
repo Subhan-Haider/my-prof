@@ -296,3 +296,44 @@ export const extensions: Extension[] = [
   },
 ];
 
+export type HeroScreenshot = {
+  id: string;
+  title: string;
+  file: string;
+  tag: string;
+  image: string;
+  badge: string;
+  desc: string;
+};
+
+export const heroScreenshots: HeroScreenshot[] = [
+  {
+    id: "dashboard",
+    title: "Daily Finance",
+    file: "DailyFinance.kt",
+    tag: "Native Compose",
+    image: "/images/daily-finance-dashboard.jpg",
+    badge: "Android App",
+    desc: "Jetpack Compose Dashboard with dynamic budget breakdown & transactions",
+  },
+  {
+    id: "analytics",
+    title: "Analytics & Budget",
+    file: "AnalyticsViewModel.kt",
+    tag: "Reactive Flow",
+    image: "/images/daily-finance-analytics.jpg",
+    badge: "Room DB & Charts",
+    desc: "Monthly trend analysis, goal tracking, and category metrics",
+  },
+  {
+    id: "app-tester",
+    title: "App Tester Hub",
+    file: "ApkDistribution.tsx",
+    tag: "Next.js / APK",
+    image: "/images/app-tester-hub.jpg",
+    badge: "Release Portal",
+    desc: "Real-time APK release portal with changelog and direct install",
+  },
+];
+
+

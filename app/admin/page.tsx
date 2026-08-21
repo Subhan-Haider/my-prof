@@ -36,6 +36,12 @@ import {
   FileText,
   Link as LinkIcon,
   Maximize2,
+  Image as ImageIcon,
+  ArrowUp,
+  ArrowDown,
+  UploadCloud,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -43,6 +49,8 @@ import {
   techCategories as initialTechCategories,
   journey as initialJourney,
   extensions as initialExtensions,
+  heroScreenshots as initialHeroScreenshots,
+  HeroScreenshot,
   Project,
   TechCategory,
   Extension,
@@ -97,7 +105,7 @@ const defaultSettings = {
   resumeFileName: "",
 };
 
-type AdminTab = "Projects" | "Skills" | "Journey" | "Messages" | "Settings" | "Database" | "Extensions";
+type AdminTab = "Projects" | "Extensions" | "Hero" | "Skills" | "Journey" | "Messages" | "Settings" | "Database";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>("Projects");
@@ -111,6 +119,9 @@ export default function AdminPage() {
   const [messages, setMessages] = useState<MessageItem[]>(defaultMessages);
   const [settings, setSettings] = useState(defaultSettings);
   const [extensionList, setExtensionList] = useState<Extension[]>(initialExtensions);
+  const [heroList, setHeroList] = useState<HeroScreenshot[]>(initialHeroScreenshots);
+  const [activeHeroPreview, setActiveHeroPreview] = useState(0);
+  const [uploadingHeroId, setUploadingHeroId] = useState<string | null>(null);
   const [extraData, setExtraData] = useState<any>({});
 
   useEffect(() => {
@@ -125,6 +136,9 @@ export default function AdminPage() {
           if (data.extensions) setExtensionList(data.extensions);
           if (data.settings) setSettings(data.settings);
           if (data.messages) setMessages(data.messages);
+          if (data.heroScreenshots && Array.isArray(data.heroScreenshots) && data.heroScreenshots.length > 0) {
+            setHeroList(data.heroScreenshots);
+          }
           setExtraData({ stats: data.stats, technologies: data.technologies });
         }
       } catch (error) {
@@ -238,6 +252,26 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  // Upload image file to /api/upload
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.url;
+      }
+      return null;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
   const syncToServer = async () => {
     const payload = {
       projects: projectList,
@@ -246,6 +280,7 @@ export default function AdminPage() {
       extensions: extensionList,
       settings: settings,
       messages: messages,
+      heroScreenshots: heroList,
       ...extraData
     };
     try {
@@ -262,6 +297,71 @@ export default function AdminPage() {
     } catch (e) {
       showToast("Error syncing to server");
     }
+  };
+
+  // Hero Showcase Handlers
+  const handleUpdateHero = (id: string, updates: Partial<HeroScreenshot>) => {
+    setHeroList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+    );
+    showToast("Updated screenshot slide details");
+  };
+
+  const handleHeroFileUpload = async (id: string, file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please upload a valid image file (PNG, JPG, WEBP)");
+      return;
+    }
+    setUploadingHeroId(id);
+    const url = await uploadImageFile(file);
+    setUploadingHeroId(null);
+    if (url) {
+      handleUpdateHero(id, { image: url });
+      showToast("Screenshot image uploaded successfully!");
+    } else {
+      showToast("Failed to upload image");
+    }
+  };
+
+  const handleAddHeroItem = () => {
+    const newId = "slide-" + Date.now().toString().slice(-4);
+    const newItem: HeroScreenshot = {
+      id: newId,
+      title: "New Feature Screen",
+      file: "MainScreen.kt",
+      tag: "Native Compose",
+      image: "/images/daily-finance-dashboard.jpg",
+      badge: "Android App",
+      desc: "Interactive Android UI component featuring modern architecture and responsive layout.",
+    };
+    setHeroList([...heroList, newItem]);
+    setActiveHeroPreview(heroList.length);
+    showToast("Added new hero screenshot slide");
+  };
+
+  const handleDeleteHeroItem = (id: string) => {
+    if (heroList.length <= 1) {
+      showToast("At least one hero screenshot slide is required");
+      return;
+    }
+    if (confirm("Are you sure you want to delete this hero screenshot slide?")) {
+      const filtered = heroList.filter((item) => item.id !== id);
+      setHeroList(filtered);
+      setActiveHeroPreview(0);
+      showToast("Deleted screenshot slide");
+    }
+  };
+
+  const handleMoveHeroItem = (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= heroList.length) return;
+    const updated = [...heroList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    setHeroList(updated);
+    setActiveHeroPreview(targetIndex);
+    showToast("Reordered screenshot slide");
   };
 
   // Open Create Project
@@ -703,6 +803,7 @@ export default function AdminPage() {
                 {(
                   [
                     { id: "Projects", label: "Projects & Apps", icon: Smartphone, count: projectList.length },
+                    { id: "Hero", label: "Hero Showcase", icon: ImageIcon, count: heroList.length },
                     { id: "Extensions", label: "Extensions & Tools", icon: Globe, count: extensionList.length },
                     { id: "Skills", label: "Skills Matrix", icon: Code, count: totalSkillsCount },
                     { id: "Journey", label: "Journey Milestones", icon: GraduationCap, count: journeyList.length },
@@ -1389,6 +1490,342 @@ export default function AdminPage() {
                 </div>
               )}
 
+              {/* TAB: HERO SHOWCASE */}
+              {activeTab === "Hero" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-white">Hero Showcase Screenshots</h2>
+                      <p className="text-xs text-[#94a3b8] mt-1">
+                        Manage the live phone mockup carousel on the homepage — change images, upload new screenshots, edit code tags, and reorder slides.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleAddHeroItem}
+                        className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2.5 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                      >
+                        <Plus size={15} />
+                        <span>Add New Slide</span>
+                      </button>
+                      <button
+                        onClick={syncToServer}
+                        className="flex items-center gap-1.5 rounded-full bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-4 py-2.5 text-xs font-mono hover:bg-[#34d399]/25 transition-all cursor-pointer"
+                      >
+                        <Database size={14} />
+                        <span>Save Changes</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Showcase Grid: Live Preview + Slide Cards */}
+                  <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr] items-start">
+                    {/* Live Phone Mockup Preview */}
+                    <div className="rounded-2xl border border-white/10 bg-[#07080e]/90 p-5 backdrop-blur-xl sticky top-28">
+                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 text-xs font-mono">
+                        <span className="text-[#34d399] font-bold">HOMEPAGE PREVIEW</span>
+                        <span className="text-[11px] text-[#64748b]">
+                          {heroList.length > 0 ? `Slide ${activeHeroPreview + 1} of ${heroList.length}` : "Empty"}
+                        </span>
+                      </div>
+
+                      {heroList.length > 0 && (
+                        <div>
+                          {/* Window bar */}
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10 text-[11px] font-mono">
+                            <span className="text-white/80 truncate max-w-[130px]">
+                              {heroList[activeHeroPreview]?.file || "MainScreen.kt"}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-[#34d399]/10 text-[#34d399] text-[10px]">
+                              {heroList[activeHeroPreview]?.tag || "Native Compose"}
+                            </span>
+                          </div>
+
+                          {/* Smartphone Simulator */}
+                          <div className="relative mx-auto w-full max-w-[230px] aspect-[9/18.5] rounded-[1.8rem] border-[6px] border-[#1e2238] bg-[#07080e] shadow-2xl overflow-hidden flex flex-col justify-between group">
+                            {/* Speaker Notch */}
+                            <div className="absolute top-1.5 left-1/2 -translate-x-1/2 h-3.5 w-16 rounded-full bg-[#1e2238] z-30 flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-[#0d0f1a] mr-1.5" />
+                              <div className="w-4 h-0.5 rounded-full bg-[#0d0f1a]" />
+                            </div>
+
+                            {/* Prev / Next controls */}
+                            <button
+                              onClick={() =>
+                                setActiveHeroPreview((prev) =>
+                                  prev === 0 ? heroList.length - 1 : prev - 1
+                                )
+                              }
+                              aria-label="Previous Preview"
+                              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110"
+                            >
+                              <ChevronLeft size={13} />
+                            </button>
+                            <button
+                              onClick={() =>
+                                setActiveHeroPreview((prev) =>
+                                  prev === heroList.length - 1 ? 0 : prev + 1
+                                )
+                              }
+                              aria-label="Next Preview"
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110"
+                            >
+                              <ChevronRight size={13} />
+                            </button>
+
+                            {/* Image */}
+                            <div className="relative w-full h-full overflow-hidden">
+                              <img
+                                src={heroList[activeHeroPreview]?.image || "/images/daily-finance-dashboard.jpg"}
+                                alt={heroList[activeHeroPreview]?.title}
+                                className="w-full h-full object-cover object-top"
+                              />
+                            </div>
+
+                            {/* Info Bar */}
+                            <div className="absolute bottom-2 inset-x-2 rounded-lg bg-[#090a12]/90 border border-white/10 p-2 backdrop-blur-md z-20 text-left">
+                              <span className="text-[9px] font-mono text-[#34d399] uppercase tracking-wider block">
+                                {heroList[activeHeroPreview]?.badge}
+                              </span>
+                              <h6 className="text-[11px] font-bold text-white leading-tight truncate">
+                                {heroList[activeHeroPreview]?.title}
+                              </h6>
+                            </div>
+                          </div>
+
+                          <p className="mt-3 text-center text-[11px] text-[#94a3b8] font-mono line-clamp-2">
+                            {heroList[activeHeroPreview]?.desc}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Slide Cards List */}
+                    <div className="space-y-6">
+                      {heroList.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          className={`rounded-2xl border p-6 transition-all ${
+                            activeHeroPreview === idx
+                              ? "border-[#34d399]/40 bg-[#34d399]/[0.02] shadow-[0_0_20px_rgba(52,211,153,0.1)]"
+                              : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                          }`}
+                        >
+                          {/* Slide Header */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                            <div className="flex items-center gap-2.5">
+                              <span className="px-2.5 py-1 rounded-full bg-white/10 text-xs font-mono text-[#34d399] font-bold">
+                                SLIDE 0{idx + 1}
+                              </span>
+                              <h3 className="font-display text-base font-bold text-white">
+                                {item.title || "Untitled Slide"}
+                              </h3>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveHeroPreview(idx)}
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                                  activeHeroPreview === idx
+                                    ? "bg-[#34d399] text-[#090a12] font-bold"
+                                    : "bg-white/5 text-[#94a3b8] hover:text-white"
+                                }`}
+                                title="Preview this slide"
+                              >
+                                <Eye size={13} />
+                                <span>Preview</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveHeroItem(idx, "up")}
+                                className="p-1.5 rounded-lg bg-white/5 text-[#94a3b8] hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                title="Move up"
+                              >
+                                <ArrowUp size={14} />
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={idx === heroList.length - 1}
+                                onClick={() => handleMoveHeroItem(idx, "down")}
+                                className="p-1.5 rounded-lg bg-white/5 text-[#94a3b8] hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                title="Move down"
+                              >
+                                <ArrowDown size={14} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteHeroItem(item.id)}
+                                className="p-1.5 rounded-lg bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20 transition-colors"
+                                title="Delete slide"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Image Preview & Upload Controls */}
+                          <div className="mt-5 grid gap-5 sm:grid-cols-[130px_1fr] items-start">
+                            {/* Thumbnail */}
+                            <div className="relative aspect-[9/16] w-full rounded-xl border border-white/15 bg-black/60 overflow-hidden group/img">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover object-top"
+                              />
+                              <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex flex-col items-center justify-center gap-1.5 text-white cursor-pointer transition-opacity backdrop-blur-xs">
+                                <UploadCloud size={20} className="text-[#34d399]" />
+                                <span className="text-[10px] font-mono font-bold">Replace Image</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleHeroFileUpload(item.id, e.target.files?.[0] ?? null)}
+                                />
+                              </label>
+                            </div>
+
+                            {/* Upload & Quick Preset Picker */}
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                  Screenshot Image Source / File
+                                </label>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={item.image}
+                                    onChange={(e) => handleUpdateHero(item.id, { image: e.target.value })}
+                                    placeholder="/images/daily-finance-dashboard.jpg or https://..."
+                                    className="flex-1 min-w-[200px] rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                                  />
+
+                                  <label className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 text-xs font-mono hover:bg-[#34d399]/25 cursor-pointer transition-colors">
+                                    {uploadingHeroId === item.id ? (
+                                      <Activity size={13} className="animate-spin" />
+                                    ) : (
+                                      <Upload size={13} />
+                                    )}
+                                    <span>{uploadingHeroId === item.id ? "Uploading..." : "Upload Image"}</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingHeroId === item.id}
+                                      onChange={(e) => handleHeroFileUpload(item.id, e.target.files?.[0] ?? null)}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Quick Presets */}
+                              <div>
+                                <span className="text-[11px] font-mono text-[#64748b] block mb-1.5">
+                                  Quick Real Screenshot Presets:
+                                </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {[
+                                    { label: "Daily Finance Dashboard", url: "/images/daily-finance-dashboard.jpg" },
+                                    { label: "Analytics & Budget", url: "/images/daily-finance-analytics.jpg" },
+                                    { label: "App Tester Hub", url: "/images/app-tester-hub.jpg" },
+                                  ].map((preset) => (
+                                    <button
+                                      key={preset.url}
+                                      type="button"
+                                      onClick={() => handleUpdateHero(item.id, { image: preset.url })}
+                                      className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
+                                        item.image === preset.url
+                                          ? "bg-[#34d399]/20 border-[#34d399]/40 text-[#34d399] font-bold"
+                                          : "bg-white/5 border-white/10 text-[#94a3b8] hover:text-white hover:bg-white/10"
+                                      }`}
+                                    >
+                                      {preset.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Metadata Fields */}
+                          <div className="mt-5 pt-4 border-t border-white/5 grid gap-4 sm:grid-cols-2">
+                            <div>
+                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                Screen / Tab Title
+                              </label>
+                              <input
+                                type="text"
+                                value={item.title}
+                                onChange={(e) => handleUpdateHero(item.id, { title: e.target.value })}
+                                placeholder="Daily Finance"
+                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                Simulated Code File Name
+                              </label>
+                              <input
+                                type="text"
+                                value={item.file}
+                                onChange={(e) => handleUpdateHero(item.id, { file: e.target.value })}
+                                placeholder="DailyFinance.kt"
+                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                Tech Tag (Top Right)
+                              </label>
+                              <input
+                                type="text"
+                                value={item.tag}
+                                onChange={(e) => handleUpdateHero(item.id, { tag: e.target.value })}
+                                placeholder="Native Compose"
+                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                Category Badge (Bottom Info)
+                              </label>
+                              <input
+                                type="text"
+                                value={item.badge}
+                                onChange={(e) => handleUpdateHero(item.id, { badge: e.target.value })}
+                                placeholder="Android App"
+                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                              />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                Feature Description (Bottom Caption)
+                              </label>
+                              <input
+                                type="text"
+                                value={item.desc}
+                                onChange={(e) => handleUpdateHero(item.id, { desc: e.target.value })}
+                                placeholder="Jetpack Compose Dashboard with dynamic budget breakdown & transactions"
+                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* TAB: EXTENSIONS */}
               {activeTab === "Extensions" && (
                 <div>
@@ -1642,8 +2079,26 @@ export default function AdminPage() {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
-                    Logo / Icon URL
+                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5 flex items-center justify-between">
+                    <span>Logo / Icon / Image</span>
+                    <label className="text-[10px] text-[#34d399] hover:underline cursor-pointer flex items-center gap-1">
+                      <Upload size={10} />
+                      <span>Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const url = await uploadImageFile(file);
+                          if (url) {
+                            setProjectForm((prev) => ({ ...prev, logoUrl: url }));
+                            showToast("Image uploaded for project!");
+                          }
+                        }}
+                      />
+                    </label>
                   </label>
                   <input
                     type="text"
