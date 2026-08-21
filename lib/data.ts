@@ -207,3 +207,93 @@ export const stats = [
   { number: "24/7", label: "Passion for Building" },
 ];
 
+export type Extension = {
+  name: string;
+  url: string;
+  role: string;
+  desc: string;
+  color: string;
+  platforms: { label: string; href: string; color: string }[];
+};
+
+export const extensions: Extension[] = [
+  {
+    name: "LootOps",
+    url: "https://lootops.me",
+    role: "Tactical Gaming HUD",
+    desc: "Free game radar that tracks Epic & Steam giveaways in real time.",
+    color: "#34d399",
+    platforms: [
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/fbapdcgkainjgpgmopmgofaiieamenmi", color: "#E34F26" },
+      { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/lfgnmjjplgmbkbcbinoioclbmjkbejoe", color: "#0078D7" },
+      { label: "Firefox",href: "https://addons.mozilla.org/en-US/firefox/addon/lootops-epic-steam-games/", color: "#FF7139" },
+    ],
+  },
+  {
+    name: "GhostType AI",
+    url: "https://subhan.tech",
+    role: "AI Typing Automation",
+    desc: "AI-powered typing assistant that humanizes text and automates repetitive input.",
+    color: "#8A2BE2",
+    platforms: [
+      { label: "Chrome",    href: "https://chromewebstore.google.com/detail/oailoanlpoofglbaechjhohmbbhpeifi", color: "#E34F26" },
+      { label: "MS Store",  href: "https://apps.microsoft.com/store/detail/9P7BBQK6ZN58?cid=DevShareMCLPCS", color: "#0078D7" },
+    ],
+  },
+  {
+    name: "BlizFlow",
+    url: "https://blizflow.online",
+    role: "Business Management",
+    desc: "All-in-one AI business suite for automation, invoicing, and workflow management.",
+    color: "#3B82F6",
+    platforms: [
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/ipjbcbidibofdlpabpdghkkcmlpamffm", color: "#E34F26" },
+      { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/iokecnjjfjjcopopcbaobmahmfhmkkha", color: "#0078D7" },
+    ],
+  },
+  {
+    name: "CodeLens",
+    url: "https://codelens.site",
+    role: "Extension Explorer",
+    desc: "Instant source auditing tool — explore and analyze any browser extension.",
+    color: "#F59E0B",
+    platforms: [
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/ehaocblggffmileeoeoiafpfjegonhjj", color: "#E34F26" },
+      { label: "Edge",   href: "https://microsoftedge.microsoft.com/addons/detail/dmgopgfalpffbbkfnjmmaophkkedaclg", color: "#0078D7" },
+    ],
+  },
+  {
+    name: "Hosh Solver",
+    url: "https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod",
+    role: "Canvas Assistant",
+    desc: "Smart assistant that helps solve Canvas LMS assignments and quizzes.",
+    color: "#34d399",
+    platforms: [
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/aapngpfppnolpebhdiconaknpncmbdod", color: "#E34F26" },
+    ],
+  },
+  {
+    name: "Image Converter Pro",
+    url: "https://lootops.website",
+    role: "Batch Image Processing",
+    desc: "Convert, resize, and optimize images in bulk — WebP, JPEG, PNG, AVIF.",
+    color: "#6366f1",
+    platforms: [
+      { label: "MS Store", href: "https://apps.microsoft.com/store/detail/9N258RP6WM0Z?cid=DevShareMCLPCS", color: "#0078D7" },
+      { label: "Edge",     href: "https://microsoftedge.microsoft.com/addons/detail/image-converter-pro/lgfkmndaibcbheaamhllbffifjlaabmm", color: "#0078D7" },
+    ],
+  },
+  {
+    name: "Emoji Smuggle",
+    url: "https://emoji.subhan.tech",
+    role: "Hidden Messenger",
+    desc: "Hide secret messages inside emoji — steganography for everyday chat.",
+    color: "#ec4899",
+    platforms: [
+      { label: "Web",    href: "https://emoji.subhan.tech", color: "#ffffff" },
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/ckpmnmlhinfjjlgahbcfobmbcdjlomia", color: "#E34F26" },
+      { label: "Chrome", href: "https://chromewebstore.google.com/detail/jphedandnaodohpddnilfloedkmogboa", color: "#E34F26" },
+    ],
+  },
+];
+
