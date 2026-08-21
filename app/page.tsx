@@ -221,8 +221,8 @@ export default function Home() {
               onTouchEnd={() => setIsHeroPaused(false)}
               className="relative flex flex-col items-center justify-center group"
             >
-              {/* Pure Screenshot Container (No Frame) */}
-              <div className="relative mx-auto w-full max-w-[190px] sm:max-w-[220px] md:max-w-[240px] aspect-[9/18.5] rounded-2xl bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden flex flex-col justify-between">
+              {/* Pure Screenshot / Promo Card Container */}
+              <div className="relative mx-auto w-full max-w-[200px] sm:max-w-[240px] md:max-w-[260px] aspect-[460/1024] rounded-2xl bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 overflow-hidden flex flex-col justify-between">
                 {/* Left/Right Quick Navigation Arrows */}
                 <button
                   onClick={() =>
@@ -246,12 +246,12 @@ export default function Home() {
                   <ChevronRight size={15} />
                 </button>
 
-                {/* Real High-Res Screenshot Image */}
+                {/* Real High-Res Designed Promo Card */}
                 <div className="relative w-full h-full overflow-hidden">
                   <img
                     key={currentHero.image}
                     src={currentHero.image}
-                    alt={currentHero.title || "App Screenshot"}
+                    alt={currentHero.title || "App Showcase"}
                     className="w-full h-full object-cover object-top transition-opacity duration-300 select-none pointer-events-none"
                   />
                   {/* Subtle glass reflection overlay */}
