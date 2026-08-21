@@ -130,7 +130,7 @@ export const techCategories: TechCategory[] = [
     category: "Backend & Cloud",
     items: [
       { name: "Node.js", level: "Proficient" },
-      { name: "Supabase / PostgreSQL", level: "Proficient" },
+      { name: "PostgreSQL", level: "Proficient" },
       { name: "REST APIs", level: "Advanced" },
       { name: "Firebase", level: "Proficient" },
     ],
@@ -157,7 +157,7 @@ export const technologies = [
   "React",
   "Tailwind CSS",
   "Framer Motion",
-  "Supabase",
+  "PostgreSQL",
   "SQLite",
   "Firebase",
   "REST APIs",

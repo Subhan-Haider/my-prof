@@ -93,8 +93,6 @@ const defaultSettings = {
   email: "contact@subhan.tech",
   github: "https://github.com/Subhan-Haider",
   testerUrl: "https://tester.subhan.tech/",
-  supabaseUrl: "https://xyzcompany.supabase.co",
-  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   resumeUrl: "",
   resumeFileName: "",
 };
@@ -1344,14 +1342,14 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {/* TAB 6: DATABASE & SUPABASE STUDIO */}
+              {/* TAB 6: DATABASE & SYNC HUB */}
               {activeTab === "Database" && (
                 <div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
                     <div>
                       <h2 className="font-display text-2xl font-bold text-white">Database &amp; Sync Hub</h2>
                       <p className="text-xs text-[#94a3b8] mt-1">
-                        Connect Supabase credentials or manage offline JSON state
+                        Manage offline JSON state
                       </p>
                     </div>
 
@@ -1364,50 +1362,6 @@ export default function AdminPage() {
                   </div>
 
                   <div className="mt-6 space-y-6 max-w-2xl">
-                    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 space-y-4">
-                      <h3 className="font-display text-sm font-bold text-white flex items-center gap-2">
-                        <Database size={15} className="text-[#34d399]" />
-                        <span>Supabase Credentials</span>
-                      </h3>
-
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          NEXT_PUBLIC_SUPABASE_URL
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.supabaseUrl}
-                          onChange={(e) =>
-                            setSettings({ ...settings, supabaseUrl: e.target.value })
-                          }
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          NEXT_PUBLIC_SUPABASE_ANON_KEY
-                        </label>
-                        <input
-                          type="password"
-                          value={settings.supabaseAnonKey}
-                          onChange={(e) =>
-                            setSettings({ ...settings, supabaseAnonKey: e.target.value })
-                          }
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => showToast("Connection tested: Active & responsive")}
-                        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-mono text-white hover:bg-white/15 transition-colors"
-                      >
-                        <Activity size={13} />
-                        <span>Test Supabase Connection</span>
-                      </button>
-                    </div>
-
                     <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 space-y-4">
                       <h3 className="font-display text-sm font-bold text-white flex items-center gap-2">
                         <Download size={15} className="text-[#38bdf8]" />

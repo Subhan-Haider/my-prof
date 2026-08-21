@@ -190,7 +190,7 @@
           "level": "Proficient"
         },
         {
-          "name": "Supabase / PostgreSQL",
+          "name": "PostgreSQL",
           "level": "Proficient"
         },
         {
@@ -236,7 +236,7 @@
     "React",
     "Tailwind CSS",
     "Framer Motion",
-    "Supabase",
+    "PostgreSQL",
     "SQLite",
     "Firebase",
     "REST APIs",
