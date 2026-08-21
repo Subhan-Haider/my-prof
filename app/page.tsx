@@ -27,7 +27,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Nav, Footer, Reveal, GlowBadge } from "@/components/site";
-import { projects, technologies, techCategories, journey, stats, extensions } from "@/lib/data";
+import type { projects as _projects, technologies as _technologies, techCategories as _techCategories, journey as _journey, stats as _stats, extensions as _extensions } from "@/lib/data";
 
 interface GitHubRepo {
   name: string;
@@ -43,6 +43,23 @@ export default function Home() {
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [activeCategory, setActiveCategory] = useState("Mobile & Android");
 
+  const [data, setData] = useState<{
+    projects: typeof _projects;
+    technologies: typeof _technologies;
+    techCategories: typeof _techCategories;
+    journey: typeof _journey;
+    stats: typeof _stats;
+    extensions: typeof _extensions;
+  }>({
+    projects: [],
+    technologies: [],
+    techCategories: [],
+    journey: [],
+    stats: [],
+    extensions: []
+  } as any);
+  const [loadingData, setLoadingData] = useState(true);
+
   useEffect(() => {
     fetch("/api/github")
       .then((res) => res.json())
@@ -53,7 +70,19 @@ export default function Home() {
       })
       .catch(() => {})
       .finally(() => setLoadingRepos(false));
+
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData) {
+          setData(resData);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingData(false));
   }, []);
+
+  const { projects = [], technologies = [], techCategories = [], journey = [], stats = [], extensions = [] } = data;
 
   return (
     <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">

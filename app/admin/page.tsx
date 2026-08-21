@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -113,6 +113,28 @@ export default function AdminPage() {
   const [messages, setMessages] = useState<MessageItem[]>(defaultMessages);
   const [settings, setSettings] = useState(defaultSettings);
   const [extensionList, setExtensionList] = useState<Extension[]>(initialExtensions);
+  const [extraData, setExtraData] = useState<any>({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/data');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.projects) setProjectList(data.projects);
+          if (data.techCategories) setCategories(data.techCategories);
+          if (data.journey) setJourneyList(data.journey);
+          if (data.extensions) setExtensionList(data.extensions);
+          if (data.settings) setSettings(data.settings);
+          if (data.messages) setMessages(data.messages);
+          setExtraData({ stats: data.stats, technologies: data.technologies });
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Resume state
   const [resumePreviewOpen, setResumePreviewOpen] = useState(false);
@@ -215,6 +237,32 @@ export default function AdminPage() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
+  };
+
+  const syncToServer = async () => {
+    const payload = {
+      projects: projectList,
+      techCategories: categories,
+      journey: journeyList,
+      extensions: extensionList,
+      settings: settings,
+      messages: messages,
+      ...extraData
+    };
+    try {
+      const res = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showToast("Successfully synced to server");
+      } else {
+        showToast("Failed to sync to server");
+      }
+    } catch (e) {
+      showToast("Error syncing to server");
+    }
   };
 
   // Open Create Project
@@ -571,6 +619,15 @@ export default function AdminPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={syncToServer}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#34d399]/30 bg-[#34d399]/10 text-xs font-mono text-[#34d399] hover:bg-[#34d399]/20 transition-colors"
+                title="Save all changes to server"
+              >
+                <Database size={13} />
+                <span>Save to Server</span>
+              </button>
+
               <button
                 onClick={handleExportJSON}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-[#cbd5e1] hover:text-white hover:bg-white/10 transition-colors"
