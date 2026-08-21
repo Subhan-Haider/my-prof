@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server"; import {getSupabase} from "@/lib/supabase";
+export async function POST(request:Request){const body=await request.json();if(!body.name||!body.email||!body.message)return NextResponse.json({error:'Missing fields'},{status:400});const supabase=getSupabase();if(supabase){const {error}=await supabase.from('messages').insert({name:body.name,email:body.email,subject:body.subject||null,message:body.message});if(error)return NextResponse.json({error:'Unable to save message'},{status:500})}return NextResponse.json({ok:true},{status:201})}
