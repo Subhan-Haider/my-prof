@@ -26,6 +26,7 @@ import {
   RotateCcw,
   X,
   Eye,
+  EyeOff,
   Star,
   Tag,
   Activity,
@@ -44,6 +45,13 @@ import {
   ChevronRight,
   Save,
   RefreshCw,
+  Lock,
+  Unlock,
+  LogOut,
+  Key,
+  UserCheck,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -118,6 +126,22 @@ type AdminTab =
   | "Database";
 
 export default function AdminPage() {
+  // Auth State
+  const [authStatus, setAuthStatus] = useState<"checking" | "authenticated" | "unauthenticated">("checking");
+  const [adminUser, setAdminUser] = useState<{ email: string; role?: string } | null>(null);
+  const [loginEmail, setLoginEmail] = useState("setupg98@gmail.com");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Security password change in settings
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordChangeMsg, setPasswordChangeMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
   const [activeTab, setActiveTab] = useState<AdminTab>("Projects");
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState<{ msg: string; type?: "success" | "error" } | null>(null);
@@ -138,30 +162,169 @@ export default function AdminPage() {
   const [uploadingProjectLogo, setUploadingProjectLogo] = useState(false);
   const [extraData, setExtraData] = useState<any>({});
 
-  // Fetch initial data from /api/data
+  // Fetch data function
+  const fetchData = async () => {
+    try {
+      const res = await fetch("/api/data");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.projects && Array.isArray(data.projects)) setProjectList(data.projects);
+        if (data.techCategories && Array.isArray(data.techCategories)) setCategories(data.techCategories);
+        if (data.journey && Array.isArray(data.journey)) setJourneyList(data.journey);
+        if (data.extensions && Array.isArray(data.extensions)) setExtensionList(data.extensions);
+        if (data.settings) setSettings((prev) => ({ ...prev, ...data.settings }));
+        if (data.messages && Array.isArray(data.messages)) setMessages(data.messages);
+        if (data.heroScreenshots && Array.isArray(data.heroScreenshots) && data.heroScreenshots.length > 0) {
+          setHeroList(data.heroScreenshots);
+        }
+        setExtraData({ stats: data.stats, technologies: data.technologies });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Check auth session on mount
   useEffect(() => {
-    const fetchData = async () => {
+    const checkAuth = async () => {
       try {
-        const res = await fetch("/api/data");
+        const res = await fetch("/api/admin/auth");
         if (res.ok) {
           const data = await res.json();
-          if (data.projects && Array.isArray(data.projects)) setProjectList(data.projects);
-          if (data.techCategories && Array.isArray(data.techCategories)) setCategories(data.techCategories);
-          if (data.journey && Array.isArray(data.journey)) setJourneyList(data.journey);
-          if (data.extensions && Array.isArray(data.extensions)) setExtensionList(data.extensions);
-          if (data.settings) setSettings((prev) => ({ ...prev, ...data.settings }));
-          if (data.messages && Array.isArray(data.messages)) setMessages(data.messages);
-          if (data.heroScreenshots && Array.isArray(data.heroScreenshots) && data.heroScreenshots.length > 0) {
-            setHeroList(data.heroScreenshots);
+          if (data.authenticated) {
+            setAuthStatus("authenticated");
+            setAdminUser(data.user || { email: "setupg98@gmail.com", role: "Superadmin" });
+            fetchData();
+            return;
           }
-          setExtraData({ stats: data.stats, technologies: data.technologies });
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Auth verification error:", error);
       }
+      setAuthStatus("unauthenticated");
     };
-    fetchData();
+
+    checkAuth();
   }, []);
+
+  // Login handler
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+
+    const normalizedEmail = loginEmail.trim().toLowerCase();
+    if (normalizedEmail !== "setupg98@gmail.com") {
+      setLoginError("Access Denied: Only setupg98@gmail.com is authorized to log in.");
+      return;
+    }
+
+    if (!loginPassword) {
+      setLoginError("Please enter your admin password.");
+      return;
+    }
+
+    try {
+      setLoginLoading(true);
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "login",
+          email: normalizedEmail,
+          password: loginPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.token) {
+          try {
+            localStorage.setItem("admin_auth_token", data.token);
+          } catch {
+            // ignore
+          }
+        }
+        setAuthStatus("authenticated");
+        setAdminUser(data.user || { email: "setupg98@gmail.com", role: "Superadmin" });
+        showToast("Welcome back, Superadmin!");
+        fetchData();
+      } else {
+        setLoginError(data.error || "Authentication failed. Please verify credentials.");
+      }
+    } catch (err) {
+      setLoginError("Network connection error. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logout" }),
+      });
+      try {
+        localStorage.removeItem("admin_auth_token");
+      } catch {
+        // ignore
+      }
+      setAuthStatus("unauthenticated");
+      setAdminUser(null);
+      setLoginPassword("");
+      showToast("Signed out of Admin Studio");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  // Change password handler
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordChangeMsg(null);
+
+    if (newPasswordInput !== confirmPasswordInput) {
+      setPasswordChangeMsg({ text: "New passwords do not match.", type: "error" });
+      return;
+    }
+
+    if (newPasswordInput.length < 6) {
+      setPasswordChangeMsg({ text: "New password must be at least 6 characters.", type: "error" });
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "change-password",
+          currentPassword: currentPasswordInput,
+          newPassword: newPasswordInput,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPasswordChangeMsg({ text: "Admin password updated successfully!", type: "success" });
+        setCurrentPasswordInput("");
+        setNewPasswordInput("");
+        setConfirmPasswordInput("");
+        showToast("Password updated!");
+      } else {
+        setPasswordChangeMsg({ text: data.error || "Failed to update password.", type: "error" });
+      }
+    } catch {
+      setPasswordChangeMsg({ text: "An error occurred while updating password.", type: "error" });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
 
   // Toast helper
   const showToast = (msg: string, type: "success" | "error" = "success") => {
@@ -765,6 +928,202 @@ export default function AdminPage() {
   const unreadMessagesCount = messages.filter((m) => !m.read).length;
   const totalSkillsCount = categories.reduce((acc, c) => acc + c.items.length, 0);
 
+  // Checking auth state loader
+  if (authStatus === "checking") {
+    return (
+      <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] flex flex-col items-center justify-center overflow-hidden">
+        <Nav />
+        {/* Glow Spheres */}
+        <div className="absolute top-1/3 left-1/3 w-[500px] h-[300px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 right-1/3 w-[400px] h-[250px] bg-[#6366f1]/10 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col items-center gap-4 text-center px-4">
+          <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-medium)] shadow-xl">
+            <Shield className="text-[#34d399] animate-pulse" size={32} />
+            <div className="absolute inset-0 rounded-2xl border border-[#34d399]/30 animate-ping opacity-25" />
+          </div>
+          <div>
+            <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+              Verifying Studio Access...
+            </h2>
+            <p className="text-xs font-mono text-[var(--text-muted)] mt-1">
+              Checking secure session credentials
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Unauthenticated Login Portal
+  if (authStatus === "unauthenticated") {
+    const isAuthorizedEmail = loginEmail.trim().toLowerCase() === "setupg98@gmail.com";
+
+    return (
+      <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden flex flex-col justify-center items-center px-4 py-20">
+        <Nav />
+
+        {/* Ambient Backdrops */}
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[350px] bg-[#34d399]/10 rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[300px] bg-[#6366f1]/10 rounded-full blur-[160px] pointer-events-none" />
+
+        {/* Toast */}
+        {toast && (
+          <div
+            className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-2xl border px-5 py-3.5 text-xs font-mono shadow-2xl backdrop-blur-2xl animate-in fade-in ${
+              toast.type === "error"
+                ? "border-red-500/40 bg-red-950/90 text-white"
+                : "border-[#34d399]/40 bg-[var(--bg-surface)] text-[var(--text-primary)]"
+            }`}
+          >
+            {toast.type === "error" ? <AlertCircle size={16} className="text-red-400" /> : <CheckCircle2 size={16} className="text-[#34d399]" />}
+            <span>{toast.msg}</span>
+          </div>
+        )}
+
+        <div className="relative z-10 w-full max-w-md">
+          {/* Card */}
+          <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]/90 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden">
+            {/* Top Accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#34d399] to-transparent opacity-80" />
+
+            {/* Header / Badge */}
+            <div className="text-center space-y-3">
+              <div className="flex justify-center">
+                <GlowBadge variant="emerald">
+                  <span className="flex items-center gap-1.5 font-mono text-[10px] tracking-wider uppercase">
+                    <Lock size={11} /> Restricted Access
+                  </span>
+                </GlowBadge>
+              </div>
+
+              <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                PORTFOLIO STUDIO<span className="text-[#34d399]">.</span>
+              </h1>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Single administrator authentication. Only authorized account is permitted.
+              </p>
+            </div>
+
+            {/* Authorized Email Pill */}
+            <div className="mt-5 flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-[#34d399]/25 bg-[#34d399]/5">
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldCheck size={16} className="text-[#34d399] shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Authorized Account</p>
+                  <p className="text-xs font-mono font-bold text-[#34d399] truncate">setupg98@gmail.com</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLoginEmail("setupg98@gmail.com")}
+                className="shrink-0 px-2.5 py-1 rounded-lg bg-[#34d399]/15 text-[#34d399] text-[10px] font-mono hover:bg-[#34d399]/25 transition-colors cursor-pointer"
+                title="Fill authorized email"
+              >
+                Auto-fill
+              </button>
+            </div>
+
+            {/* Error Banner */}
+            {loginError && (
+              <div className="mt-4 p-3 rounded-2xl border border-red-500/40 bg-red-950/40 text-red-300 text-xs font-mono flex items-start gap-2.5 animate-in fade-in">
+                <AlertTriangle size={15} className="text-red-400 shrink-0 mt-0.5" />
+                <div className="leading-snug">{loginError}</div>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleLogin} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
+                  <span>Administrator Email</span>
+                  {!isAuthorizedEmail && loginEmail.length > 0 && (
+                    <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com authorized</span>
+                  )}
+                </label>
+                <div className="relative">
+                  <input
+                    required
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="setupg98@gmail.com"
+                    className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
+                      !isAuthorizedEmail && loginEmail.length > 0
+                        ? "border-amber-500/60 focus:border-amber-400"
+                        : "border-[var(--border-medium)] focus:border-[#34d399]"
+                    }`}
+                  />
+                  {isAuthorizedEmail && (
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
+                      <CheckCircle2 size={16} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                  Admin Password
+                </label>
+                <div className="relative">
+                  <input
+                    required
+                    type={showPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Enter admin password"
+                    className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] transition-colors focus:border-[#34d399] focus:outline-none pr-11 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loginLoading}
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg shadow-[#34d399]/20 hover:bg-[#6ee7b7] hover:shadow-[#34d399]/30 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {loginLoading ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Authenticating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={14} />
+                      <span>Sign In to Admin Studio</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Back link & help */}
+            <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 hover:text-[var(--text-primary)] transition-colors"
+              >
+                <ArrowLeft size={13} />
+                <span>Return to Portfolio</span>
+              </Link>
+
+              <span className="font-mono text-[10px] text-[#34d399]">v2.5 · Verified Admin</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
@@ -820,6 +1179,13 @@ export default function AdminPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              {/* Authorized Superadmin Pill */}
+              <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#34d399]/25 bg-[#34d399]/5 text-xs font-mono text-[var(--text-secondary)]">
+                <div className="w-2 h-2 rounded-full bg-[#34d399] animate-pulse" />
+                <span className="text-[var(--text-primary)] font-semibold">{adminUser?.email || "setupg98@gmail.com"}</span>
+                <span className="text-[10px] bg-[#34d399]/20 text-[#34d399] px-2 py-0.5 rounded-full font-bold">Admin</span>
+              </div>
+
               <button
                 onClick={() => persistData()}
                 disabled={isSaving}
@@ -848,8 +1214,17 @@ export default function AdminPage() {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all"
               >
                 <ArrowLeft size={13} />
-                <span>View Public Site</span>
+                <span>View Site</span>
               </Link>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-red-500/30 bg-red-500/10 text-xs font-mono text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+                title="Sign out of Admin Studio"
+              >
+                <LogOut size={13} />
+                <span>Log Out</span>
+              </button>
             </div>
           </div>
 
@@ -1986,6 +2361,90 @@ export default function AdminPage() {
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Admin Security & Password Management Card */}
+                  <div className="mt-8 max-w-2xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-6 space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck size={16} className="text-[#34d399]" />
+                        <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">Admin Security &amp; Master Access</h3>
+                      </div>
+                      <span className="text-[10px] font-mono text-[#34d399] bg-[#34d399]/10 border border-[#34d399]/20 px-2.5 py-0.5 rounded-full w-fit">
+                        Authorized: setupg98@gmail.com
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      Update your administrator credentials. Changes take effect immediately across all active sessions.
+                    </p>
+
+                    {passwordChangeMsg && (
+                      <div className={`p-3 rounded-xl text-xs font-mono flex items-center gap-2 ${
+                        passwordChangeMsg.type === "success" 
+                          ? "bg-[#34d399]/10 border border-[#34d399]/30 text-[#34d399]" 
+                          : "bg-red-500/10 border border-red-500/30 text-red-400"
+                      }`}>
+                        {passwordChangeMsg.type === "success" ? <Check size={14} /> : <AlertTriangle size={14} />}
+                        <span>{passwordChangeMsg.text}</span>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleChangePassword} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                          Current Password
+                        </label>
+                        <input
+                          required
+                          type="password"
+                          placeholder="Enter current password (default: setupg98)"
+                          value={currentPasswordInput}
+                          onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                          className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                            New Password
+                          </label>
+                          <input
+                            required
+                            type="password"
+                            placeholder="Min 6 characters"
+                            value={newPasswordInput}
+                            onChange={(e) => setNewPasswordInput(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                            Confirm New Password
+                          </label>
+                          <input
+                            required
+                            type="password"
+                            placeholder="Repeat new password"
+                            value={confirmPasswordInput}
+                            onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={changingPassword}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          {changingPassword ? <RefreshCw size={13} className="animate-spin" /> : <Key size={13} />}
+                          <span>{changingPassword ? "Updating..." : "Update Password"}</span>
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}

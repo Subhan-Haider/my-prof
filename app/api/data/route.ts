@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { isRequestAuthorized } from '@/lib/admin-auth';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'data.json');
 
@@ -10,7 +11,9 @@ export async function GET() {
   try {
     const fileContents = await fs.readFile(DATA_FILE_PATH, 'utf8');
     const data = JSON.parse(fileContents);
-    return NextResponse.json(data, {
+    // Don't leak adminAuth credentials in public GET response
+    const { adminAuth, ...publicData } = data;
+    return NextResponse.json(publicData, {
       headers: {
         'Cache-Control': 'no-store, max-age=0'
       }
@@ -23,11 +26,33 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const isAuth = await isRequestAuthorized(request);
+    if (!isAuth) {
+      return NextResponse.json({ error: 'Unauthorized. Admin login required.' }, { status: 401 });
+    }
+
     const data = await request.json();
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2), 'utf8');
+    
+    // Preserve existing adminAuth if not in incoming payload
+    let existingAdminAuth = undefined;
+    try {
+      const existingFileContents = await fs.readFile(DATA_FILE_PATH, 'utf8');
+      const existingData = JSON.parse(existingFileContents);
+      existingAdminAuth = existingData.adminAuth;
+    } catch {
+      // ignore
+    }
+
+    const payloadToWrite = {
+      ...data,
+      ...(existingAdminAuth && !data.adminAuth ? { adminAuth: existingAdminAuth } : {}),
+    };
+
+    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(payloadToWrite, null, 2), 'utf8');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error writing data:', error);
     return NextResponse.json({ error: 'Failed to write data' }, { status: 500 });
   }
 }
+

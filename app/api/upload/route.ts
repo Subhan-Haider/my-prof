@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { isRequestAuthorized } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
+    const isAuth = await isRequestAuthorized(request);
+    if (!isAuth) {
+      return NextResponse.json({ error: 'Unauthorized. Admin login required to upload files.' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const uploadType = formData.get('type') as string | null;
