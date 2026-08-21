@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -441,8 +441,8 @@ export default function AdminPage() {
                     { id: "Journey", label: "Journey Milestones", icon: GraduationCap, count: journeyList.length },
                     { id: "Messages", label: "Inbox Messages", icon: Inbox, count: messages.length, badge: unreadMessagesCount },
                     { id: "Settings", label: "Site & Profile", icon: Settings, count: 1 },
-                    { id: "Database", label: "Sync & Database", icon: Database, count: "Active" },
-                  ] as const
+                    { id: "Database", label: "Sync & Database", icon: Database, count: "Active" as string | number },
+                  ] as Array<{ id: AdminTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; count: string | number; badge?: number }>
                 ).map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
