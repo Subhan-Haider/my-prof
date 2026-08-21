@@ -27,8 +27,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Subhan Haider — Student. Developer. Builder.",
-    template: "%s — Subhan Haider",
+    default: "Subhan Haider | Student. Developer. Builder.",
+    template: "%s | Subhan Haider",
   },
   description:
     "Personal portfolio and platform for Android apps, web experiences, open-source projects, and experiments by Subhan Haider.",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Subhan Haider", url: "https://github.com/Subhan-Haider" }],
   openGraph: {
     type: "website",
-    title: "Subhan Haider — Student. Developer. Builder.",
+    title: "Subhan Haider | Student. Developer. Builder.",
     description:
       "Turning ideas into Android apps, websites, experiments, and digital experiences.",
     url: "https://subhan.tech",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Subhan Haider — Student. Developer. Builder.",
+    title: "Subhan Haider | Student. Developer. Builder.",
     description:
       "Turning ideas into Android apps, websites, experiments, and digital experiences.",
   },
