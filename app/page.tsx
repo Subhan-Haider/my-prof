@@ -261,10 +261,6 @@ export default function Home() {
       <section className="relative border-y border-white/[0.08] bg-[#0c0e18] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#34d399]">
-              <Sparkles size={14} />
-              <span>THE BUILDER MINDSET</span>
-            </div>
             <h2 className="display-title mt-4 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white">
               I LEARN BEST <br />
               <span className="gradient-text-mint">BY BUILDING REAL THINGS.</span>
@@ -335,10 +331,6 @@ export default function Home() {
           <Reveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-white/[0.08]">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono text-[#34d399]">
-                  <Layers size={14} />
-                  <span>CURATED SHOWCASE</span>
-                </div>
                 <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                   SELECTED WORK<span className="text-[#34d399]">.</span>
                 </h2>
@@ -522,10 +514,6 @@ export default function Home() {
 
         <div className="mx-auto max-w-7xl grid gap-12 lg:grid-cols-[1fr_1.1fr] items-center">
           <Reveal>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#34d399]">
-              <Smartphone size={14} />
-              <span>MOBILE ENGINEERING</span>
-            </div>
             <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
               BUILT FOR <br />
               <span className="gradient-text-mint">THE ANDROID OS.</span>
@@ -628,10 +616,6 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <Reveal>
             <div className="text-center max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 text-xs font-mono text-[#34d399]">
-                <Code2 size={14} />
-                <span>TOOLKIT &amp; TECHNOLOGIES</span>
-              </div>
               <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 TOOLS I USE <br />
                 <span className="gradient-text-mint">TO BRING IDEAS TO LIFE.</span>
@@ -692,10 +676,6 @@ export default function Home() {
           <Reveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono text-[#8A2BE2]">
-                  <Globe size={14} />
-                  <span>BROWSER EXTENSIONS &amp; APPS</span>
-                </div>
                 <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
                   FEATURED EXTENSIONS<span className="text-[#34d399]">.</span>
                 </h2>
@@ -864,10 +844,6 @@ export default function Home() {
           <Reveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono text-[#34d399]">
-                  <Github size={14} />
-                  <span>OPEN SOURCE CONTRIBUTIONS</span>
-                </div>
                 <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
                   LIVE GITHUB ACTIVITY<span className="text-[#34d399]">.</span>
                 </h2>
@@ -958,10 +934,6 @@ export default function Home() {
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <div className="inline-flex items-center gap-2 text-xs font-mono text-[#34d399]">
-                <Zap size={14} />
-                <span>EXPERIENCE &amp; GROWTH</span>
-              </div>
               <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 THE JOURNEY SO FAR<span className="text-[#34d399]">.</span>
               </h2>
@@ -1012,9 +984,6 @@ export default function Home() {
 
             <div className="relative z-10 grid gap-10 lg:grid-cols-[1.3fr_0.7fr] items-center">
               <div>
-                <GlowBadge variant="emerald">
-                  <span>READY TO COLLABORATE</span>
-                </GlowBadge>
                 <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                   LET&apos;S BUILD <br />
                   <span className="gradient-text-mint">SOMETHING IMPACTFUL.</span>
