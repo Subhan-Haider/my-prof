@@ -129,7 +129,7 @@ export default async function CaseStudy({
           )}
 
           {/* Interface Visual Showcase Banner */}
-          <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0c1815] p-8 sm:p-12 shadow-2xl overflow-hidden relative">
+          <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0c1815] p-6 sm:p-10 shadow-2xl overflow-hidden relative">
             <div className="flex items-center justify-between pb-6 border-b border-white/10 text-xs font-mono text-[#64748b]">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
@@ -137,10 +137,10 @@ export default async function CaseStudy({
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
                 <span className="ml-2 text-white/80">{project.slug}.spec</span>
               </div>
-              <span className="text-[#34d399] font-bold">ARCHITECTURE VIEW</span>
+              <span className="text-[#34d399] font-bold">SCREENSHOT &amp; ARCHITECTURE</span>
             </div>
 
-            <div className="py-8 grid gap-6 sm:grid-cols-2 items-center">
+            <div className="py-6 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-center">
               <div>
                 <span className="text-xs font-mono text-[#34d399] uppercase tracking-wider">
                   Product Overview
@@ -148,16 +148,43 @@ export default async function CaseStudy({
                 <p className="mt-3 text-base sm:text-lg text-[#cbd5e1] leading-relaxed">
                   {project.summary}
                 </p>
+
+                <div className="mt-6 rounded-2xl border border-white/10 bg-[#090a12]/80 p-5 space-y-3 font-mono text-xs text-[#94a3b8]">
+                  <div className="flex justify-between items-center text-[#34d399]">
+                    <span>BUILD STATUS</span>
+                    <span>VERIFIED PASS</span>
+                  </div>
+                  <div className="text-white/80">&gt; Target: {project.type} Platform</div>
+                  <div className="text-white/80">&gt; Architecture: Clean Architecture + MVVM</div>
+                  <div className="text-[#64748b]">&gt; Local Security: 100% On-Device Persistence</div>
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-[#090a12]/80 p-5 space-y-3 font-mono text-xs text-[#94a3b8]">
-                <div className="flex justify-between items-center text-[#34d399]">
-                  <span>BUILD STATUS</span>
-                  <span>VERIFIED PASS</span>
-                </div>
-                <div className="text-white/80">&gt; Target: {project.type} Platform</div>
-                <div className="text-white/80">&gt; Deployment: Production Ready</div>
-                <div className="text-[#64748b]">&gt; Privacy: 100% Client/Local Encrypted</div>
+              {/* Real Project Screenshot / Mockup Preview */}
+              <div className="flex justify-center">
+                {project.slug === "daily-finance" ? (
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[#07080e] shadow-2xl overflow-hidden group">
+                    <img
+                      src="/images/daily-finance-dashboard.jpg"
+                      alt="Daily Finance Dashboard Screenshot"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                ) : project.slug === "app-tester" ? (
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[#07080e] shadow-2xl overflow-hidden group">
+                    <img
+                      src="/images/app-tester-hub.jpg"
+                      alt="App Tester Hub Screenshot"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full rounded-2xl border border-white/10 bg-[#090a12]/90 p-6 font-mono text-xs text-[#94a3b8] space-y-2">
+                    <div className="text-[#34d399]">$ git status --short</div>
+                    <div className="text-white">&gt; 100% Free &amp; Open Source</div>
+                    <div className="text-[#64748b]">&gt; Modular architecture patterns</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

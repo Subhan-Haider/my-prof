@@ -25,9 +25,41 @@ import {
   Star,
   GitFork,
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Nav, Footer, Reveal, GlowBadge } from "@/components/site";
 import type { projects as _projects, technologies as _technologies, techCategories as _techCategories, journey as _journey, stats as _stats, extensions as _extensions } from "@/lib/data";
+
+const heroScreenshots = [
+  {
+    id: "dashboard",
+    title: "Daily Finance",
+    file: "DailyFinance.kt",
+    tag: "Native Compose",
+    image: "/images/daily-finance-dashboard.jpg",
+    badge: "Android App",
+    desc: "Jetpack Compose Dashboard with dynamic budget breakdown & transactions",
+  },
+  {
+    id: "analytics",
+    title: "Analytics & Budget",
+    file: "AnalyticsViewModel.kt",
+    tag: "Reactive Flow",
+    image: "/images/daily-finance-analytics.jpg",
+    badge: "Room DB & Charts",
+    desc: "Monthly trend analysis, goal tracking, and category metrics",
+  },
+  {
+    id: "app-tester",
+    title: "App Tester Hub",
+    file: "ApkDistribution.tsx",
+    tag: "Next.js / APK",
+    image: "/images/app-tester-hub.jpg",
+    badge: "Release Portal",
+    desc: "Real-time APK release portal with changelog and direct install",
+  },
+];
 
 interface GitHubRepo {
   name: string;
@@ -42,6 +74,7 @@ export default function Home() {
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [activeCategory, setActiveCategory] = useState("Mobile & Android");
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
 
   const [data, setData] = useState<{
     projects: typeof _projects;
@@ -172,105 +205,127 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Right Column: Interactive App & Code Mockup Showcase */}
+          {/* Right Column: Interactive Real Screenshot & App Showcase */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.95, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative lg:h-[580px] flex items-center justify-center"
+            className="relative lg:h-[620px] flex items-center justify-center"
           >
             {/* Ambient Background Box with Glass border */}
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/80 to-[#0c0e17]/90 p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
+              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/85 to-[#0c0e17]/95 p-5 sm:p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
             >
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs font-mono text-[#94a3b8]">
+              {/* Window Bar & Screen Tabs */}
+              <div className="flex flex-wrap items-center justify-between pb-3.5 mb-4 border-b border-white/10 text-xs font-mono gap-2">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
-                  <span className="ml-2 text-white/70 font-semibold">DailyFinance.kt</span>
+                  <span className="ml-2 text-white/80 font-semibold font-mono text-[11px]">
+                    {heroScreenshots[activeHeroIndex].file}
+                  </span>
                 </div>
-                <span className="text-[#34d399] font-semibold">Native Compose</span>
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-2.5 py-0.5 text-[11px] text-[#34d399]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
+                  <span>{heroScreenshots[activeHeroIndex].tag}</span>
+                </div>
               </div>
 
-              {/* Smartphone Simulator Card */}
-              <div className="relative mx-auto w-full max-w-[320px] rounded-[2rem] border-[6px] border-[#1e2238] bg-[#0d0f1a] p-4 shadow-2xl">
-                {/* Speaker notch */}
-                <div className="mx-auto h-4 w-28 rounded-full bg-[#1e2238] mb-3 flex items-center justify-center">
+              {/* Screenshots Carousel Selector Tabs */}
+              <div className="flex items-center justify-center gap-1.5 mb-4 p-1 bg-black/40 border border-white/5 rounded-full">
+                {heroScreenshots.map((item, idx) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveHeroIndex(idx)}
+                    className={`flex-1 py-1.5 px-3 rounded-full text-[11px] font-mono transition-all text-center truncate ${
+                      activeHeroIndex === idx
+                        ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_12px_rgba(52,211,153,0.35)]"
+                        : "text-[#94a3b8] hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Smartphone Simulator with Real Screenshot */}
+              <div className="relative mx-auto w-full max-w-[290px] sm:max-w-[310px] aspect-[9/18.5] rounded-[2.2rem] border-[7px] border-[#1e2238] bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between group">
+                {/* Speaker Notch & Camera */}
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
-                  <div className="w-6 h-1 rounded-full bg-[#0d0f1a]" />
+                  <div className="w-5 h-1 rounded-full bg-[#0d0f1a]" />
                 </div>
 
-                {/* Simulated App Header */}
-                <div className="flex items-center justify-between mb-4">
+                {/* Left/Right Quick Navigation Arrows */}
+                <button
+                  onClick={() =>
+                    setActiveHeroIndex((prev) =>
+                      prev === 0 ? heroScreenshots.length - 1 : prev - 1
+                    )
+                  }
+                  aria-label="Previous Screenshot"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-md hover:bg-black/80 hover:scale-110"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() =>
+                    setActiveHeroIndex((prev) =>
+                      prev === heroScreenshots.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  aria-label="Next Screenshot"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-md hover:bg-black/80 hover:scale-110"
+                >
+                  <ChevronRight size={16} />
+                </button>
+
+                {/* Real High-Res Screenshot Image */}
+                <div className="relative w-full h-full overflow-hidden">
+                  <img
+                    key={heroScreenshots[activeHeroIndex].image}
+                    src={heroScreenshots[activeHeroIndex].image}
+                    alt={heroScreenshots[activeHeroIndex].title}
+                    className="w-full h-full object-cover object-top transition-opacity duration-300 select-none pointer-events-none"
+                  />
+                  {/* Subtle glass reflection overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent pointer-events-none" />
+                </div>
+
+                {/* Floating Bottom Screenshot Info Bar */}
+                <div className="absolute bottom-2.5 inset-x-2.5 rounded-xl bg-[#090a12]/90 border border-white/10 p-2.5 backdrop-blur-md z-20 flex items-center justify-between text-left">
                   <div>
-                    <span className="text-[10px] font-mono text-[#64748b]">AUGUST 2026</span>
-                    <h4 className="text-sm font-bold text-white">Daily Finance</h4>
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-[#34d399]/20 border border-[#34d399]/40 flex items-center justify-center text-[#34d399] text-xs font-bold">
-                    SH
-                  </div>
-                </div>
-
-                {/* Simulated Balance Card */}
-                <div className="rounded-2xl bg-gradient-to-br from-[#1b2342] via-[#121629] to-[#1a2e28] p-4 border border-white/10 shadow-lg">
-                  <span className="text-[10px] font-mono text-[#94a3b8] uppercase">Total Balance</span>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-2xl font-black font-display text-white">$4,850.40</span>
-                    <span className="text-[11px] font-bold text-[#34d399] bg-[#34d399]/15 px-2 py-0.5 rounded-full">
-                      +14.2%
+                    <span className="text-[10px] font-mono text-[#34d399] uppercase tracking-wider block">
+                      {heroScreenshots[activeHeroIndex].badge}
                     </span>
+                    <h5 className="text-xs font-bold text-white leading-tight">
+                      {heroScreenshots[activeHeroIndex].title}
+                    </h5>
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <div className="flex-1 rounded-lg bg-white/10 py-1.5 text-center text-[10px] font-medium text-white hover:bg-white/15">
-                      + Expense
-                    </div>
-                    <div className="flex-1 rounded-lg bg-[#34d399]/25 py-1.5 text-center text-[10px] font-bold text-[#34d399]">
-                      Analytics
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulated Spending Breakdown Chart */}
-                <div className="mt-3 rounded-xl bg-white/[0.03] p-3 border border-white/5">
-                  <div className="flex items-center justify-between text-[11px] mb-2">
-                    <span className="text-[#94a3b8]">Monthly Budget</span>
-                    <span className="font-mono text-white">$1,240 / $2,000</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden flex">
-                    <div className="w-[45%] bg-[#34d399]" />
-                    <div className="w-[20%] bg-[#6366f1]" />
-                    <div className="w-[15%] bg-[#38bdf8]" />
-                  </div>
-                </div>
-
-                {/* Simulated Recent Transactions */}
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between rounded-lg bg-white/[0.02] p-2 text-[11px]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-md bg-[#6366f1]/20 text-[#818cf8] flex items-center justify-center">
-                        <Code2 size={12} />
-                      </div>
-                      <span className="text-[#cbd5e1]">Dev Server Hosting</span>
-                    </div>
-                    <span className="font-mono font-bold text-[#ef4444]">-$14.00</span>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg bg-white/[0.02] p-2 text-[11px]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-md bg-[#34d399]/20 text-[#34d399] flex items-center justify-center">
-                        <TrendingUp size={12} />
-                      </div>
-                      <span className="text-[#cbd5e1]">Freelance Contract</span>
-                    </div>
-                    <span className="font-mono font-bold text-[#34d399]">+$350.00</span>
+                  <div className="flex gap-1">
+                    {heroScreenshots.map((_, i) => (
+                      <span
+                        key={i}
+                        onClick={() => setActiveHeroIndex(i)}
+                        className={`cursor-pointer rounded-full transition-all ${
+                          activeHeroIndex === i
+                            ? "w-4 h-1.5 bg-[#34d399]"
+                            : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
 
-
+              {/* Bottom Interactive Feature Label */}
+              <p className="mt-4 text-center text-xs text-[#94a3b8] font-mono flex items-center justify-center gap-2">
+                <Sparkles size={13} className="text-[#34d399]" />
+                <span>{heroScreenshots[activeHeroIndex].desc}</span>
+              </p>
             </motion.div>
           </motion.div>
         </div>
