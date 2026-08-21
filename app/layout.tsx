@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -21,8 +22,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#090a12",
-  colorScheme: "dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#090a12" },
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -76,17 +79,35 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} scroll-smooth`}
+      suppressHydrationWarning
+      className={`${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} scroll-smooth dark`}
     >
-      <body className="bg-[#090a12] text-[#f4f5f8] antialiased selection:bg-[#34d399]/25 selection:text-[#34d399] font-sans">
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#6366f1]/12 via-[#34d399]/6 to-transparent blur-3xl rounded-full" />
-          <div className="absolute top-[35%] -left-64 w-[600px] h-[600px] bg-[#6366f1]/8 blur-3xl rounded-full" />
-          <div className="absolute top-[65%] -right-64 w-[600px] h-[600px] bg-[#34d399]/6 blur-3xl rounded-full" />
-        </div>
-        <div className="relative z-10">{children}</div>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const savedTheme = localStorage.getItem('theme');
+                const theme = savedTheme === 'light' ? 'light' : 'dark';
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(theme);
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.colorScheme = theme;
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-[var(--bg-main)] text-[var(--text-primary)] antialiased selection:bg-[#34d399]/25 selection:text-[#059669] dark:selection:text-[#34d399] font-sans transition-colors duration-300">
+        <ThemeProvider>
+          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#6366f1]/15 via-[#34d399]/8 to-transparent blur-3xl rounded-full opacity-70 dark:opacity-100" />
+            <div className="absolute top-[35%] -left-64 w-[600px] h-[600px] bg-[#6366f1]/10 blur-3xl rounded-full opacity-60 dark:opacity-100" />
+            <div className="absolute top-[65%] -right-64 w-[600px] h-[600px] bg-[#34d399]/8 blur-3xl rounded-full opacity-60 dark:opacity-100" />
+          </div>
+          <div className="relative z-10">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
-

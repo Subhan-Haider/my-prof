@@ -119,7 +119,7 @@ export default function Home() {
   }, [isHeroPaused, safeScreenshots.length]);
 
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       {/* ================= HERO SECTION ================= */}
@@ -222,7 +222,7 @@ export default function Home() {
               className="relative flex flex-col items-center justify-center group"
             >
               {/* Pure Screenshot / Promo Card Container */}
-              <div className="relative mx-auto w-full max-w-[200px] sm:max-w-[240px] md:max-w-[260px] aspect-[460/1024] rounded-2xl bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 overflow-hidden flex flex-col justify-between">
+              <div className="relative mx-auto w-full max-w-[200px] sm:max-w-[240px] md:max-w-[260px] aspect-[460/1024] rounded-2xl bg-[var(--bg-surface-elevated)] shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 overflow-hidden flex flex-col justify-between">
                 {/* Left/Right Quick Navigation Arrows */}
                 <button
                   onClick={() =>
@@ -286,7 +286,7 @@ export default function Home() {
       </section>
 
       {/* ================= CORE PHILOSOPHY ================= */}
-      <section className="relative border-y border-white/[0.08] bg-[#0c0e18] px-6 py-24 md:px-12">
+      <section className="relative border-y border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="left">
             <h2 className="display-title mt-4 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white">
@@ -303,7 +303,7 @@ export default function Home() {
           {/* 4 Bento Highlights */}
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <Reveal direction="up" scale delay={0.1}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#34d399]/40 transition-all group">
+              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#34d399]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Smartphone size={20} />
                 </div>
@@ -315,7 +315,7 @@ export default function Home() {
             </Reveal>
 
             <Reveal direction="up" scale delay={0.2}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#818cf8]/40 transition-all group">
+              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#818cf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#6366f1]/10 text-[#818cf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Globe size={20} />
                 </div>
@@ -327,7 +327,7 @@ export default function Home() {
             </Reveal>
 
             <Reveal direction="up" scale delay={0.3}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#38bdf8]/40 transition-all group">
+              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#38bdf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={20} />
                 </div>
@@ -339,7 +339,7 @@ export default function Home() {
             </Reveal>
 
             <Reveal direction="up" scale delay={0.4}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#ec4899]/40 transition-all group">
+              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#ec4899]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#ec4899]/10 text-[#ec4899] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <FolderGit2 size={20} />
                 </div>
@@ -377,7 +377,7 @@ export default function Home() {
           <div className="mt-12 space-y-8">
             {projects.map((project, idx) => (
               <Reveal key={project.slug} direction={idx % 2 === 0 ? "left" : "right"} scale delay={idx * 0.1}>
-                <div className="project-card rounded-3xl border border-white/[0.08] bg-[#0f111d]/80 p-6 sm:p-10 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
+                <div className="project-card rounded-3xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 sm:p-10 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
                   <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
@@ -472,7 +472,7 @@ export default function Home() {
 
                       {project.slug === "daily-finance" ? (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[#090a12]/80 p-4">
+                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4">
                             <div className="flex justify-between items-center text-xs">
                               <span className="text-[#94a3b8]">Budget Health</span>
                               <span className="text-[#34d399] font-bold">Optimal (94%)</span>
@@ -494,7 +494,7 @@ export default function Home() {
                         </div>
                       ) : project.slug === "app-tester" ? (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[#090a12]/80 p-4">
+                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4">
                             <div className="flex items-center gap-3">
                               {project.logoUrl ? (
                                 <img 
@@ -533,7 +533,7 @@ export default function Home() {
                         </div>
                       ) : (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[#090a12]/80 p-4 font-mono text-xs text-[#94a3b8]">
+                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4 font-mono text-xs text-[#94a3b8]">
                             <div className="text-[#34d399]">$ git clone github.com/Subhan-Haider</div>
                             <div className="text-white/70 mt-1">&gt; 100% Free &amp; Open Source Modules</div>
                             <div className="text-[#64748b] mt-1">&gt; Jetpack Compose canvas charts included</div>
@@ -554,7 +554,7 @@ export default function Home() {
       </section>
 
       {/* ================= ANDROID SPOTLIGHT ================= */}
-      <section id="android" className="relative border-y border-white/[0.08] bg-[#0c0e18] px-6 py-28 md:px-12 overflow-hidden">
+      <section id="android" className="relative border-y border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-28 md:px-12 overflow-hidden">
         <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl grid gap-12 lg:grid-cols-[1fr_1.1fr] items-center">
@@ -622,7 +622,7 @@ export default function Home() {
 
           {/* Right Side: Code / Architecture Card */}
           <Reveal direction="right" delay={0.2}>
-            <div className="rounded-3xl border border-white/10 bg-[#090a12]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl font-mono">
+            <div className="rounded-3xl border border-white/10 bg-[var(--bg-surface)] p-6 sm:p-8 backdrop-blur-xl shadow-2xl font-mono">
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs">
                 <div className="flex items-center gap-2">
                   <Terminal size={14} className="text-[#34d399]" />
@@ -677,7 +677,7 @@ export default function Home() {
               {[...technologies, ...technologies, ...technologies].map((tech, i) => (
                 <span
                   key={i}
-                  className="rounded-full border border-white/10 bg-[#111424]/80 px-4 py-2 text-xs font-mono text-[#cbd5e1]"
+                  className="rounded-full border border-white/10 bg-[var(--bg-surface)] px-4 py-2 text-xs font-mono text-[#cbd5e1]"
                 >
                   {tech}
                 </span>
@@ -716,7 +716,7 @@ export default function Home() {
       </section>
 
       {/* ================= FEATURED EXTENSIONS ================= */}
-      <section className="border-t border-white/[0.08] bg-[#07080e] px-6 py-24 md:px-12">
+      <section className="border-t border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Reveal direction="left">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
@@ -743,7 +743,7 @@ export default function Home() {
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {extensions.map((ext, i) => (
               <Reveal key={ext.name} direction="up" delay={i * 0.07}>
-                <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 backdrop-blur-md hover:border-white/20 hover:bg-[#15192c]/80 transition-all">
+                <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-white/20 hover:bg-[#15192c]/80 transition-all">
                   {/* Accent glow */}
                   <div
                     className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -805,7 +805,7 @@ export default function Home() {
       </section>
 
       {/* ================= LIVE GITHUB REPOS ================= */}
-      <section className="border-t border-white/[0.08] bg-[#090a12] px-6 py-24 md:px-12">
+      <section className="border-t border-white/[0.08] bg-[var(--bg-surface)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Reveal direction="right">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
@@ -896,7 +896,7 @@ export default function Home() {
       </section>
 
       {/* ================= JOURNEY TIMELINE ================= */}
-      <section id="journey" className="border-t border-white/[0.08] bg-[#0c0e18] px-6 py-28 md:px-12">
+      <section id="journey" className="border-t border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-5xl">
           <Reveal direction="down">
             <div className="text-center max-w-2xl mx-auto mb-16">
@@ -915,11 +915,11 @@ export default function Home() {
               <Reveal key={node.title} direction="left" delay={i * 0.1}>
                 <div className="relative group">
                   {/* Node Dot */}
-                  <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-[#090a12] border-2 border-[#34d399] flex items-center justify-center group-hover:scale-125 transition-transform shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+                  <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-[var(--bg-surface)] border-2 border-[#34d399] flex items-center justify-center group-hover:scale-125 transition-transform shadow-[0_0_10px_rgba(52,211,153,0.5)]">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#34d399]" />
                   </div>
 
-                  <div className="rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-mono text-xs text-[#34d399] font-bold">{node.year}</span>
                       <span className="text-[11px] font-mono bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-[#94a3b8]">
@@ -979,7 +979,7 @@ export default function Home() {
               </div>
 
               {/* Quick Contact Card */}
-              <div className="rounded-2xl border border-white/10 bg-[#090a12]/80 p-6 backdrop-blur-xl">
+              <div className="rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-6 backdrop-blur-xl">
                 <div className="text-xs font-mono text-[#64748b] uppercase tracking-wider">Quick Info</div>
                 <div className="mt-4 space-y-3 text-sm">
                   <div>

@@ -23,7 +23,7 @@ export const metadata = {
 
 export default function ResumePage() {
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       <article className="relative pt-32 sm:pt-36 pb-20 sm:pb-24 px-4 sm:px-6 md:px-12 grid-pattern">
@@ -111,7 +111,7 @@ export default function ResumePage() {
           </header>
 
           {/* Section: Profile Summary */}
-          <section className="mt-8 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 sm:p-8 backdrop-blur-xl">
+          <section className="mt-8 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-5 sm:p-8 backdrop-blur-xl">
             <h2 className="font-display text-xl font-bold text-white flex items-center gap-2 pb-4 border-b border-white/[0.08]">
               <Sparkles size={18} className="text-[#34d399]" />
               <span>Professional Summary</span>
@@ -125,7 +125,7 @@ export default function ResumePage() {
           </section>
 
           {/* Section: Technical Skillset Matrix */}
-          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-8 backdrop-blur-xl">
+          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-8 backdrop-blur-xl">
             <h2 className="font-display text-xl font-bold text-white flex items-center gap-2 pb-4 border-b border-white/[0.08]">
               <FileText size={18} className="text-[#34d399]" />
               <span>Technical Skills</span>
@@ -156,7 +156,7 @@ export default function ResumePage() {
           </section>
 
           {/* Section: Featured Projects */}
-          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-8 backdrop-blur-xl">
+          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-8 backdrop-blur-xl">
             <h2 className="font-display text-xl font-bold text-white flex items-center gap-2 pb-4 border-b border-white/[0.08]">
               <Smartphone size={18} className="text-[#34d399]" />
               <span>Featured Engineering Projects</span>
@@ -218,7 +218,7 @@ export default function ResumePage() {
           </section>
 
           {/* Section: Education */}
-          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-8 backdrop-blur-xl">
+          <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-8 backdrop-blur-xl">
             <h2 className="font-display text-xl font-bold text-white flex items-center gap-2 pb-4 border-b border-white/[0.08]">
               <GraduationCap size={18} className="text-[#34d399]" />
               <span>Education</span>

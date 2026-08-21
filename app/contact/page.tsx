@@ -62,7 +62,7 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 px-4 sm:px-6 md:px-12 grid-pattern">
@@ -104,7 +104,7 @@ export default function ContactPage() {
                   href="https://github.com/Subhan-Haider"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-4 hover:border-[#34d399]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-[#34d399]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     <Github size={20} />
@@ -121,7 +121,7 @@ export default function ContactPage() {
                   href="https://tester.subhan.tech/"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-4 hover:border-[#38bdf8]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-[#38bdf8]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 flex items-center justify-center text-[#38bdf8] group-hover:scale-110 transition-transform">
                     <Smartphone size={20} />
@@ -141,7 +141,7 @@ export default function ContactPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="rounded-3xl border border-white/10 bg-[#0f111d]/90 p-5 sm:p-8 sm:p-10 backdrop-blur-2xl shadow-2xl"
+              className="rounded-3xl border border-white/10 bg-[var(--bg-surface)] p-5 sm:p-8 sm:p-10 backdrop-blur-2xl shadow-2xl"
             >
               <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] pb-4 mb-6 border-b border-white/10">
                 <MessageSquare size={15} />
@@ -208,7 +208,7 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                        className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
                       />
                     </div>
 
@@ -224,7 +224,7 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                        className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
                       }
-                      className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                      className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -258,7 +258,7 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors resize-none"
+                      className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors resize-none"
                     />
                   </div>
 

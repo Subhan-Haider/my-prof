@@ -37,7 +37,7 @@ export default async function CaseStudy({
     projects[(currentIndex - 1 + projects.length) % projects.length];
 
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       {/* Case Study Hero */}
@@ -117,7 +117,7 @@ export default async function CaseStudy({
               {project.metrics.map((m) => (
                 <div
                   key={m.label}
-                  className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 sm:p-5 text-center backdrop-blur-md"
+                  className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-4 sm:p-5 text-center backdrop-blur-md"
                 >
                   <div className="text-xs font-mono text-[#64748b]">{m.label}</div>
                   <div className="font-display text-base sm:text-xl font-bold text-white mt-1">
@@ -149,7 +149,7 @@ export default async function CaseStudy({
                   {project.summary}
                 </p>
 
-                <div className="mt-6 rounded-2xl border border-white/10 bg-[#090a12]/80 p-5 space-y-3 font-mono text-xs text-[#94a3b8]">
+                <div className="mt-6 rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-5 space-y-3 font-mono text-xs text-[#94a3b8]">
                   <div className="flex justify-between items-center text-[#34d399]">
                     <span>BUILD STATUS</span>
                     <span>VERIFIED PASS</span>
@@ -163,7 +163,7 @@ export default async function CaseStudy({
               {/* Real Project Screenshot / Mockup Preview */}
               <div className="flex justify-center">
                 {project.slug === "daily-finance" ? (
-                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[#07080e] shadow-2xl overflow-hidden group">
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
                     <img
                       src="/images/daily-finance-dashboard.jpg"
                       alt="Daily Finance Dashboard Screenshot"
@@ -171,7 +171,7 @@ export default async function CaseStudy({
                     />
                   </div>
                 ) : project.slug === "app-tester" ? (
-                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[#07080e] shadow-2xl overflow-hidden group">
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
                     <img
                       src="/images/app-tester-hub.jpg"
                       alt="App Tester Hub Screenshot"
@@ -179,7 +179,7 @@ export default async function CaseStudy({
                     />
                   </div>
                 ) : (
-                  <div className="w-full rounded-2xl border border-white/10 bg-[#090a12]/90 p-6 font-mono text-xs text-[#94a3b8] space-y-2">
+                  <div className="w-full rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-6 font-mono text-xs text-[#94a3b8] space-y-2">
                     <div className="text-[#34d399]">$ git status --short</div>
                     <div className="text-white">&gt; 100% Free &amp; Open Source</div>
                     <div className="text-[#64748b]">&gt; Modular architecture patterns</div>
@@ -208,7 +208,7 @@ export default async function CaseStudy({
           {/* Deep Dive: Challenge & Solution */}
           {project.challenge && project.solution && (
             <section className="mt-16 pt-12 border-t border-white/[0.08] grid gap-8 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-md">
+              <div className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-md">
                 <div className="w-9 h-9 rounded-xl bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center mb-4">
                   <Cpu size={18} />
                 </div>
@@ -220,7 +220,7 @@ export default async function CaseStudy({
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-md">
+              <div className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-md">
                 <div className="w-9 h-9 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-4">
                   <CheckCircle2 size={18} />
                 </div>
@@ -249,7 +249,7 @@ export default async function CaseStudy({
                 {project.features.map((feature, idx) => (
                   <div
                     key={feature}
-                    className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/75 p-5 backdrop-blur-md hover:border-[#34d399]/30 transition-all"
+                    className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[#34d399]/30 transition-all"
                   >
                     <span className="font-mono text-xs text-[#34d399] font-bold">
                       0{idx + 1}

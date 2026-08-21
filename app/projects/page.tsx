@@ -44,7 +44,7 @@ export default function ProjectsPage() {
   }, [activeFilter, searchQuery]);
 
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       {/* Header Section */}
@@ -71,7 +71,7 @@ export default function ProjectsPage() {
           </Reveal>
 
           {/* Controls Bar: Filters, Search, View Mode */}
-          <div className="mt-10 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="mt-10 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Filter Category Chips - scrollable on mobile */}
             <div className="flex flex-row overflow-x-auto scrollbar-none items-center gap-2 pb-1.5 -mx-1 px-1">
               {categories.map((cat) => {
@@ -117,7 +117,7 @@ export default function ProjectsPage() {
                   placeholder="Search projects or stack..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-full border border-white/10 bg-[#090a12]/80 pl-9 pr-8 py-2 text-xs text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                  className="w-full rounded-full border border-white/10 bg-[var(--bg-surface)] pl-9 pr-8 py-2 text-xs text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
                 />
                 {searchQuery && (
                   <button
@@ -130,7 +130,7 @@ export default function ProjectsPage() {
               </div>
 
               {/* View Toggle */}
-              <div className="hidden sm:flex items-center rounded-full border border-white/10 bg-[#090a12]/80 p-1">
+              <div className="hidden sm:flex items-center rounded-full border border-white/10 bg-[var(--bg-surface)] p-1">
                 <button
                   onClick={() => setViewMode("grid")}
                   aria-label="Grid view"
@@ -167,7 +167,7 @@ export default function ProjectsPage() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProjects.map((project, idx) => (
                   <Reveal key={project.slug} direction="up" scale delay={idx * 0.06}>
-                    <div className="project-card flex flex-col justify-between h-full rounded-3xl border border-white/[0.08] bg-[#0f111d]/75 p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
+                    <div className="project-card flex flex-col justify-between h-full rounded-3xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
                       <div>
                         <div className="flex items-center justify-between">
                           <GlowBadge
@@ -250,7 +250,7 @@ export default function ProjectsPage() {
               <div className="space-y-4">
                 {filteredProjects.map((project, idx) => (
                   <Reveal key={project.slug} direction="up" delay={idx * 0.04}>
-                    <div className="project-card rounded-2xl border border-white/[0.08] bg-[#0f111d]/75 p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="project-card rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <GlowBadge

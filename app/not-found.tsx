@@ -4,7 +4,7 @@ import { Nav, Footer, GlowBadge } from "@/components/site";
 
 export default function NotFound() {
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden flex flex-col">
+    <main className="relative min-h-screen bg-[var(--bg-surface)] text-[#f8fafc] overflow-hidden flex flex-col">
       <Nav />
 
       <section className="relative flex-1 flex flex-col items-center justify-center px-6 py-40 text-center z-10 grid-pattern">
