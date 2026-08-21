@@ -227,13 +227,19 @@ html.dark .project-card:hover {
 }
 
 /* Light Theme Overrides for crisp contrast */
-html.light .text-white {
-  color: #0f172a !important;
+html.light .display-title,
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: var(--text-primary);
 }
 
 html.light .text-\[\#cbd5e1\],
 html.light .text-\[\#94a3b8\] {
-  color: #475569 !important;
+  color: #475569;
 }
 
 html.light .border-white\/10,

@@ -954,18 +954,18 @@ export default function Home() {
       {/* ================= RESUME & CONTACT BANNER ================= */}
       <section className="px-6 py-24 md:px-12 relative overflow-hidden">
         <div className="mx-auto max-w-7xl">
-          <div className="relative rounded-3xl border border-white/15 bg-gradient-to-r from-[#171b33] via-[#0f111e] to-[#122320] p-8 sm:p-14 backdrop-blur-2xl shadow-2xl overflow-hidden">
+          <div className="relative rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-emerald-50/60 via-[var(--bg-surface)] to-indigo-50/60 dark:from-[#171b33] dark:via-[#0f111e] dark:to-[#122320] p-8 sm:p-14 backdrop-blur-2xl shadow-xl dark:shadow-2xl overflow-hidden">
             {/* Ambient corner glows */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-[#34d399]/15 blur-3xl rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#6366f1]/15 blur-3xl rounded-full pointer-events-none" />
 
             <div className="relative z-10 grid gap-10 lg:grid-cols-[1.3fr_0.7fr] items-center">
               <div>
-                <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
+                <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-[var(--text-primary)]">
                   LET&apos;S BUILD <br />
                   <span className="gradient-text-mint">SOMETHING IMPACTFUL.</span>
                 </h2>
-                <p className="mt-5 text-base sm:text-lg text-[#94a3b8] max-w-xl leading-relaxed">
+                <p className="mt-5 text-base sm:text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
                   Whether you have an idea for an Android app, want to collaborate on open-source projects,
                   or simply want to connect, my inbox is always open.
                 </p>
@@ -973,7 +973,7 @@ export default function Home() {
                 <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
                   <Link
                     href="/contact"
-                    className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
+                    className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] px-6 py-3.5 text-sm font-bold shadow-lg hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
                   >
                     <span>Get in Touch</span>
                     <ArrowUpRight size={16} />
@@ -981,7 +981,7 @@ export default function Home() {
 
                   <Link
                     href="/resume"
-                    className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 active:scale-98 transition-all text-center min-h-[44px]"
+                    className="flex items-center justify-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-6 py-3.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] active:scale-98 transition-all text-center min-h-[44px] shadow-sm"
                   >
                     <span>View Complete Resume</span>
                     <ArrowUpRight size={14} />
@@ -990,25 +990,25 @@ export default function Home() {
               </div>
 
               {/* Quick Contact Card */}
-              <div className="rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-6 backdrop-blur-xl">
-                <div className="text-xs font-mono text-[#64748b] uppercase tracking-wider">Quick Info</div>
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] dark:bg-[var(--bg-surface-elevated)] p-6 backdrop-blur-xl shadow-md dark:shadow-none">
+                <div className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">Quick Info</div>
                 <div className="mt-4 space-y-3 text-sm">
                   <div>
-                    <span className="text-[#64748b] block text-xs">Role</span>
-                    <span className="text-white font-medium">Student &amp; Software Developer</span>
+                    <span className="text-[var(--text-muted)] block text-xs">Role</span>
+                    <span className="text-[var(--text-primary)] font-medium">Student &amp; Software Developer</span>
                   </div>
                   <div>
-                    <span className="text-[#64748b] block text-xs">Core Focus</span>
-                    <span className="text-[#34d399] font-medium">Android (Kotlin/Compose) &amp; Web</span>
+                    <span className="text-[var(--text-muted)] block text-xs">Core Focus</span>
+                    <span className="text-emerald-600 dark:text-[#34d399] font-medium">Android (Kotlin/Compose) &amp; Web</span>
                   </div>
                   <div>
-                    <span className="text-[#64748b] block text-xs">Profiles</span>
-                    <div className="mt-1 flex gap-3 text-xs text-[#cbd5e1]">
+                    <span className="text-[var(--text-muted)] block text-xs">Profiles</span>
+                    <div className="mt-1 flex gap-3 text-xs text-[var(--text-secondary)]">
                       <a
                         href="https://github.com/Subhan-Haider"
                         target="_blank"
                         rel="noreferrer"
-                        className="hover:text-[#34d399] underline flex items-center gap-1"
+                        className="hover:text-emerald-600 dark:hover:text-[#34d399] underline flex items-center gap-1 font-medium"
                       >
                         GitHub <ArrowUpRight size={11} />
                       </a>
@@ -1016,7 +1016,7 @@ export default function Home() {
                         href="https://tester.subhan.tech/"
                         target="_blank"
                         rel="noreferrer"
-                        className="hover:text-[#34d399] underline flex items-center gap-1"
+                        className="hover:text-emerald-600 dark:hover:text-[#34d399] underline flex items-center gap-1 font-medium"
                       >
                         App Tester <ArrowUpRight size={11} />
                       </a>
