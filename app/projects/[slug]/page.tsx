@@ -16,17 +16,13 @@ import {
   Code2,
 } from "lucide-react";
 import { Footer, Nav, GlowBadge } from "@/components/site";
-import { projects } from "@/lib/data";
-
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
-}
+import { getAllProjects, getProjectBySlug } from "@/lib/data-server";
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
-  const project = projects.find((x) => x.slug === params.slug);
+  const project = await getProjectBySlug(params.slug);
   if (!project) return { title: "Project Not Found" };
   return {
     title: `${project.title} — Subhan Haider`,
@@ -39,13 +35,14 @@ export default async function CaseStudy(props: {
 }) {
   const params = await props.params;
   const slug = params.slug;
-  const project = projects.find((x) => x.slug === slug);
+  const project = await getProjectBySlug(slug);
   if (!project) return notFound();
 
-  const currentIndex = projects.findIndex((x) => x.slug === slug);
-  const nextProject = projects[(currentIndex + 1) % projects.length];
+  const allProjects = await getAllProjects();
+  const currentIndex = allProjects.findIndex((x) => x.slug === slug);
+  const nextProject = allProjects[(currentIndex + 1) % allProjects.length];
   const prevProject =
-    projects[(currentIndex - 1 + projects.length) % projects.length];
+    allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length];
 
   return (
     <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">

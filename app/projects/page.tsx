@@ -15,7 +15,8 @@ import {
   X,
 } from "lucide-react";
 import { Nav, Footer, Reveal, GlowBadge } from "@/components/site";
-import { projects, Project } from "@/lib/data";
+import { useEffect } from "react";
+import { projects as initialProjects, Project } from "@/lib/data";
 
 const categories = [
   "All",
@@ -27,12 +28,24 @@ const categories = [
 ];
 
 export default function ProjectsPage() {
+  const [projectList, setProjectList] = useState<Project[]>(initialProjects);
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.projects) && data.projects.length > 0) {
+          setProjectList(data.projects);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return projectList.filter((project) => {
       const matchesFilter =
         activeFilter === "All" || project.type === activeFilter;
       const matchesSearch =
@@ -41,7 +54,7 @@ export default function ProjectsPage() {
           .includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [projectList, activeFilter, searchQuery]);
 
   return (
     <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
@@ -73,8 +86,8 @@ export default function ProjectsPage() {
               {categories.map((cat) => {
                 const count =
                   cat === "All"
-                    ? projects.length
-                    : projects.filter((p) => p.type === cat).length;
+                    ? projectList.length
+                    : projectList.filter((p) => p.type === cat).length;
 
                 return (
                   <button

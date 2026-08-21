@@ -42,6 +42,8 @@ import {
   UploadCloud,
   ChevronLeft,
   ChevronRight,
+  Save,
+  RefreshCw,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -94,23 +96,33 @@ const defaultMessages: MessageItem[] = [
 
 const defaultSettings = {
   name: "Subhan Haider",
-  tagline: "",
+  tagline: "Student. Developer. Builder.",
   bio: "Passionate high school student and developer building native Android apps, modern web platforms, and open-source tools with a focus on performance and privacy.",
   status: "Open for Collaborations & Opportunities",
   isAvailable: true,
   email: "contact@subhan.tech",
   github: "https://github.com/Subhan-Haider",
   testerUrl: "https://tester.subhan.tech/",
-  resumeUrl: "",
-  resumeFileName: "",
+  resumeUrl: "/resume-subhan-haider.pdf",
+  resumeFileName: "resume-subhan-haider.pdf",
 };
 
-type AdminTab = "Projects" | "Extensions" | "Hero" | "Skills" | "Journey" | "Messages" | "Settings" | "Database";
+type AdminTab =
+  | "Projects"
+  | "Hero"
+  | "Extensions"
+  | "Skills"
+  | "Journey"
+  | "Messages"
+  | "Settings"
+  | "Database";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>("Projects");
   const [search, setSearch] = useState("");
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type?: "success" | "error" } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   // Editable State
   const [projectList, setProjectList] = useState<Project[]>(initialProjects);
@@ -122,46 +134,122 @@ export default function AdminPage() {
   const [heroList, setHeroList] = useState<HeroScreenshot[]>(initialHeroScreenshots);
   const [activeHeroPreview, setActiveHeroPreview] = useState(0);
   const [uploadingHeroId, setUploadingHeroId] = useState<string | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [uploadingProjectLogo, setUploadingProjectLogo] = useState(false);
   const [extraData, setExtraData] = useState<any>({});
 
+  // Fetch initial data from /api/data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/data');
+        const res = await fetch("/api/data");
         if (res.ok) {
           const data = await res.json();
-          if (data.projects) setProjectList(data.projects);
-          if (data.techCategories) setCategories(data.techCategories);
-          if (data.journey) setJourneyList(data.journey);
-          if (data.extensions) setExtensionList(data.extensions);
-          if (data.settings) setSettings(data.settings);
-          if (data.messages) setMessages(data.messages);
+          if (data.projects && Array.isArray(data.projects)) setProjectList(data.projects);
+          if (data.techCategories && Array.isArray(data.techCategories)) setCategories(data.techCategories);
+          if (data.journey && Array.isArray(data.journey)) setJourneyList(data.journey);
+          if (data.extensions && Array.isArray(data.extensions)) setExtensionList(data.extensions);
+          if (data.settings) setSettings((prev) => ({ ...prev, ...data.settings }));
+          if (data.messages && Array.isArray(data.messages)) setMessages(data.messages);
           if (data.heroScreenshots && Array.isArray(data.heroScreenshots) && data.heroScreenshots.length > 0) {
             setHeroList(data.heroScreenshots);
           }
           setExtraData({ stats: data.stats, technologies: data.technologies });
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, []);
+
+  // Toast helper
+  const showToast = (msg: string, type: "success" | "error" = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Central Server Persistence
+  const persistData = async (overrides: Partial<any> = {}) => {
+    const payload = {
+      projects: overrides.projects ?? projectList,
+      techCategories: overrides.techCategories ?? categories,
+      journey: overrides.journey ?? journeyList,
+      extensions: overrides.extensions ?? extensionList,
+      settings: overrides.settings ?? settings,
+      messages: overrides.messages ?? messages,
+      heroScreenshots: overrides.heroScreenshots ?? heroList,
+      ...extraData,
+      ...overrides,
+    };
+    try {
+      setIsSaving(true);
+      const res = await fetch("/api/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setLastSaved(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error(err);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Upload file helper (Images & PDFs)
+  const uploadFile = async (file: File, type?: string): Promise<{ url: string; fileName: string } | null> => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (type) formData.append("type", type);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { url: data.url, fileName: data.fileName || file.name };
+      }
+      return null;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
 
   // Resume state
   const [resumePreviewOpen, setResumePreviewOpen] = useState(false);
   const [resumeDragOver, setResumeDragOver] = useState(false);
   const resumeFileRef = useRef<HTMLInputElement>(null);
 
-  const handleResumeFile = (file: File | null) => {
+  const handleResumeFile = async (file: File | null) => {
     if (!file) return;
-    if (file.type !== "application/pdf") {
-      showToast("Please upload a PDF file only");
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      showToast("Please upload a PDF file only", "error");
       return;
     }
-    const url = URL.createObjectURL(file);
-    setSettings((prev) => ({ ...prev, resumeUrl: url, resumeFileName: file.name }));
-    showToast(`Loaded "${file.name}"`);
+    setUploadingResume(true);
+    const uploaded = await uploadFile(file, "resume");
+    setUploadingResume(false);
+
+    if (uploaded) {
+      const updatedSettings = {
+        ...settings,
+        resumeUrl: uploaded.url,
+        resumeFileName: file.name,
+      };
+      setSettings(updatedSettings);
+      await persistData({ settings: updatedSettings });
+      showToast(`Uploaded & saved "${file.name}" as live resume!`);
+    } else {
+      showToast("Failed to upload PDF resume", "error");
+    }
   };
 
   const handleResumeDrop = (e: React.DragEvent) => {
@@ -171,17 +259,18 @@ export default function AdminPage() {
     handleResumeFile(file);
   };
 
-  const handleResumeClear = () => {
-    if (settings.resumeUrl.startsWith("blob:")) URL.revokeObjectURL(settings.resumeUrl);
-    setSettings((prev) => ({ ...prev, resumeUrl: "", resumeFileName: "" }));
-    showToast("Resume cleared");
+  const handleResumeClear = async () => {
+    const updatedSettings = { ...settings, resumeUrl: "", resumeFileName: "" };
+    setSettings(updatedSettings);
+    await persistData({ settings: updatedSettings });
+    showToast("Resume cleared and updated");
   };
 
   const handleResumeDownload = () => {
     if (!settings.resumeUrl) return;
     const a = document.createElement("a");
     a.href = settings.resumeUrl;
-    a.download = settings.resumeFileName || "resume.pdf";
+    a.download = settings.resumeFileName || "resume-subhan-haider.pdf";
     a.click();
   };
 
@@ -200,7 +289,7 @@ export default function AdminPage() {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
 
-  const [editingSkill, setEditingSkill] = useState<{catName: string, skillName: string, level: string} | null>(null);
+  const [editingSkill, setEditingSkill] = useState<{ catName: string; skillName: string; level: string } | null>(null);
   const [editSkillForm, setEditSkillForm] = useState({ name: "", level: "" });
 
   const [isCreatingJourney, setIsCreatingJourney] = useState(false);
@@ -246,85 +335,32 @@ export default function AdminPage() {
   const [stackInput, setStackInput] = useState("");
   const [featuresInput, setFeaturesInput] = useState("");
 
-  // Toast auto-hide
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3500);
-  };
-
-  // Upload image file to /api/upload
-  const uploadImageFile = async (file: File): Promise<string | null> => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data.url;
-      }
-      return null;
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
-  };
-
-  const syncToServer = async () => {
-    const payload = {
-      projects: projectList,
-      techCategories: categories,
-      journey: journeyList,
-      extensions: extensionList,
-      settings: settings,
-      messages: messages,
-      heroScreenshots: heroList,
-      ...extraData
-    };
-    try {
-      const res = await fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        showToast("Successfully synced to server");
-      } else {
-        showToast("Failed to sync to server");
-      }
-    } catch (e) {
-      showToast("Error syncing to server");
-    }
-  };
-
   // Hero Showcase Handlers
-  const handleUpdateHero = (id: string, updates: Partial<HeroScreenshot>) => {
-    setHeroList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
-    );
-    showToast("Updated screenshot slide details");
+  const handleUpdateHero = async (id: string, updates: Partial<HeroScreenshot>) => {
+    const updated = heroList.map((item) => (item.id === id ? { ...item, ...updates } : item));
+    setHeroList(updated);
+    await persistData({ heroScreenshots: updated });
+    showToast("Updated and saved screenshot slide");
   };
 
   const handleHeroFileUpload = async (id: string, file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      showToast("Please upload a valid image file (PNG, JPG, WEBP)");
+      showToast("Please upload a valid image file (PNG, JPG, WEBP)", "error");
       return;
     }
     setUploadingHeroId(id);
-    const url = await uploadImageFile(file);
+    const uploaded = await uploadFile(file);
     setUploadingHeroId(null);
-    if (url) {
-      handleUpdateHero(id, { image: url });
-      showToast("Screenshot image uploaded successfully!");
+    if (uploaded) {
+      await handleUpdateHero(id, { image: uploaded.url });
+      showToast("Screenshot image uploaded and saved!");
     } else {
-      showToast("Failed to upload image");
+      showToast("Failed to upload image", "error");
     }
   };
 
-  const handleAddHeroItem = () => {
+  const handleAddHeroItem = async () => {
     const newId = "slide-" + Date.now().toString().slice(-4);
     const newItem: HeroScreenshot = {
       id: newId,
@@ -335,25 +371,28 @@ export default function AdminPage() {
       badge: "Android App",
       desc: "Interactive Android UI component featuring modern architecture and responsive layout.",
     };
-    setHeroList([...heroList, newItem]);
+    const updated = [...heroList, newItem];
+    setHeroList(updated);
     setActiveHeroPreview(heroList.length);
+    await persistData({ heroScreenshots: updated });
     showToast("Added new hero screenshot slide");
   };
 
-  const handleDeleteHeroItem = (id: string) => {
+  const handleDeleteHeroItem = async (id: string) => {
     if (heroList.length <= 1) {
-      showToast("At least one hero screenshot slide is required");
+      showToast("At least one hero screenshot slide is required", "error");
       return;
     }
     if (confirm("Are you sure you want to delete this hero screenshot slide?")) {
-      const filtered = heroList.filter((item) => item.id !== id);
-      setHeroList(filtered);
+      const updated = heroList.filter((item) => item.id !== id);
+      setHeroList(updated);
       setActiveHeroPreview(0);
+      await persistData({ heroScreenshots: updated });
       showToast("Deleted screenshot slide");
     }
   };
 
-  const handleMoveHeroItem = (index: number, direction: "up" | "down") => {
+  const handleMoveHeroItem = async (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= heroList.length) return;
     const updated = [...heroList];
@@ -361,7 +400,8 @@ export default function AdminPage() {
     updated.splice(targetIndex, 0, moved);
     setHeroList(updated);
     setActiveHeroPreview(targetIndex);
-    showToast("Reordered screenshot slide");
+    await persistData({ heroScreenshots: updated });
+    showToast("Reordered screenshot slides");
   };
 
   // Open Create Project
@@ -397,137 +437,162 @@ export default function AdminPage() {
   };
 
   // Save Project
-  const handleSaveProject = (e: React.FormEvent) => {
+  const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault();
     const updatedStack = stackInput.split(",").map((s) => s.trim()).filter(Boolean);
     const updatedFeatures = featuresInput.split("\n").map((f) => f.trim()).filter(Boolean);
 
     const newProjData: Project = {
-      slug: projectForm.slug || "project-" + Date.now(),
-      title: projectForm.title || "Untitled Project",
-      tagline: projectForm.tagline || "",
+      slug: projectForm.slug?.trim() || "project-" + Date.now(),
+      title: projectForm.title?.trim() || "Untitled Project",
+      tagline: projectForm.tagline?.trim() || "",
       type: (projectForm.type as Project["type"]) || "Android",
-      summary: projectForm.summary || "",
+      summary: projectForm.summary?.trim() || "",
       stack: updatedStack.length ? updatedStack : ["General"],
       featured: projectForm.featured ?? true,
-      year: projectForm.year || "2025",
+      year: projectForm.year?.trim() || "2025",
       features: updatedFeatures,
-      idea: projectForm.idea,
-      challenge: projectForm.challenge,
-      solution: projectForm.solution,
-      liveUrl: projectForm.liveUrl,
-      githubUrl: projectForm.githubUrl,
-      logoUrl: projectForm.logoUrl,
+      idea: projectForm.idea?.trim(),
+      challenge: projectForm.challenge?.trim(),
+      solution: projectForm.solution?.trim(),
+      liveUrl: projectForm.liveUrl?.trim(),
+      githubUrl: projectForm.githubUrl?.trim(),
+      logoUrl: projectForm.logoUrl?.trim(),
     };
 
+    let updatedList: Project[] = [];
     if (isCreatingProject) {
-      setProjectList([newProjData, ...projectList]);
+      updatedList = [newProjData, ...projectList];
+      setProjectList(updatedList);
       showToast(`Created project "${newProjData.title}"`);
     } else if (editingProject) {
-      setProjectList(
-        projectList.map((p) => (p.slug === editingProject.slug ? newProjData : p))
-      );
+      updatedList = projectList.map((p) => (p.slug === editingProject.slug ? newProjData : p));
+      setProjectList(updatedList);
       showToast(`Updated project "${newProjData.title}"`);
     }
 
+    await persistData({ projects: updatedList });
     setIsCreatingProject(false);
     setEditingProject(null);
   };
 
   // Delete Project
-  const handleDeleteProject = (slug: string) => {
+  const handleDeleteProject = async (slug: string) => {
     if (confirm("Are you sure you want to delete this project?")) {
       const p = projectList.find((x) => x.slug === slug);
-      setProjectList(projectList.filter((x) => x.slug !== slug));
+      const updated = projectList.filter((x) => x.slug !== slug);
+      setProjectList(updated);
+      await persistData({ projects: updated });
       showToast(`Deleted "${p?.title || slug}"`);
     }
   };
 
   // Toggle Featured
-  const handleToggleFeatured = (slug: string) => {
-    setProjectList(
-      projectList.map((p) =>
-        p.slug === slug ? { ...p, featured: !p.featured } : p
-      )
+  const handleToggleFeatured = async (slug: string) => {
+    const updated = projectList.map((p) =>
+      p.slug === slug ? { ...p, featured: !p.featured } : p
     );
+    setProjectList(updated);
+    await persistData({ projects: updated });
     showToast("Updated featured state");
   };
 
   // Add Skill
-  const handleAddSkill = (e: React.FormEvent) => {
+  const handleAddSkill = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSkillName.trim()) return;
 
-    setCategories(
-      categories.map((c) => {
-        if (c.category === newSkillCategory) {
-          return {
-            ...c,
-            items: [...c.items, { name: newSkillName.trim(), level: newSkillLevel }],
-          };
-        }
-        return c;
-      })
-    );
+    const updated = categories.map((c) => {
+      if (c.category === newSkillCategory) {
+        return {
+          ...c,
+          items: [...c.items, { name: newSkillName.trim(), level: newSkillLevel }],
+        };
+      }
+      return c;
+    });
+
+    setCategories(updated);
+    await persistData({ techCategories: updated });
     setNewSkillName("");
     setIsCreatingSkill(false);
     showToast(`Added skill "${newSkillName}"`);
   };
 
   // Add Category
-  const handleAddCategory = (e: React.FormEvent) => {
+  const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
-    setCategories([...categories, { category: newCategoryName.trim(), items: [] }]);
+    const updated = [...categories, { category: newCategoryName.trim(), items: [] }];
+    setCategories(updated);
+    await persistData({ techCategories: updated });
     setNewCategoryName("");
     setIsCreatingCategory(false);
     showToast(`Added category "${newCategoryName}"`);
   };
 
   // Delete Category
-  const handleDeleteCategory = (catName: string) => {
+  const handleDeleteCategory = async (catName: string) => {
     if (confirm(`Delete category "${catName}" and all its skills?`)) {
-      setCategories(categories.filter((c) => c.category !== catName));
+      const updated = categories.filter((c) => c.category !== catName);
+      setCategories(updated);
+      await persistData({ techCategories: updated });
       showToast(`Deleted category "${catName}"`);
     }
   };
 
   // Edit Category
-  const handleSaveEditCategory = (e: React.FormEvent) => {
+  const handleSaveEditCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editCategoryName.trim() || !editingCategory) return;
-    setCategories(
-      categories.map((c) =>
-        c.category === editingCategory
-          ? { ...c, category: editCategoryName.trim() }
-          : c
-      )
+    const updated = categories.map((c) =>
+      c.category === editingCategory
+        ? { ...c, category: editCategoryName.trim() }
+        : c
     );
+    setCategories(updated);
+    await persistData({ techCategories: updated });
     setEditingCategory(null);
     showToast(`Updated category "${editCategoryName}"`);
   };
 
   // Edit Skill
-  const handleSaveEditSkill = (e: React.FormEvent) => {
+  const handleSaveEditSkill = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editSkillForm.name.trim() || !editingSkill) return;
-    setCategories(
-      categories.map((c) => {
-        if (c.category === editingSkill.catName) {
-          return {
-            ...c,
-            items: c.items.map((item) =>
-              item.name === editingSkill.skillName
-                ? { name: editSkillForm.name.trim(), level: editSkillForm.level }
-                : item
-            ),
-          };
-        }
-        return c;
-      })
-    );
+    const updated = categories.map((c) => {
+      if (c.category === editingSkill.catName) {
+        return {
+          ...c,
+          items: c.items.map((item) =>
+            item.name === editingSkill.skillName
+              ? { name: editSkillForm.name.trim(), level: editSkillForm.level }
+              : item
+          ),
+        };
+      }
+      return c;
+    });
+    setCategories(updated);
+    await persistData({ techCategories: updated });
     setEditingSkill(null);
     showToast(`Updated skill "${editSkillForm.name}"`);
+  };
+
+  // Delete Skill
+  const handleDeleteSkill = async (catName: string, skillName: string) => {
+    const updated = categories.map((c) => {
+      if (c.category === catName) {
+        return {
+          ...c,
+          items: c.items.filter((item) => item.name !== skillName),
+        };
+      }
+      return c;
+    });
+    setCategories(updated);
+    await persistData({ techCategories: updated });
+    showToast(`Removed skill "${skillName}"`);
   };
 
   // Journey Handlers
@@ -541,19 +606,30 @@ export default function AdminPage() {
     setJourneyForm(j);
   };
 
-  const handleSaveJourney = (e: React.FormEvent) => {
+  const handleSaveJourney = async (e: React.FormEvent) => {
     e.preventDefault();
+    let updated: any[] = [];
     if (isCreatingJourney) {
-      setJourneyList([...journeyList, journeyForm]);
+      updated = [...journeyList, journeyForm];
+      setJourneyList(updated);
       showToast(`Added milestone "${journeyForm.title}"`);
     } else if (editingJourney) {
-      setJourneyList(
-        journeyList.map((j) => (j.title === editingJourney.title ? journeyForm : j))
-      );
+      updated = journeyList.map((j) => (j.title === editingJourney.title ? journeyForm : j));
+      setJourneyList(updated);
       showToast(`Updated milestone "${journeyForm.title}"`);
     }
+    await persistData({ journey: updated });
     setIsCreatingJourney(false);
     setEditingJourney(null);
+  };
+
+  const handleDeleteJourney = async (title: string) => {
+    if (confirm("Are you sure you want to delete this milestone?")) {
+      const updated = journeyList.filter((j) => j.title !== title);
+      setJourneyList(updated);
+      await persistData({ journey: updated });
+      showToast("Deleted milestone");
+    }
   };
 
   // Extension Handlers
@@ -569,22 +645,28 @@ export default function AdminPage() {
     setEditingExtension(ext);
   };
 
-  const handleSaveExtension = (e: React.FormEvent) => {
+  const handleSaveExtension = async (e: React.FormEvent) => {
     e.preventDefault();
+    let updated: Extension[] = [];
     if (isCreatingExtension) {
-      setExtensionList([...extensionList, extForm]);
+      updated = [...extensionList, extForm];
+      setExtensionList(updated);
       showToast(`Added extension "${extForm.name}"`);
     } else if (editingExtension) {
-      setExtensionList(extensionList.map((ex) => ex.name === editingExtension.name ? extForm : ex));
+      updated = extensionList.map((ex) => (ex.name === editingExtension.name ? extForm : ex));
+      setExtensionList(updated);
       showToast(`Updated extension "${extForm.name}"`);
     }
+    await persistData({ extensions: updated });
     setIsCreatingExtension(false);
     setEditingExtension(null);
   };
 
-  const handleDeleteExtension = (name: string) => {
+  const handleDeleteExtension = async (name: string) => {
     if (confirm(`Delete extension "${name}"?`)) {
-      setExtensionList(extensionList.filter((ex) => ex.name !== name));
+      const updated = extensionList.filter((ex) => ex.name !== name);
+      setExtensionList(updated);
+      await persistData({ extensions: updated });
       showToast(`Deleted extension "${name}"`);
     }
   };
@@ -599,41 +681,30 @@ export default function AdminPage() {
     setExtForm({ ...extForm, platforms: extForm.platforms.filter((_, i) => i !== idx) });
   };
 
-  const handleDeleteJourney = (title: string) => {
-    if (confirm("Are you sure you want to delete this milestone?")) {
-      setJourneyList(journeyList.filter((j) => j.title !== title));
-      showToast("Deleted milestone");
-    }
+  // Message Handlers
+  const handleToggleMessageRead = async (id: string) => {
+    const updated = messages.map((m) => (m.id === id ? { ...m, read: !m.read } : m));
+    setMessages(updated);
+    await persistData({ messages: updated });
   };
 
-  // Delete Skill
-  const handleDeleteSkill = (catName: string, skillName: string) => {
-    setCategories(
-      categories.map((c) => {
-        if (c.category === catName) {
-          return {
-            ...c,
-            items: c.items.filter((item) => item.name !== skillName),
-          };
-        }
-        return c;
-      })
-    );
-    showToast(`Removed skill "${skillName}"`);
-  };
-
-  // Toggle Message Read
-  const handleToggleMessageRead = (id: string) => {
-    setMessages(
-      messages.map((m) => (m.id === id ? { ...m, read: !m.read } : m))
-    );
-  };
-
-  // Delete Message
-  const handleDeleteMessage = (id: string) => {
-    setMessages(messages.filter((m) => m.id !== id));
+  const handleDeleteMessage = async (id: string) => {
+    const updated = messages.filter((m) => m.id !== id);
+    setMessages(updated);
     if (viewingMessage?.id === id) setViewingMessage(null);
+    await persistData({ messages: updated });
     showToast("Message deleted");
+  };
+
+  // Settings Save Handler
+  const handleSaveSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const success = await persistData({ settings });
+    if (success) {
+      showToast("Profile & site settings saved successfully!");
+    } else {
+      showToast("Failed to save settings", "error");
+    }
   };
 
   // Export JSON Backup
@@ -642,9 +713,12 @@ export default function AdminPage() {
       exportedAt: new Date().toISOString(),
       settings,
       projects: projectList,
-      categories,
+      techCategories: categories,
       journey: journeyList,
+      extensions: extensionList,
+      heroScreenshots: heroList,
       messages,
+      ...extraData,
     };
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: "application/json",
@@ -659,14 +733,25 @@ export default function AdminPage() {
   };
 
   // Reset to default
-  const handleResetToDefaults = () => {
-    if (confirm("Reset all collections to initial factory defaults?")) {
+  const handleResetToDefaults = async () => {
+    if (confirm("Reset all collections to initial factory defaults and overwrite database?")) {
       setProjectList(initialProjects);
       setCategories(initialTechCategories);
       setJourneyList(initialJourney);
       setMessages(defaultMessages);
       setSettings(defaultSettings);
-      showToast("Reset all data to defaults");
+      setExtensionList(initialExtensions);
+      setHeroList(initialHeroScreenshots);
+      await persistData({
+        projects: initialProjects,
+        techCategories: initialTechCategories,
+        journey: initialJourney,
+        messages: defaultMessages,
+        settings: defaultSettings,
+        extensions: initialExtensions,
+        heroScreenshots: initialHeroScreenshots,
+      });
+      showToast("Reset all collections to initial defaults");
     }
   };
 
@@ -681,57 +766,77 @@ export default function AdminPage() {
   const totalSkillsCount = categories.reduce((acc, c) => acc + c.items.length, 0);
 
   return (
-    <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
+    <main className="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-300 overflow-hidden">
       <Nav />
 
       {/* Floating Toast Notification */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-2xl border border-[#34d399]/40 bg-[#0f111d]/95 px-5 py-3.5 text-xs font-mono text-white shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5">
-          <CheckCircle2 size={16} className="text-[#34d399]" />
-          <span>{toast}</span>
+        <div
+          className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-2xl border px-5 py-3.5 text-xs font-mono shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 ${
+            toast.type === "error"
+              ? "border-red-500/40 bg-red-950/90 text-white"
+              : "border-[#34d399]/40 bg-[var(--bg-surface)] text-[var(--text-primary)]"
+          }`}
+        >
+          {toast.type === "error" ? (
+            <AlertCircle size={16} className="text-red-400" />
+          ) : (
+            <CheckCircle2 size={16} className="text-[#34d399]" />
+          )}
+          <span>{toast.msg}</span>
         </div>
       )}
 
-      <section className="relative pt-36 pb-20 px-6 md:px-12 grid-pattern">
+      <section className="relative pt-32 sm:pt-36 pb-20 px-4 sm:px-6 md:px-12 grid-pattern">
         {/* Glow Spheres */}
         <div className="absolute top-28 left-1/4 w-[600px] h-[350px] bg-[#6366f1]/10 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute top-48 right-1/4 w-[500px] h-[300px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/[0.08]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-[var(--border-subtle)]">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <GlowBadge variant="emerald">
                   <span>CMS ADMIN STUDIO</span>
                 </GlowBadge>
                 <span className="text-xs font-mono text-[#34d399] bg-[#34d399]/10 border border-[#34d399]/20 px-2.5 py-1 rounded-full flex items-center gap-1.5">
                   <Activity size={12} className="animate-pulse" />
-                  <span>Live Reactive Store</span>
+                  <span>Auto-Sync Active</span>
                 </span>
+                {lastSaved && (
+                  <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                    Saved at {lastSaved}
+                  </span>
+                )}
               </div>
 
-              <h1 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
+              <h1 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-[var(--text-primary)]">
                 PORTFOLIO STUDIO<span className="text-[#34d399]">.</span>
               </h1>
-              <p className="mt-2 text-sm text-[#94a3b8]">
-                Real-time management for projects, skills matrix, milestones, contact inquiries, and site configuration.
+              <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                Real-time management for projects, hero screenshots, skills matrix, milestones, and site configuration.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={syncToServer}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#34d399]/30 bg-[#34d399]/10 text-xs font-mono text-[#34d399] hover:bg-[#34d399]/20 transition-colors"
-                title="Save all changes to server"
+                onClick={() => persistData()}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#34d399]/30 bg-[#34d399]/10 text-xs font-mono text-[#34d399] hover:bg-[#34d399]/20 transition-colors cursor-pointer"
+                title="Save all collections to server"
               >
-                <Database size={13} />
-                <span>Save to Server</span>
+                {isSaving ? (
+                  <RefreshCw size={13} className="animate-spin" />
+                ) : (
+                  <Database size={13} />
+                )}
+                <span>{isSaving ? "Saving..." : "Save All Changes"}</span>
               </button>
 
               <button
                 onClick={handleExportJSON}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-[#cbd5e1] hover:text-white hover:bg-white/10 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer"
                 title="Download JSON Backup"
               >
                 <Download size={13} />
@@ -750,42 +855,52 @@ export default function AdminPage() {
 
           {/* Quick Metrics Bar */}
           <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 backdrop-blur-xl">
-              <span className="text-xs font-mono text-[#64748b] block">PROJECTS</span>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 backdrop-blur-xl shadow-sm">
+              <span className="text-xs font-mono text-[var(--text-muted)] block">PROJECTS</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-2xl font-bold font-display text-white">{projectList.length}</span>
+                <span className="text-2xl font-bold font-display text-[var(--text-primary)]">
+                  {projectList.length}
+                </span>
                 <span className="text-[11px] font-mono text-[#34d399]">
                   {projectList.filter((p) => p.featured).length} Featured
                 </span>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 backdrop-blur-xl">
-              <span className="text-xs font-mono text-[#64748b] block">SKILLS MATRIX</span>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 backdrop-blur-xl shadow-sm">
+              <span className="text-xs font-mono text-[var(--text-muted)] block">SKILLS MATRIX</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-2xl font-bold font-display text-white">{totalSkillsCount}</span>
-                <span className="text-[11px] font-mono text-[#38bdf8]">{categories.length} Categories</span>
+                <span className="text-2xl font-bold font-display text-[var(--text-primary)]">
+                  {totalSkillsCount}
+                </span>
+                <span className="text-[11px] font-mono text-[#38bdf8]">
+                  {categories.length} Categories
+                </span>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 backdrop-blur-xl">
-              <span className="text-xs font-mono text-[#64748b] block">JOURNEY PHASES</span>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 backdrop-blur-xl shadow-sm">
+              <span className="text-xs font-mono text-[var(--text-muted)] block">JOURNEY PHASES</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-2xl font-bold font-display text-white">{journeyList.length}</span>
+                <span className="text-2xl font-bold font-display text-[var(--text-primary)]">
+                  {journeyList.length}
+                </span>
                 <span className="text-[11px] font-mono text-[#a855f7]">Milestones</span>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 backdrop-blur-xl">
-              <span className="text-xs font-mono text-[#64748b] block">INBOX INQUIRIES</span>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 backdrop-blur-xl shadow-sm">
+              <span className="text-xs font-mono text-[var(--text-muted)] block">INBOX INQUIRIES</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-2xl font-bold font-display text-white">{messages.length}</span>
+                <span className="text-2xl font-bold font-display text-[var(--text-primary)]">
+                  {messages.length}
+                </span>
                 {unreadMessagesCount > 0 ? (
-                  <span className="text-[11px] font-mono bg-[#ef4444]/20 text-[#fca5a5] border border-[#ef4444]/30 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full">
                     {unreadMessagesCount} Unread
                   </span>
                 ) : (
-                  <span className="text-[11px] font-mono text-[#64748b]">All Read</span>
+                  <span className="text-[11px] font-mono text-[var(--text-muted)]">All Read</span>
                 )}
               </div>
             </div>
@@ -794,8 +909,8 @@ export default function AdminPage() {
           {/* Main Grid: Sidebar & Workspace */}
           <div className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr] items-start">
             {/* Sidebar Navigation */}
-            <aside className="rounded-3xl border border-white/[0.08] bg-[#0f111d]/85 p-3 sm:p-4 backdrop-blur-xl shadow-xl">
-              <div className="hidden lg:block px-3 py-2 text-[11px] font-mono text-[#64748b] uppercase tracking-wider">
+            <aside className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 sm:p-4 backdrop-blur-xl shadow-sm">
+              <div className="hidden lg:block px-3 py-2 text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
                 Studio Collections
               </div>
 
@@ -810,7 +925,13 @@ export default function AdminPage() {
                     { id: "Messages", label: "Inbox Messages", icon: Inbox, count: messages.length, badge: unreadMessagesCount },
                     { id: "Settings", label: "Site & Profile", icon: Settings, count: 1 },
                     { id: "Database", label: "Sync & Database", icon: Database, count: "Active" as string | number },
-                  ] as Array<{ id: AdminTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; count: string | number; badge?: number }>
+                  ] as Array<{
+                    id: AdminTab;
+                    label: string;
+                    icon: React.ComponentType<{ size?: number; className?: string }>;
+                    count: string | number;
+                    badge?: number;
+                  }>
                 ).map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -821,25 +942,25 @@ export default function AdminPage() {
                         setActiveTab(tab.id as AdminTab);
                         setSearch("");
                       }}
-                      className={`whitespace-nowrap flex-shrink-0 lg:w-full flex items-center justify-between gap-3 px-3.5 py-2.5 sm:py-3 rounded-xl text-xs font-mono transition-all ${
+                      className={`whitespace-nowrap flex-shrink-0 lg:w-full flex items-center justify-between gap-3 px-3.5 py-2.5 sm:py-3 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                         isActive
                           ? "bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 font-bold shadow-sm"
-                          : "text-[#94a3b8] hover:bg-white/5 hover:text-white border border-transparent"
+                          : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon size={15} className={isActive ? "text-[#34d399]" : "text-[#64748b]"} />
+                        <Icon size={15} className={isActive ? "text-[#34d399]" : "text-[var(--text-muted)]"} />
                         <span>{tab.label}</span>
                       </div>
 
                       {tab.badge ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef4444] text-white font-bold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500 text-white font-bold">
                           {tab.badge}
                         </span>
                       ) : (
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full ${
-                            isActive ? "bg-[#34d399]/20 text-[#34d399]" : "bg-white/5 text-[#64748b]"
+                            isActive ? "bg-[#34d399]/20 text-[#34d399]" : "bg-[var(--bg-surface-elevated)] text-[var(--text-muted)]"
                           }`}
                         >
                           {tab.count}
@@ -850,10 +971,10 @@ export default function AdminPage() {
                 })}
               </div>
 
-              <div className="hidden lg:block pt-4 mt-4 border-t border-white/5">
+              <div className="hidden lg:block pt-4 mt-4 border-t border-[var(--border-subtle)]">
                 <button
                   onClick={handleResetToDefaults}
-                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-mono text-[#64748b] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-mono text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                 >
                   <RotateCcw size={13} />
                   <span>Reset to Defaults</span>
@@ -862,15 +983,15 @@ export default function AdminPage() {
             </aside>
 
             {/* Workspace Area */}
-            <div className="rounded-3xl border border-white/[0.08] bg-[#0f111d]/85 p-6 sm:p-8 backdrop-blur-xl shadow-xl min-h-[560px]">
+            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 backdrop-blur-xl shadow-sm min-h-[560px]">
               {/* TAB 1: PROJECTS */}
               {activeTab === "Projects" && (
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
                     <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Project Records</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Manage case studies, metrics, Android builds, and open-source packages
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Project Records</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Manage case studies, architecture notes, and mobile APK builds
                       </p>
                     </div>
 
@@ -887,53 +1008,53 @@ export default function AdminPage() {
 
                   {/* Search Bar */}
                   <div className="mt-6 relative">
-                    <Search size={15} className="absolute left-4 top-3.5 text-[#64748b]" />
+                    <Search size={15} className="absolute left-4 top-3.5 text-[var(--text-muted)]" />
                     <input
                       type="text"
                       placeholder="Filter projects by title, stack, or category..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-[#090a12]/80 pl-11 pr-4 py-2.5 text-xs text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none"
+                      className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] pl-11 pr-4 py-2.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[#34d399] focus:outline-none"
                     />
                   </div>
 
                   {/* Projects List */}
                   <div className="mt-6 space-y-3">
                     {filteredProjects.length === 0 ? (
-                      <div className="py-12 text-center text-xs text-[#64748b]">
+                      <div className="py-12 text-center text-xs text-[var(--text-muted)]">
                         No projects matching &ldquo;{search}&rdquo;
                       </div>
                     ) : (
                       filteredProjects.map((proj) => (
                         <div
                           key={proj.slug}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-white/10 hover:bg-white/[0.04] transition-all"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 hover:border-[var(--border-active)] transition-all"
                         >
                           <div className="space-y-1.5">
                             <div className="flex flex-wrap items-center gap-2.5">
-                              <h3 className="font-display text-base font-bold text-white">
+                              <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
                                 {proj.title}
                               </h3>
                               <span
                                 className={`text-[10px] font-mono px-2 py-0.5 rounded-full cursor-pointer transition-colors ${
                                   proj.featured
-                                    ? "bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30"
-                                    : "bg-white/5 text-[#64748b]"
+                                    ? "bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 font-bold"
+                                    : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]"
                                 }`}
                                 onClick={() => handleToggleFeatured(proj.slug)}
                                 title="Click to toggle featured status"
                               >
                                 {proj.featured ? "★ Featured" : "Standard"}
                               </span>
-                              <span className="text-[10px] font-mono bg-white/5 text-[#94a3b8] px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-mono bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-full">
                                 {proj.type}
                               </span>
-                              <span className="text-[10px] font-mono text-[#64748b]">
+                              <span className="text-[10px] font-mono text-[var(--text-muted)]">
                                 {proj.year}
                               </span>
                             </div>
 
-                            <p className="text-xs text-[#94a3b8] line-clamp-1 max-w-xl">
+                            <p className="text-xs text-[var(--text-secondary)] line-clamp-1 max-w-xl">
                               {proj.summary}
                             </p>
 
@@ -941,7 +1062,7 @@ export default function AdminPage() {
                               {proj.stack.map((s) => (
                                 <span
                                   key={s}
-                                  className="text-[10px] font-mono text-[#64748b] bg-white/[0.03] px-2 py-0.5 rounded"
+                                  className="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-2 py-0.5 rounded"
                                 >
                                   {s}
                                 </span>
@@ -952,7 +1073,7 @@ export default function AdminPage() {
                           <div className="flex items-center gap-2 shrink-0">
                             <Link
                               href={`/projects/${proj.slug}`}
-                              className="p-2 rounded-xl border border-white/10 bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
+                              className="p-2 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors"
                               title="Preview on live site"
                             >
                               <Eye size={13} />
@@ -960,7 +1081,7 @@ export default function AdminPage() {
 
                             <button
                               onClick={() => handleOpenEditProject(proj)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 text-xs font-mono text-white hover:bg-white/15 transition-colors cursor-pointer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-medium)] text-xs font-mono text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer"
                             >
                               <Edit2 size={12} />
                               <span>Edit</span>
@@ -968,7 +1089,7 @@ export default function AdminPage() {
 
                             <button
                               onClick={() => handleDeleteProject(proj.slug)}
-                              className="p-2 rounded-xl bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+                              className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
                               title="Delete project"
                             >
                               <Trash2 size={13} />
@@ -981,523 +1102,14 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {/* TAB 2: SKILLS MATRIX */}
-              {activeTab === "Skills" && (
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-                    <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Technical Skills Matrix</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Configure frameworks, languages, Android SDK tools, and proficiencies
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setIsCreatingCategory(true)}
-                        className="flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-white/20 transition-all cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Add Category</span>
-                      </button>
-                      <button
-                        onClick={() => setIsCreatingSkill(true)}
-                        className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Add Skill</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid gap-6 sm:grid-cols-2">
-                    {categories.map((cat) => (
-                      <div
-                        key={cat.category}
-                        className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 space-y-4"
-                      >
-                        <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                          <h3 className="font-display text-sm font-bold text-white">
-                            {cat.category}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono text-[#34d399] bg-[#34d399]/10 px-2 py-0.5 rounded-full">
-                              {cat.items.length} skills
-                            </span>
-                            <button
-                              onClick={() => {
-                                setEditingCategory(cat.category);
-                                setEditCategoryName(cat.category);
-                              }}
-                              className="text-[#64748b] hover:text-white p-1 transition-colors"
-                              title="Edit category"
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCategory(cat.category)}
-                              className="text-[#64748b] hover:text-[#ef4444] p-1 transition-colors"
-                              title="Remove category"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          {cat.items.map((item) => (
-                            <div
-                              key={item.name}
-                              className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.02] border border-white/5 text-xs font-mono group hover:border-white/10"
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="text-white font-medium">{item.name}</span>
-                                <span className="text-[10px] text-[#64748b]">({item.level})</span>
-                              </div>
-
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  onClick={() => {
-                                    setEditingSkill({ catName: cat.category, skillName: item.name, level: item.level });
-                                    setEditSkillForm({ name: item.name, level: item.level });
-                                  }}
-                                  className="text-[#64748b] hover:text-white p-1 transition-colors"
-                                  title="Edit skill"
-                                >
-                                  <Edit2 size={12} />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSkill(cat.category, item.name)}
-                                  className="text-[#64748b] hover:text-[#ef4444] p-1 transition-colors"
-                                  title="Remove skill"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: JOURNEY MILESTONES */}
-              {activeTab === "Journey" && (
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-                    <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Journey & Milestones</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Timeline milestones displayed on the homepage story section
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleOpenCreateJourney}
-                      className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
-                    >
-                      <Plus size={14} />
-                      <span>Add Milestone</span>
-                    </button>
-                  </div>
-
-                  <div className="mt-6 space-y-4">
-                    {journeyList.map((item) => (
-                      <div
-                        key={item.title}
-                        className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-white/10 hover:bg-white/[0.04] transition-all"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-xs font-mono text-[#34d399] font-bold">
-                              {item.year}
-                            </span>
-                            <h3 className="font-display text-sm font-bold text-white">
-                              {item.title}
-                            </h3>
-                            <span className="text-[10px] font-mono bg-white/5 text-[#94a3b8] px-2 py-0.5 rounded-full">
-                              {item.badge}
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#94a3b8] max-w-2xl">{item.description}</p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => handleOpenEditJourney(item)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 text-xs font-mono text-white hover:bg-white/15 transition-colors cursor-pointer"
-                          >
-                            <Edit2 size={12} />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteJourney(item.title)}
-                            className="p-2 rounded-xl bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
-                            title="Delete milestone"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: MESSAGES INBOX */}
-              {activeTab === "Messages" && (
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-                    <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Inquiries Inbox</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Contact form submissions, developer inquiries, and collaboration proposals
-                      </p>
-                    </div>
-
-                    <span className="text-xs font-mono text-[#64748b]">
-                      {messages.length} total messages
-                    </span>
-                  </div>
-
-                  <div className="mt-6 space-y-3">
-                    {messages.length === 0 ? (
-                      <div className="py-12 text-center text-xs text-[#64748b]">
-                        Inbox is empty. No messages yet.
-                      </div>
-                    ) : (
-                      messages.map((m) => (
-                        <div
-                          key={m.id}
-                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-4 sm:p-5 transition-all ${
-                            m.read
-                              ? "border-white/5 bg-white/[0.01]"
-                              : "border-[#34d399]/30 bg-[#34d399]/[0.03]"
-                          }`}
-                        >
-                          <div
-                            className="space-y-1 cursor-pointer flex-1"
-                            onClick={() => {
-                              setViewingMessage(m);
-                              if (!m.read) handleToggleMessageRead(m.id);
-                            }}
-                          >
-                            <div className="flex flex-wrap items-center gap-2">
-                              {!m.read && (
-                                <span className="w-2 h-2 rounded-full bg-[#34d399]" />
-                              )}
-                              <span className="text-sm font-bold text-white">{m.name}</span>
-                              <span className="text-xs font-mono text-[#64748b]">
-                                &lt;{m.email}&gt;
-                              </span>
-                              <span className="text-[10px] font-mono bg-white/5 text-[#34d399] px-2 py-0.5 rounded-full">
-                                {m.topic}
-                              </span>
-                            </div>
-                            <h4 className="text-xs font-semibold text-[#cbd5e1]">{m.subject}</h4>
-                            <p className="text-xs text-[#94a3b8] line-clamp-1">{m.message}</p>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[11px] font-mono text-[#64748b] mr-2">
-                              {m.date}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setViewingMessage(m);
-                                if (!m.read) handleToggleMessageRead(m.id);
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-white/10 text-xs font-mono text-white hover:bg-white/15"
-                            >
-                              Read
-                            </button>
-                            <button
-                              onClick={() => handleDeleteMessage(m.id)}
-                              className="p-2 rounded-xl bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20"
-                              title="Delete message"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 5: SITE & PROFILE SETTINGS */}
-              {activeTab === "Settings" && (
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-                    <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Profile &amp; Site Configuration</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Update personal branding, availability badge, and social URLs
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => showToast("Site configuration saved")}
-                      className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-5 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7]"
-                    >
-                      <Check size={14} />
-                      <span>Save Changes</span>
-                    </button>
-                  </div>
-
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      showToast("Profile settings saved successfully");
-                    }}
-                    className="mt-6 space-y-6 max-w-2xl"
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          Author Name
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.name}
-                          onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          Contact Email
-                        </label>
-                        <input
-                          type="email"
-                          value={settings.email}
-                          onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                        Display Tagline
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.tagline}
-                        onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                        className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                        Bio / Short Description
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={settings.bio}
-                        onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
-                        className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none resize-none"
-                      />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          GitHub Profile URL
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.github}
-                          onChange={(e) => setSettings({ ...settings, github: e.target.value })}
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-[#94a3b8] mb-2">
-                          Tester Portal URL
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.testerUrl}
-                          onChange={(e) =>
-                            setSettings({ ...settings, testerUrl: e.target.value })
-                          }
-                          className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-4 py-2.5 text-xs text-white focus:border-[#34d399] focus:outline-none"
-                        />
-                      </div>
-                    </div>
-                  </form>
-
-                  {/* ── Resume / CV Card ── */}
-                  <div className="mt-8 max-w-2xl rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText size={16} className="text-[#a855f7]" />
-                        <h3 className="font-display text-sm font-bold text-white">Resume / CV</h3>
-                      </div>
-                      {settings.resumeUrl && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setResumePreviewOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#a855f7]/15 text-[#a855f7] border border-[#a855f7]/30 text-[11px] font-mono hover:bg-[#a855f7]/25 transition-colors"
-                          >
-                            <Maximize2 size={11} />
-                            Preview
-                          </button>
-                          <button
-                            onClick={handleResumeDownload}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 text-[11px] font-mono hover:bg-[#38bdf8]/25 transition-colors"
-                          >
-                            <Download size={11} />
-                            Download
-                          </button>
-                          <button
-                            onClick={handleResumeClear}
-                            className="p-1.5 rounded-full bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20 transition-colors"
-                            title="Clear resume"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Active resume display */}
-                    {settings.resumeUrl && (
-                      <div className="flex items-center gap-3 rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/5 px-4 py-3">
-                        <FileText size={18} className="text-[#a855f7] shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-white truncate">
-                            {settings.resumeFileName || "resume.pdf"}
-                          </p>
-                          {settings.resumeUrl.startsWith("http") && (
-                            <p className="text-[10px] font-mono text-[#64748b] truncate mt-0.5">
-                              {settings.resumeUrl}
-                            </p>
-                          )}
-                          {settings.resumeUrl.startsWith("blob:") && (
-                            <p className="text-[10px] font-mono text-[#34d399] mt-0.5">Uploaded locally — save backup to keep</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Paste URL */}
-                    <div>
-                      <label className="block text-xs font-mono text-[#94a3b8] mb-2 flex items-center gap-1.5">
-                        <LinkIcon size={11} /> Paste PDF Link (Google Drive, Dropbox, direct URL…)
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="url"
-                          placeholder="https://drive.google.com/file/d/.../view"
-                          value={settings.resumeUrl.startsWith("http") ? settings.resumeUrl : ""}
-                          onChange={(e) =>
-                            setSettings((prev) => ({
-                              ...prev,
-                              resumeUrl: e.target.value,
-                              resumeFileName: prev.resumeFileName || "resume.pdf",
-                            }))
-                          }
-                          className="flex-1 rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#a855f7] focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => showToast("Resume URL saved")}
-                          className="px-4 py-2 rounded-xl bg-[#a855f7]/20 text-[#a855f7] text-xs font-bold hover:bg-[#a855f7]/30 transition-colors"
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Drag & Drop Upload */}
-                    <div
-                      onDragOver={(e) => { e.preventDefault(); setResumeDragOver(true); }}
-                      onDragLeave={() => setResumeDragOver(false)}
-                      onDrop={handleResumeDrop}
-                      onClick={() => resumeFileRef.current?.click()}
-                      className={`relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed cursor-pointer py-8 transition-all ${
-                        resumeDragOver
-                          ? "border-[#a855f7] bg-[#a855f7]/10"
-                          : "border-white/10 bg-white/[0.02] hover:border-[#a855f7]/50 hover:bg-[#a855f7]/5"
-                      }`}
-                    >
-                      <input
-                        ref={resumeFileRef}
-                        type="file"
-                        accept="application/pdf"
-                        className="hidden"
-                        onChange={(e) => handleResumeFile(e.target.files?.[0] ?? null)}
-                      />
-                      <Upload size={22} className={resumeDragOver ? "text-[#a855f7]" : "text-[#64748b]"} />
-                      <div className="text-center">
-                        <p className="text-xs font-semibold text-white">
-                          {resumeDragOver ? "Drop your PDF here" : "Upload PDF Resume"}
-                        </p>
-                        <p className="text-[10px] text-[#64748b] mt-0.5">Drag & drop or click to browse — PDF only</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 6: DATABASE & SYNC HUB */}
-              {activeTab === "Database" && (
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-                    <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Database &amp; Sync Hub</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Manage offline JSON state
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-[#34d399] bg-[#34d399]/10 border border-[#34d399]/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-                        <CheckCircle2 size={13} />
-                        <span>Ready</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 space-y-6 max-w-2xl">
-                    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 space-y-4">
-                      <h3 className="font-display text-sm font-bold text-white flex items-center gap-2">
-                        <Download size={15} className="text-[#38bdf8]" />
-                        <span>Offline State &amp; Portable Backup</span>
-                      </h3>
-                      <p className="text-xs text-[#94a3b8]">
-                        Download the entire portfolio state (all case studies, skills matrix, milestones, and messages) into a portable single JSON file.
-                      </p>
-
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={handleExportJSON}
-                          className="flex items-center gap-2 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 px-4 py-2 text-xs font-mono hover:bg-[#38bdf8]/25 transition-colors"
-                        >
-                          <Download size={13} />
-                          <span>Export JSON Backup</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* TAB: HERO SHOWCASE */}
               {activeTab === "Hero" && (
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
                     <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Hero Showcase Screenshots</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Manage the live phone mockup carousel on the homepage — change images, upload new screenshots, edit code tags, and reorder slides.
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Hero Showcase Screenshots</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Live phone mockup carousel on homepage — upload screenshots, change code labels, and reorder slides.
                       </p>
                     </div>
 
@@ -1509,23 +1121,16 @@ export default function AdminPage() {
                         <Plus size={15} />
                         <span>Add New Slide</span>
                       </button>
-                      <button
-                        onClick={syncToServer}
-                        className="flex items-center gap-1.5 rounded-full bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-4 py-2.5 text-xs font-mono hover:bg-[#34d399]/25 transition-all cursor-pointer"
-                      >
-                        <Database size={14} />
-                        <span>Save Changes</span>
-                      </button>
                     </div>
                   </div>
 
                   {/* Showcase Grid: Live Preview + Slide Cards */}
                   <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr] items-start">
                     {/* Live Phone Mockup Preview */}
-                    <div className="rounded-2xl border border-white/10 bg-[#07080e]/90 p-5 backdrop-blur-xl sticky top-28">
-                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 text-xs font-mono">
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 backdrop-blur-xl sticky top-28">
+                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--border-subtle)] text-xs font-mono">
                         <span className="text-[#34d399] font-bold">HOMEPAGE PREVIEW</span>
-                        <span className="text-[11px] text-[#64748b]">
+                        <span className="text-[11px] text-[var(--text-muted)]">
                           {heroList.length > 0 ? `Slide ${activeHeroPreview + 1} of ${heroList.length}` : "Empty"}
                         </span>
                       </div>
@@ -1533,8 +1138,8 @@ export default function AdminPage() {
                       {heroList.length > 0 && (
                         <div>
                           {/* Window bar */}
-                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10 text-[11px] font-mono">
-                            <span className="text-white/80 truncate max-w-[130px]">
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-[var(--border-subtle)] text-[11px] font-mono">
+                            <span className="text-[var(--text-primary)] truncate max-w-[130px]">
                               {heroList[activeHeroPreview]?.file || "MainScreen.kt"}
                             </span>
                             <span className="px-2 py-0.5 rounded-full bg-[#34d399]/10 text-[#34d399] text-[10px]">
@@ -1558,7 +1163,7 @@ export default function AdminPage() {
                                 )
                               }
                               aria-label="Previous Preview"
-                              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110"
+                              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110 cursor-pointer"
                             >
                               <ChevronLeft size={13} />
                             </button>
@@ -1569,7 +1174,7 @@ export default function AdminPage() {
                                 )
                               }
                               aria-label="Next Preview"
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110"
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center z-20 hover:scale-110 cursor-pointer"
                             >
                               <ChevronRight size={13} />
                             </button>
@@ -1594,7 +1199,7 @@ export default function AdminPage() {
                             </div>
                           </div>
 
-                          <p className="mt-3 text-center text-[11px] text-[#94a3b8] font-mono line-clamp-2">
+                          <p className="mt-3 text-center text-[11px] text-[var(--text-secondary)] font-mono line-clamp-2">
                             {heroList[activeHeroPreview]?.desc}
                           </p>
                         </div>
@@ -1608,17 +1213,17 @@ export default function AdminPage() {
                           key={item.id || idx}
                           className={`rounded-2xl border p-6 transition-all ${
                             activeHeroPreview === idx
-                              ? "border-[#34d399]/40 bg-[#34d399]/[0.02] shadow-[0_0_20px_rgba(52,211,153,0.1)]"
-                              : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                              ? "border-[#34d399]/40 bg-[#34d399]/[0.03] shadow-[0_0_20px_rgba(52,211,153,0.1)]"
+                              : "border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:border-[var(--border-active)]"
                           }`}
                         >
                           {/* Slide Header */}
-                          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border-subtle)]">
                             <div className="flex items-center gap-2.5">
-                              <span className="px-2.5 py-1 rounded-full bg-white/10 text-xs font-mono text-[#34d399] font-bold">
+                              <span className="px-2.5 py-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono text-[#34d399] font-bold">
                                 SLIDE 0{idx + 1}
                               </span>
-                              <h3 className="font-display text-base font-bold text-white">
+                              <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
                                 {item.title || "Untitled Slide"}
                               </h3>
                             </div>
@@ -1627,10 +1232,10 @@ export default function AdminPage() {
                               <button
                                 type="button"
                                 onClick={() => setActiveHeroPreview(idx)}
-                                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                                   activeHeroPreview === idx
                                     ? "bg-[#34d399] text-[#090a12] font-bold"
-                                    : "bg-white/5 text-[#94a3b8] hover:text-white"
+                                    : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                 }`}
                                 title="Preview this slide"
                               >
@@ -1642,7 +1247,7 @@ export default function AdminPage() {
                                 type="button"
                                 disabled={idx === 0}
                                 onClick={() => handleMoveHeroItem(idx, "up")}
-                                className="p-1.5 rounded-lg bg-white/5 text-[#94a3b8] hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                className="p-1.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                                 title="Move up"
                               >
                                 <ArrowUp size={14} />
@@ -1652,7 +1257,7 @@ export default function AdminPage() {
                                 type="button"
                                 disabled={idx === heroList.length - 1}
                                 onClick={() => handleMoveHeroItem(idx, "down")}
-                                className="p-1.5 rounded-lg bg-white/5 text-[#94a3b8] hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                className="p-1.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                                 title="Move down"
                               >
                                 <ArrowDown size={14} />
@@ -1661,7 +1266,7 @@ export default function AdminPage() {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteHeroItem(item.id)}
-                                className="p-1.5 rounded-lg bg-[#ef4444]/10 text-[#fca5a5] hover:bg-[#ef4444]/20 transition-colors"
+                                className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
                                 title="Delete slide"
                               >
                                 <Trash2 size={14} />
@@ -1672,13 +1277,13 @@ export default function AdminPage() {
                           {/* Image Preview & Upload Controls */}
                           <div className="mt-5 grid gap-5 sm:grid-cols-[130px_1fr] items-start">
                             {/* Thumbnail */}
-                            <div className="relative aspect-[9/16] w-full rounded-xl border border-white/15 bg-black/60 overflow-hidden group/img">
+                            <div className="relative aspect-[9/16] w-full rounded-xl border border-[var(--border-medium)] bg-black/60 overflow-hidden group/img">
                               <img
                                 src={item.image}
                                 alt={item.title}
                                 className="w-full h-full object-cover object-top"
                               />
-                              <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex flex-col items-center justify-center gap-1.5 text-white cursor-pointer transition-opacity backdrop-blur-xs">
+                              <label className="absolute inset-0 bg-black/70 opacity-0 group-hover/img:opacity-100 flex flex-col items-center justify-center gap-1.5 text-white cursor-pointer transition-opacity backdrop-blur-xs">
                                 <UploadCloud size={20} className="text-[#34d399]" />
                                 <span className="text-[10px] font-mono font-bold">Replace Image</span>
                                 <input
@@ -1693,7 +1298,7 @@ export default function AdminPage() {
                             {/* Upload & Quick Preset Picker */}
                             <div className="space-y-4">
                               <div>
-                                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                   Screenshot Image Source / File
                                 </label>
                                 <div className="flex flex-wrap items-center gap-2">
@@ -1702,7 +1307,7 @@ export default function AdminPage() {
                                     value={item.image}
                                     onChange={(e) => handleUpdateHero(item.id, { image: e.target.value })}
                                     placeholder="/images/daily-finance-dashboard.jpg or https://..."
-                                    className="flex-1 min-w-[200px] rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                                    className="flex-1 min-w-[200px] rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                                   />
 
                                   <label className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 text-xs font-mono hover:bg-[#34d399]/25 cursor-pointer transition-colors">
@@ -1725,7 +1330,7 @@ export default function AdminPage() {
 
                               {/* Quick Presets */}
                               <div>
-                                <span className="text-[11px] font-mono text-[#64748b] block mb-1.5">
+                                <span className="text-[11px] font-mono text-[var(--text-muted)] block mb-1.5">
                                   Quick Real Screenshot Presets:
                                 </span>
                                 <div className="flex flex-wrap gap-1.5">
@@ -1738,10 +1343,10 @@ export default function AdminPage() {
                                       key={preset.url}
                                       type="button"
                                       onClick={() => handleUpdateHero(item.id, { image: preset.url })}
-                                      className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
+                                      className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                                         item.image === preset.url
                                           ? "bg-[#34d399]/20 border-[#34d399]/40 text-[#34d399] font-bold"
-                                          : "bg-white/5 border-white/10 text-[#94a3b8] hover:text-white hover:bg-white/10"
+                                          : "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                       }`}
                                     >
                                       {preset.label}
@@ -1753,9 +1358,9 @@ export default function AdminPage() {
                           </div>
 
                           {/* Metadata Fields */}
-                          <div className="mt-5 pt-4 border-t border-white/5 grid gap-4 sm:grid-cols-2">
+                          <div className="mt-5 pt-4 border-t border-[var(--border-subtle)] grid gap-4 sm:grid-cols-2">
                             <div>
-                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                 Screen / Tab Title
                               </label>
                               <input
@@ -1763,12 +1368,12 @@ export default function AdminPage() {
                                 value={item.title}
                                 onChange={(e) => handleUpdateHero(item.id, { title: e.target.value })}
                                 placeholder="Daily Finance"
-                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                                className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                 Simulated Code File Name
                               </label>
                               <input
@@ -1776,12 +1381,12 @@ export default function AdminPage() {
                                 value={item.file}
                                 onChange={(e) => handleUpdateHero(item.id, { file: e.target.value })}
                                 placeholder="DailyFinance.kt"
-                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                                className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                 Tech Tag (Top Right)
                               </label>
                               <input
@@ -1789,12 +1394,12 @@ export default function AdminPage() {
                                 value={item.tag}
                                 onChange={(e) => handleUpdateHero(item.id, { tag: e.target.value })}
                                 placeholder="Native Compose"
-                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                                className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                 Category Badge (Bottom Info)
                               </label>
                               <input
@@ -1802,12 +1407,12 @@ export default function AdminPage() {
                                 value={item.badge}
                                 onChange={(e) => handleUpdateHero(item.id, { badge: e.target.value })}
                                 placeholder="Android App"
-                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                                className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
 
                             <div className="sm:col-span-2">
-                              <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                                 Feature Description (Bottom Caption)
                               </label>
                               <input
@@ -1815,7 +1420,7 @@ export default function AdminPage() {
                                 value={item.desc}
                                 onChange={(e) => handleUpdateHero(item.id, { desc: e.target.value })}
                                 placeholder="Optional feature highlight or description..."
-                                className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                                className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
                           </div>
@@ -1829,11 +1434,11 @@ export default function AdminPage() {
               {/* TAB: EXTENSIONS */}
               {activeTab === "Extensions" && (
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
                     <div>
-                      <h2 className="font-display text-2xl font-bold text-white">Extensions & Tools</h2>
-                      <p className="text-xs text-[#94a3b8] mt-1">
-                        Manage browser extensions, web tools, and store listings
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Extensions & Tools</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Manage browser extensions, developer tools, and store listings
                       </p>
                     </div>
                     <button
@@ -1849,21 +1454,21 @@ export default function AdminPage() {
                     {extensionList.map((ext) => (
                       <div
                         key={ext.name}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-white/10 hover:bg-white/[0.04] transition-all"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 hover:border-[var(--border-active)] transition-all"
                       >
                         <div className="flex items-start gap-4">
                           <div
-                            className="mt-0.5 w-3 h-3 rounded-full flex-shrink-0"
+                            className="mt-1 w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm"
                             style={{ backgroundColor: ext.color }}
                           />
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-display text-base font-bold text-white">{ext.name}</h3>
-                              <span className="text-[10px] font-mono bg-white/5 text-[#94a3b8] px-2 py-0.5 rounded-full">
+                              <h3 className="font-display text-base font-bold text-[var(--text-primary)]">{ext.name}</h3>
+                              <span className="text-[10px] font-mono bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-full">
                                 {ext.role}
                               </span>
                             </div>
-                            <p className="text-xs text-[#94a3b8] max-w-xl">{ext.desc}</p>
+                            <p className="text-xs text-[var(--text-secondary)] max-w-xl">{ext.desc}</p>
                             <div className="flex flex-wrap gap-1.5 pt-1">
                               {ext.platforms.map((p, i) => (
                                 <a
@@ -1871,7 +1476,7 @@ export default function AdminPage() {
                                   href={p.href}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/10 bg-white/5 text-[#94a3b8] hover:text-white transition-colors"
+                                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                                 >
                                   {p.label}
                                 </a>
@@ -1885,21 +1490,21 @@ export default function AdminPage() {
                             href={ext.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 rounded-xl border border-white/10 bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
+                            className="p-2 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                             title="Visit site"
                           >
                             <ExternalLink size={13} />
                           </a>
                           <button
                             onClick={() => handleOpenEditExtension(ext)}
-                            className="p-2 rounded-xl border border-white/10 bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
+                            className="p-2 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                             title="Edit extension"
                           >
                             <Edit2 size={13} />
                           </button>
                           <button
                             onClick={() => handleDeleteExtension(ext.name)}
-                            className="p-2 rounded-xl border border-[#ef4444]/20 bg-[#ef4444]/5 text-[#ef4444] hover:bg-[#ef4444]/15 transition-colors"
+                            className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
                             title="Delete extension"
                           >
                             <Trash2 size={13} />
@@ -1909,10 +1514,531 @@ export default function AdminPage() {
                     ))}
 
                     {extensionList.length === 0 && (
-                      <div className="py-12 text-center text-xs text-[#64748b]">
+                      <div className="py-12 text-center text-xs text-[var(--text-muted)]">
                         No extensions yet. Add your first one.
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: SKILLS MATRIX */}
+              {activeTab === "Skills" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Technical Skills Matrix</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Configure frameworks, languages, Android SDK tools, and proficiencies
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsCreatingCategory(true)}
+                        className="flex items-center gap-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-medium)] px-4 py-2 text-xs font-bold text-[var(--text-primary)] shadow-sm hover:bg-[var(--bg-surface)] transition-all cursor-pointer"
+                      >
+                        <Plus size={14} />
+                        <span>Add Category</span>
+                      </button>
+                      <button
+                        onClick={() => setIsCreatingSkill(true)}
+                        className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                      >
+                        <Plus size={14} />
+                        <span>Add Skill</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                    {categories.map((cat) => (
+                      <div
+                        key={cat.category}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 space-y-4"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                          <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">
+                            {cat.category}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono text-[#34d399] bg-[#34d399]/10 px-2 py-0.5 rounded-full">
+                              {cat.items.length} skills
+                            </span>
+                            <button
+                              onClick={() => {
+                                setEditingCategory(cat.category);
+                                setEditCategoryName(cat.category);
+                              }}
+                              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 transition-colors cursor-pointer"
+                              title="Edit category"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCategory(cat.category)}
+                              className="text-[var(--text-muted)] hover:text-red-500 p-1 transition-colors cursor-pointer"
+                              title="Remove category"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {cat.items.map((item) => (
+                            <div
+                              key={item.name}
+                              className="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono group hover:border-[var(--border-medium)]"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-[var(--text-primary)] font-medium">{item.name}</span>
+                                <span className="text-[10px] text-[var(--text-muted)]">({item.level})</span>
+                              </div>
+
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => {
+                                    setEditingSkill({ catName: cat.category, skillName: item.name, level: item.level });
+                                    setEditSkillForm({ name: item.name, level: item.level });
+                                  }}
+                                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 transition-colors cursor-pointer"
+                                  title="Edit skill"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteSkill(cat.category, item.name)}
+                                  className="text-[var(--text-muted)] hover:text-red-500 p-1 transition-colors cursor-pointer"
+                                  title="Remove skill"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: JOURNEY MILESTONES */}
+              {activeTab === "Journey" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Journey &amp; Milestones</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Timeline milestones displayed on the homepage story section
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleOpenCreateJourney}
+                      className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                    >
+                      <Plus size={14} />
+                      <span>Add Milestone</span>
+                    </button>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    {journeyList.map((item) => (
+                      <div
+                        key={item.title}
+                        className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 hover:border-[var(--border-active)] transition-all"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xs font-mono text-[#34d399] font-bold">
+                              {item.year}
+                            </span>
+                            <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">
+                              {item.title}
+                            </h3>
+                            <span className="text-[10px] font-mono bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-full">
+                              {item.badge}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[var(--text-secondary)] max-w-2xl">{item.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => handleOpenEditJourney(item)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-medium)] text-xs font-mono text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer"
+                          >
+                            <Edit2 size={12} />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteJourney(item.title)}
+                            className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
+                            title="Delete milestone"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: MESSAGES INBOX */}
+              {activeTab === "Messages" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Inquiries Inbox</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Contact form submissions, developer inquiries, and collaboration proposals
+                      </p>
+                    </div>
+
+                    <span className="text-xs font-mono text-[var(--text-muted)]">
+                      {messages.length} total messages
+                    </span>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    {messages.length === 0 ? (
+                      <div className="py-12 text-center text-xs text-[var(--text-muted)]">
+                        Inbox is empty. No messages yet.
+                      </div>
+                    ) : (
+                      messages.map((m) => (
+                        <div
+                          key={m.id}
+                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-4 sm:p-5 transition-all ${
+                            m.read
+                              ? "border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]"
+                              : "border-[#34d399]/40 bg-[#34d399]/[0.05]"
+                          }`}
+                        >
+                          <div
+                            className="space-y-1 cursor-pointer flex-1"
+                            onClick={() => {
+                              setViewingMessage(m);
+                              if (!m.read) handleToggleMessageRead(m.id);
+                            }}
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              {!m.read && (
+                                <span className="w-2 h-2 rounded-full bg-[#34d399]" />
+                              )}
+                              <span className="text-sm font-bold text-[var(--text-primary)]">{m.name}</span>
+                              <span className="text-xs font-mono text-[var(--text-muted)]">
+                                &lt;{m.email}&gt;
+                              </span>
+                              <span className="text-[10px] font-mono bg-[var(--bg-surface)] text-[#34d399] border border-[var(--border-subtle)] px-2 py-0.5 rounded-full">
+                                {m.topic}
+                              </span>
+                            </div>
+                            <h4 className="text-xs font-semibold text-[var(--text-primary)]">{m.subject}</h4>
+                            <p className="text-xs text-[var(--text-secondary)] line-clamp-1">{m.message}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] font-mono text-[var(--text-muted)] mr-2">
+                              {m.date}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setViewingMessage(m);
+                                if (!m.read) handleToggleMessageRead(m.id);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-medium)] text-xs font-mono text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] cursor-pointer"
+                            >
+                              Read
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMessage(m.id)}
+                              className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 cursor-pointer"
+                              title="Delete message"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: SITE & PROFILE SETTINGS */}
+              {activeTab === "Settings" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Profile &amp; Site Configuration</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Update personal branding, availability badge, and social URLs
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleSaveSettings()}
+                      disabled={isSaving}
+                      className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-5 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] cursor-pointer"
+                    >
+                      <Check size={14} />
+                      <span>{isSaving ? "Saving..." : "Save Settings"}</span>
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveSettings} className="mt-6 space-y-6 max-w-2xl">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                          Author Name
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.name}
+                          onChange={(e) => setSettings({ ...settings, name: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                          Contact Email
+                        </label>
+                        <input
+                          type="email"
+                          value={settings.email}
+                          onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                        Display Tagline
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.tagline}
+                        onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
+                        className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                        Bio / Short Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={settings.bio}
+                        onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
+                        className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                          GitHub Profile URL
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.github}
+                          onChange={(e) => setSettings({ ...settings, github: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">
+                          Tester Portal URL
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.testerUrl}
+                          onChange={(e) =>
+                            setSettings({ ...settings, testerUrl: e.target.value })
+                          }
+                          className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-2.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </form>
+
+                  {/* Resume / CV Card */}
+                  <div className="mt-8 max-w-2xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-6 space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText size={16} className="text-[#a855f7]" />
+                        <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">Resume / CV Document</h3>
+                      </div>
+                      {settings.resumeUrl && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setResumePreviewOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#a855f7]/15 text-[#a855f7] border border-[#a855f7]/30 text-[11px] font-mono hover:bg-[#a855f7]/25 transition-colors cursor-pointer"
+                          >
+                            <Maximize2 size={11} />
+                            Preview
+                          </button>
+                          <button
+                            onClick={handleResumeDownload}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 text-[11px] font-mono hover:bg-[#38bdf8]/25 transition-colors cursor-pointer"
+                          >
+                            <Download size={11} />
+                            Download
+                          </button>
+                          <button
+                            onClick={handleResumeClear}
+                            className="p-1.5 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
+                            title="Clear resume"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Active resume display */}
+                    {settings.resumeUrl && (
+                      <div className="flex items-center gap-3 rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/5 px-4 py-3">
+                        <FileText size={18} className="text-[#a855f7] shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                            {settings.resumeFileName || "resume-subhan-haider.pdf"}
+                          </p>
+                          <p className="text-[10px] font-mono text-[var(--text-muted)] truncate mt-0.5">
+                            {settings.resumeUrl}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-mono text-[#34d399] bg-[#34d399]/10 px-2 py-0.5 rounded-full">
+                          Live Active
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Paste URL */}
+                    <div>
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
+                        <LinkIcon size={11} /> Direct PDF URL or Google Drive link
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder="https://.../resume.pdf"
+                          value={settings.resumeUrl}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              resumeUrl: e.target.value,
+                              resumeFileName: prev.resumeFileName || "resume.pdf",
+                            }))
+                          }
+                          className="flex-1 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#a855f7] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveSettings()}
+                          className="px-4 py-2 rounded-xl bg-[#a855f7]/20 text-[#a855f7] text-xs font-bold hover:bg-[#a855f7]/30 transition-colors cursor-pointer"
+                        >
+                          Save URL
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Drag & Drop Upload */}
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setResumeDragOver(true); }}
+                      onDragLeave={() => setResumeDragOver(false)}
+                      onDrop={handleResumeDrop}
+                      onClick={() => resumeFileRef.current?.click()}
+                      className={`relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed cursor-pointer py-8 transition-all ${
+                        resumeDragOver
+                          ? "border-[#a855f7] bg-[#a855f7]/10"
+                          : "border-[var(--border-medium)] bg-[var(--bg-surface)] hover:border-[#a855f7]/50 hover:bg-[#a855f7]/5"
+                      }`}
+                    >
+                      <input
+                        ref={resumeFileRef}
+                        type="file"
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={(e) => handleResumeFile(e.target.files?.[0] ?? null)}
+                      />
+                      {uploadingResume ? (
+                        <Activity size={24} className="text-[#a855f7] animate-spin" />
+                      ) : (
+                        <Upload size={22} className={resumeDragOver ? "text-[#a855f7]" : "text-[var(--text-muted)]"} />
+                      )}
+                      <div className="text-center">
+                        <p className="text-xs font-semibold text-[var(--text-primary)]">
+                          {uploadingResume
+                            ? "Uploading PDF to server..."
+                            : resumeDragOver
+                            ? "Drop your PDF here"
+                            : "Upload New PDF Resume"}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                          Drag & drop or click to browse — replaces live `/resume-subhan-haider.pdf`
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 6: DATABASE & SYNC HUB */}
+              {activeTab === "Database" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Database &amp; Sync Hub</h2>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Inspect and manage persistent database state in `data.json`
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-[#34d399] bg-[#34d399]/10 border border-[#34d399]/20 px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <CheckCircle2 size={13} />
+                        <span>Ready &amp; Synced</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 space-y-6 max-w-2xl">
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-6 space-y-4">
+                      <h3 className="font-display text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <Download size={15} className="text-[#38bdf8]" />
+                        <span>Offline State &amp; Portable Backup</span>
+                      </h3>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        Download the entire portfolio state (all case studies, hero screenshots, skills matrix, milestones, and messages) into a portable single JSON file.
+                      </p>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleExportJSON}
+                          className="flex items-center gap-2 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 px-4 py-2 text-xs font-mono hover:bg-[#38bdf8]/25 transition-colors cursor-pointer"
+                        >
+                          <Download size={13} />
+                          <span>Export JSON Backup</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => persistData()}
+                          disabled={isSaving}
+                          className="flex items-center gap-2 rounded-full bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-4 py-2 text-xs font-mono hover:bg-[#34d399]/25 transition-colors cursor-pointer"
+                        >
+                          <Save size={13} />
+                          <span>{isSaving ? "Saving..." : "Force Save Database"}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1924,28 +2050,28 @@ export default function AdminPage() {
       {/* CREATE / EDIT PROJECT MODAL */}
       {(isCreatingProject || editingProject) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0f111d] p-6 sm:p-8 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-3xl rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => {
                 setIsCreatingProject(false);
                 setEditingProject(null);
               }}
-              className="absolute right-6 top-6 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
+              className="absolute right-6 top-6 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
             >
               <X size={16} />
             </button>
 
-            <h2 className="font-display text-2xl font-bold text-white">
+            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
               {isCreatingProject ? "Create New Project" : `Edit Project: ${projectForm.title}`}
             </h2>
-            <p className="text-xs text-[#94a3b8] mt-1">
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
               Configure project case study details, architecture highlights, and metadata
             </p>
 
             <form onSubmit={handleSaveProject} className="mt-6 space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     Project Title *
                   </label>
                   <input
@@ -1953,12 +2079,12 @@ export default function AdminPage() {
                     type="text"
                     value={projectForm.title || ""}
                     onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     URL Slug *
                   </label>
                   <input
@@ -1966,14 +2092,14 @@ export default function AdminPage() {
                     type="text"
                     value={projectForm.slug || ""}
                     onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     Category Type
                   </label>
                   <select
@@ -1984,7 +2110,7 @@ export default function AdminPage() {
                         type: e.target.value as Project["type"],
                       })
                     }
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                   >
                     <option value="Android">Android</option>
                     <option value="Website">Website</option>
@@ -1996,14 +2122,14 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     Release Year
                   </label>
                   <input
                     type="text"
                     value={projectForm.year || "2025"}
                     onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
 
@@ -2015,11 +2141,11 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setProjectForm({ ...projectForm, featured: e.target.checked })
                     }
-                    className="rounded border-white/20 bg-[#090a12] text-[#34d399] focus:ring-0"
+                    className="rounded border-[var(--border-medium)] text-[#34d399] focus:ring-0 cursor-pointer"
                   />
                   <label
                     htmlFor="featured-check"
-                    className="text-xs font-mono text-white cursor-pointer"
+                    className="text-xs font-mono text-[var(--text-primary)] cursor-pointer"
                   >
                     Featured on Home
                   </label>
@@ -2027,7 +2153,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Tagline / Short Hook
                 </label>
                 <input
@@ -2035,24 +2161,24 @@ export default function AdminPage() {
                   value={projectForm.tagline || ""}
                   onChange={(e) => setProjectForm({ ...projectForm, tagline: e.target.value })}
                   placeholder="Intelligent personal finance and expense tracking on Android"
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Summary
                 </label>
                 <textarea
                   rows={3}
                   value={projectForm.summary || ""}
                   onChange={(e) => setProjectForm({ ...projectForm, summary: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none resize-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Tech Stack (comma separated)
                 </label>
                 <input
@@ -2060,12 +2186,12 @@ export default function AdminPage() {
                   value={stackInput}
                   onChange={(e) => setStackInput(e.target.value)}
                   placeholder="Kotlin, Jetpack Compose, Room DB, Coroutines"
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Key Features (one per line)
                 </label>
                 <textarea
@@ -2073,44 +2199,49 @@ export default function AdminPage() {
                   value={featuresInput}
                   onChange={(e) => setFeaturesInput(e.target.value)}
                   placeholder="Real-time expense tracking&#10;Offline first SQLite DB&#10;Material 3 dynamic theming"
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none resize-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none resize-none"
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5 flex items-center justify-between">
-                    <span>Logo / Icon / Image</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-mono text-[var(--text-secondary)]">
+                      Logo / Icon
+                    </label>
                     <label className="text-[10px] text-[#34d399] hover:underline cursor-pointer flex items-center gap-1">
                       <Upload size={10} />
-                      <span>Upload</span>
+                      <span>{uploadingProjectLogo ? "Uploading..." : "Upload"}</span>
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
+                        disabled={uploadingProjectLogo}
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          const url = await uploadImageFile(file);
-                          if (url) {
-                            setProjectForm((prev) => ({ ...prev, logoUrl: url }));
+                          setUploadingProjectLogo(true);
+                          const uploaded = await uploadFile(file);
+                          setUploadingProjectLogo(false);
+                          if (uploaded) {
+                            setProjectForm((prev) => ({ ...prev, logoUrl: uploaded.url }));
                             showToast("Image uploaded for project!");
                           }
                         }}
                       />
                     </label>
-                  </label>
+                  </div>
                   <input
                     type="text"
                     value={projectForm.logoUrl || ""}
                     onChange={(e) => setProjectForm({ ...projectForm, logoUrl: e.target.value })}
                     placeholder="/images/logo.png"
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     Live Demo / Tester URL
                   </label>
                   <input
@@ -2118,12 +2249,12 @@ export default function AdminPage() {
                     value={projectForm.liveUrl || ""}
                     onChange={(e) => setProjectForm({ ...projectForm, liveUrl: e.target.value })}
                     placeholder="https://tester.subhan.tech/"
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                     GitHub Repo URL
                   </label>
                   <input
@@ -2131,25 +2262,25 @@ export default function AdminPage() {
                     value={projectForm.githubUrl || ""}
                     onChange={(e) => setProjectForm({ ...projectForm, githubUrl: e.target.value })}
                     placeholder="https://github.com/Subhan-Haider/..."
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
                   onClick={() => {
                     setIsCreatingProject(false);
                     setEditingProject(null);
                   }}
-                  className="px-5 py-2 rounded-full border border-white/10 bg-white/5 text-xs text-[#94a3b8] hover:text-white"
+                  className="px-5 py-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7]"
+                  className="px-6 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer"
                 >
                   Save Project
                 </button>
@@ -2162,28 +2293,28 @@ export default function AdminPage() {
       {/* CREATE SKILL MODAL */}
       {isCreatingSkill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0f111d] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-2xl">
             <button
               onClick={() => setIsCreatingSkill(false)}
-              className="absolute right-5 top-5 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-5 top-5 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={15} />
             </button>
 
-            <h2 className="font-display text-xl font-bold text-white">Add Skill</h2>
-            <p className="text-xs text-[#94a3b8] mt-1">
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Add Skill</h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
               Add a new technology or tool to the skills matrix
             </p>
 
             <form onSubmit={handleAddSkill} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Category
                 </label>
                 <select
                   value={newSkillCategory}
                   onChange={(e) => setNewSkillCategory(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 >
                   {categories.map((c) => (
                     <option key={c.category} value={c.category}>
@@ -2194,7 +2325,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Skill Name *
                 </label>
                 <input
@@ -2203,18 +2334,18 @@ export default function AdminPage() {
                   placeholder="e.g. Jetpack Glance"
                   value={newSkillName}
                   onChange={(e) => setNewSkillName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Proficiency Level
                 </label>
                 <select
                   value={newSkillLevel}
                   onChange={(e) => setNewSkillLevel(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 >
                   <option value="Primary">Primary</option>
                   <option value="Advanced">Advanced</option>
@@ -2227,13 +2358,13 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setIsCreatingSkill(false)}
-                  className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs text-[#94a3b8]"
+                  className="px-4 py-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12]"
+                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] cursor-pointer hover:bg-[#6ee7b7]"
                 >
                   Add Skill
                 </button>
@@ -2246,10 +2377,10 @@ export default function AdminPage() {
       {/* VIEW MESSAGE MODAL */}
       {viewingMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-xl rounded-3xl border border-white/10 bg-[#0f111d] p-6 sm:p-8 shadow-2xl">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl">
             <button
               onClick={() => setViewingMessage(null)}
-              className="absolute right-6 top-6 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-6 top-6 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -2258,15 +2389,15 @@ export default function AdminPage() {
               <span className="text-[10px] font-mono bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/30 px-2.5 py-0.5 rounded-full">
                 {viewingMessage.topic}
               </span>
-              <span className="text-xs font-mono text-[#64748b]">{viewingMessage.date}</span>
+              <span className="text-xs font-mono text-[var(--text-muted)]">{viewingMessage.date}</span>
             </div>
 
-            <h2 className="font-display text-xl font-bold text-white mt-3">
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mt-3">
               {viewingMessage.subject}
             </h2>
 
-            <div className="mt-2 text-xs font-mono text-[#94a3b8] pb-4 border-b border-white/10">
-              From: <span className="text-white font-bold">{viewingMessage.name}</span> (
+            <div className="mt-2 text-xs font-mono text-[var(--text-secondary)] pb-4 border-b border-[var(--border-subtle)]">
+              From: <span className="text-[var(--text-primary)] font-bold">{viewingMessage.name}</span> (
               <a
                 href={`mailto:${viewingMessage.email}`}
                 className="text-[#34d399] hover:underline"
@@ -2276,14 +2407,14 @@ export default function AdminPage() {
               )
             </div>
 
-            <div className="mt-4 rounded-2xl bg-[#090a12]/80 border border-white/5 p-4 text-xs text-[#cbd5e1] leading-relaxed whitespace-pre-wrap">
+            <div className="mt-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] p-4 text-xs text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
               {viewingMessage.message}
             </div>
 
             <div className="mt-6 flex items-center justify-between gap-3 pt-2">
               <button
                 onClick={() => handleDeleteMessage(viewingMessage.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ef4444]/10 text-xs font-mono text-[#fca5a5] hover:bg-[#ef4444]/20"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-xs font-mono text-red-500 hover:bg-red-500/20 cursor-pointer"
               >
                 <Trash2 size={12} />
                 <span>Delete Message</span>
@@ -2306,41 +2437,41 @@ export default function AdminPage() {
       {/* CREATE / EDIT JOURNEY MODAL */}
       {(isCreatingJourney || editingJourney) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-xl rounded-3xl border border-white/10 bg-[#0f111d] p-6 sm:p-8 shadow-2xl my-8">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl my-8">
             <button
               onClick={() => {
                 setIsCreatingJourney(false);
                 setEditingJourney(null);
               }}
-              className="absolute right-6 top-6 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-6 top-6 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={16} />
             </button>
-            <h2 className="font-display text-xl font-bold text-white">
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">
               {isCreatingJourney ? "Add Milestone" : "Edit Milestone"}
             </h2>
             <form onSubmit={handleSaveJourney} className="mt-5 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Year / Phase</label>
-                  <input required type="text" value={journeyForm.year} onChange={(e) => setJourneyForm({ ...journeyForm, year: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Year / Phase</label>
+                  <input required type="text" value={journeyForm.year} onChange={(e) => setJourneyForm({ ...journeyForm, year: e.target.value })} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Badge</label>
-                  <input required type="text" value={journeyForm.badge} onChange={(e) => setJourneyForm({ ...journeyForm, badge: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Badge</label>
+                  <input required type="text" value={journeyForm.badge} onChange={(e) => setJourneyForm({ ...journeyForm, badge: e.target.value })} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Title</label>
-                <input required type="text" value={journeyForm.title} onChange={(e) => setJourneyForm({ ...journeyForm, title: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Title</label>
+                <input required type="text" value={journeyForm.title} onChange={(e) => setJourneyForm({ ...journeyForm, title: e.target.value })} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Description</label>
-                <textarea required rows={3} value={journeyForm.description} onChange={(e) => setJourneyForm({ ...journeyForm, description: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white resize-none focus:border-[#34d399] focus:outline-none" />
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Description</label>
+                <textarea required rows={3} value={journeyForm.description} onChange={(e) => setJourneyForm({ ...journeyForm, description: e.target.value })} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] resize-none focus:border-[#34d399] focus:outline-none" />
               </div>
               <div className="flex justify-end gap-3 pt-3">
-                <button type="button" onClick={() => { setIsCreatingJourney(false); setEditingJourney(null); }} className="px-4 py-2 rounded-full bg-white/5 text-xs text-[#94a3b8] hover:text-white">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7]">Save</button>
+                <button type="button" onClick={() => { setIsCreatingJourney(false); setEditingJourney(null); }} className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">Cancel</button>
+                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer">Save</button>
               </div>
             </form>
           </div>
@@ -2350,22 +2481,22 @@ export default function AdminPage() {
       {/* EDIT CATEGORY MODAL */}
       {editingCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0f111d] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-2xl">
             <button
               onClick={() => setEditingCategory(null)}
-              className="absolute right-5 top-5 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-5 top-5 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={15} />
             </button>
-            <h2 className="font-display text-xl font-bold text-white">Edit Category</h2>
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Edit Category</h2>
             <form onSubmit={handleSaveEditCategory} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Category Name</label>
-                <input required type="text" value={editCategoryName} onChange={(e) => setEditCategoryName(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Category Name</label>
+                <input required type="text" value={editCategoryName} onChange={(e) => setEditCategoryName(e.target.value)} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
               </div>
               <div className="flex justify-end gap-3 pt-3">
-                <button type="button" onClick={() => setEditingCategory(null)} className="px-4 py-2 rounded-full bg-white/5 text-xs text-[#94a3b8] hover:text-white">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7]">Save Category</button>
+                <button type="button" onClick={() => setEditingCategory(null)} className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] cursor-pointer">Cancel</button>
+                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer">Save Category</button>
               </div>
             </form>
           </div>
@@ -2375,22 +2506,22 @@ export default function AdminPage() {
       {/* EDIT SKILL MODAL */}
       {editingSkill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0f111d] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-2xl">
             <button
               onClick={() => setEditingSkill(null)}
-              className="absolute right-5 top-5 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-5 top-5 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={15} />
             </button>
 
-            <h2 className="font-display text-xl font-bold text-white">Edit Skill</h2>
-            <p className="text-xs text-[#94a3b8] mt-1">
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Edit Skill</h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
               Update skill details in {editingSkill.catName}
             </p>
 
             <form onSubmit={handleSaveEditSkill} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Skill Name *
                 </label>
                 <input
@@ -2398,18 +2529,18 @@ export default function AdminPage() {
                   type="text"
                   value={editSkillForm.name}
                   onChange={(e) => setEditSkillForm({ ...editSkillForm, name: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Proficiency Level
                 </label>
                 <select
                   value={editSkillForm.level}
                   onChange={(e) => setEditSkillForm({ ...editSkillForm, level: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
                 >
                   <option value="Primary">Primary</option>
                   <option value="Advanced">Advanced</option>
@@ -2422,13 +2553,13 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setEditingSkill(null)}
-                  className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs text-[#94a3b8]"
+                  className="px-4 py-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12]"
+                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] cursor-pointer hover:bg-[#6ee7b7]"
                 >
                   Save Skill
                 </button>
@@ -2441,22 +2572,22 @@ export default function AdminPage() {
       {/* CREATE CATEGORY MODAL */}
       {isCreatingCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0f111d] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-2xl">
             <button
               onClick={() => setIsCreatingCategory(false)}
-              className="absolute right-5 top-5 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-5 top-5 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={15} />
             </button>
-            <h2 className="font-display text-xl font-bold text-white">Add Category</h2>
+            <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Add Category</h2>
             <form onSubmit={handleAddCategory} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Category Name</label>
-                <input required type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Category Name</label>
+                <input required type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
               </div>
               <div className="flex justify-end gap-3 pt-3">
-                <button type="button" onClick={() => setIsCreatingCategory(false)} className="px-4 py-2 rounded-full bg-white/5 text-xs text-[#94a3b8] hover:text-white">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7]">Add Category</button>
+                <button type="button" onClick={() => setIsCreatingCategory(false)} className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] cursor-pointer">Cancel</button>
+                <button type="submit" className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer">Add Category</button>
               </div>
             </form>
           </div>
@@ -2466,71 +2597,71 @@ export default function AdminPage() {
       {/* CREATE / EDIT EXTENSION MODAL */}
       {(isCreatingExtension || editingExtension) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#0f111d] p-6 sm:p-8 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => { setIsCreatingExtension(false); setEditingExtension(null); }}
-              className="absolute right-6 top-6 p-2 rounded-full bg-white/5 text-[#94a3b8] hover:text-white"
+              className="absolute right-6 top-6 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <X size={16} />
             </button>
 
-            <h2 className="font-display text-2xl font-bold text-white">
+            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
               {isCreatingExtension ? "Add Extension" : `Edit: ${editingExtension?.name}`}
             </h2>
-            <p className="text-xs text-[#94a3b8] mt-1">Browser extension or tool listing details</p>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">Browser extension or tool listing details</p>
 
             <form onSubmit={handleSaveExtension} className="mt-6 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Name *</label>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Name *</label>
                   <input required type="text" value={extForm.name}
                     onChange={(e) => setExtForm({ ...extForm, name: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Role / Category *</label>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Role / Category *</label>
                   <input required type="text" value={extForm.role}
                     onChange={(e) => setExtForm({ ...extForm, role: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Website URL *</label>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Website URL *</label>
                 <input required type="url" value={extForm.url}
                   onChange={(e) => setExtForm({ ...extForm, url: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none" />
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none" />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Description</label>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Description</label>
                 <textarea value={extForm.desc} rows={2}
                   onChange={(e) => setExtForm({ ...extForm, desc: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none resize-none" />
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none resize-none" />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">Accent Color</label>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">Accent Color</label>
                 <div className="flex items-center gap-3">
                   <input type="color" value={extForm.color}
                     onChange={(e) => setExtForm({ ...extForm, color: e.target.value })}
-                    className="h-8 w-12 rounded cursor-pointer bg-transparent border border-white/10" />
+                    className="h-8 w-12 rounded cursor-pointer bg-transparent border border-[var(--border-medium)]" />
                   <input type="text" value={extForm.color}
                     onChange={(e) => setExtForm({ ...extForm, color: e.target.value })}
-                    className="flex-1 rounded-xl border border-white/10 bg-[#090a12]/80 px-3 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none" />
+                    className="flex-1 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none" />
                 </div>
               </div>
 
               {/* Platforms */}
               <div>
-                <label className="block text-xs font-mono text-[#94a3b8] mb-2">Store Platforms</label>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2">Store Platforms</label>
                 <div className="space-y-2 mb-3">
                   {extForm.platforms.map((p, i) => (
-                    <div key={i} className="flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2">
-                      <span className="text-xs font-mono text-white">{p.label}</span>
-                      <span className="text-[11px] text-[#64748b] truncate max-w-[200px]">{p.href}</span>
+                    <div key={i} className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-3 py-2">
+                      <span className="text-xs font-mono text-[var(--text-primary)]">{p.label}</span>
+                      <span className="text-[11px] text-[var(--text-muted)] truncate max-w-[200px]">{p.href}</span>
                       <button type="button" onClick={() => handleRemoveExtPlatform(i)}
-                        className="text-[#ef4444] hover:text-red-300 shrink-0">
+                        className="text-red-500 hover:text-red-400 shrink-0 cursor-pointer">
                         <X size={13} />
                       </button>
                     </div>
@@ -2538,25 +2669,25 @@ export default function AdminPage() {
                 </div>
                 <div className="grid grid-cols-[80px_1fr_60px_auto] gap-2 items-end">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748b] mb-1">Label</label>
+                    <label className="block text-[10px] font-mono text-[var(--text-muted)] mb-1">Label</label>
                     <input type="text" placeholder="Chrome" value={extPlatformInput.label}
                       onChange={(e) => setExtPlatformInput({ ...extPlatformInput, label: e.target.value })}
-                      className="w-full rounded-lg border border-white/10 bg-[#090a12]/80 px-2 py-1.5 text-xs text-white focus:border-[#34d399] focus:outline-none" />
+                      className="w-full rounded-lg border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-2 py-1.5 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748b] mb-1">URL</label>
+                    <label className="block text-[10px] font-mono text-[var(--text-muted)] mb-1">URL</label>
                     <input type="url" placeholder="https://..." value={extPlatformInput.href}
                       onChange={(e) => setExtPlatformInput({ ...extPlatformInput, href: e.target.value })}
-                      className="w-full rounded-lg border border-white/10 bg-[#090a12]/80 px-2 py-1.5 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none" />
+                      className="w-full rounded-lg border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-2 py-1.5 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748b] mb-1">Color</label>
+                    <label className="block text-[10px] font-mono text-[var(--text-muted)] mb-1">Color</label>
                     <input type="color" value={extPlatformInput.color}
                       onChange={(e) => setExtPlatformInput({ ...extPlatformInput, color: e.target.value })}
-                      className="h-[30px] w-full rounded cursor-pointer bg-transparent border border-white/10" />
+                      className="h-[30px] w-full rounded cursor-pointer bg-transparent border border-[var(--border-medium)]" />
                   </div>
                   <button type="button" onClick={handleAddExtPlatform}
-                    className="h-[30px] px-3 rounded-lg bg-[#34d399]/20 text-[#34d399] text-xs font-bold hover:bg-[#34d399]/30 transition-colors">
+                    className="h-[30px] px-3 rounded-lg bg-[#34d399]/20 text-[#34d399] text-xs font-bold hover:bg-[#34d399]/30 transition-colors cursor-pointer">
                     <Plus size={13} />
                   </button>
                 </div>
@@ -2565,11 +2696,11 @@ export default function AdminPage() {
               <div className="flex items-center justify-end gap-3 pt-3">
                 <button type="button"
                   onClick={() => { setIsCreatingExtension(false); setEditingExtension(null); }}
-                  className="px-4 py-2 rounded-full bg-white/5 text-xs text-[#94a3b8] hover:text-white">
+                  className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
                   Cancel
                 </button>
                 <button type="submit"
-                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7]">
+                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer">
                   {isCreatingExtension ? "Add Extension" : "Save Changes"}
                 </button>
               </div>
@@ -2591,7 +2722,7 @@ export default function AdminPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleResumeDownload}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 text-xs font-mono hover:bg-[#38bdf8]/25 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 text-xs font-mono hover:bg-[#38bdf8]/25 transition-colors cursor-pointer"
               >
                 <Download size={13} />
                 Download
@@ -2607,7 +2738,7 @@ export default function AdminPage() {
               </a>
               <button
                 onClick={() => setResumePreviewOpen(false)}
-                className="p-2 rounded-full bg-white/10 text-[#94a3b8] hover:text-white hover:bg-white/15 transition-colors"
+                className="p-2 rounded-full bg-white/10 text-[#94a3b8] hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
