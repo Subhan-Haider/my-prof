@@ -93,6 +93,8 @@ export default function Home() {
       .finally(() => setLoadingData(false));
   }, []);
 
+  const [isHeroPaused, setIsHeroPaused] = useState(false);
+
   const {
     projects = [],
     technologies = [],
@@ -106,6 +108,15 @@ export default function Home() {
   const safeScreenshots = heroScreenshots && heroScreenshots.length > 0 ? heroScreenshots : defaultHeroScreenshots;
   const currentIdx = activeHeroIndex >= safeScreenshots.length ? 0 : activeHeroIndex;
   const currentHero = safeScreenshots[currentIdx] || defaultHeroScreenshots[0];
+
+  // Auto-scroll hero showcase screenshots every 3.5 seconds
+  useEffect(() => {
+    if (isHeroPaused || safeScreenshots.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveHeroIndex((prev) => (prev + 1) % safeScreenshots.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isHeroPaused, safeScreenshots.length]);
 
   return (
     <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
@@ -198,22 +209,20 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.95, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative lg:h-[620px] flex items-center justify-center w-full"
+            className="relative lg:h-[480px] flex items-center justify-center w-full my-4 lg:my-0"
           >
-            {/* Floating Device Showcase - ONLY Pure Images */}
+            {/* Floating Image Showcase - Pure Screenshot, No Frame */}
             <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              onMouseEnter={() => setIsHeroPaused(true)}
+              onMouseLeave={() => setIsHeroPaused(false)}
+              onTouchStart={() => setIsHeroPaused(true)}
+              onTouchEnd={() => setIsHeroPaused(false)}
               className="relative flex flex-col items-center justify-center group"
             >
-              {/* Smartphone Simulator */}
-              <div className="relative mx-auto w-full max-w-[280px] sm:max-w-[320px] aspect-[9/18.5] rounded-[2.5rem] border-[8px] border-[#1e2238] bg-[#07080e] shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col justify-between">
-                {/* Speaker Notch & Camera */}
-                <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center pointer-events-none">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
-                  <div className="w-5 h-1 rounded-full bg-[#0d0f1a]" />
-                </div>
-
+              {/* Pure Screenshot Container (No Frame) */}
+              <div className="relative mx-auto w-full max-w-[190px] sm:max-w-[220px] md:max-w-[240px] aspect-[9/18.5] rounded-2xl bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden flex flex-col justify-between">
                 {/* Left/Right Quick Navigation Arrows */}
                 <button
                   onClick={() =>
@@ -222,9 +231,9 @@ export default function Home() {
                     )
                   }
                   aria-label="Previous screenshot"
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={15} />
                 </button>
 
                 <button
@@ -232,12 +241,12 @@ export default function Home() {
                     setActiveHeroIndex((prev) => (prev + 1) % safeScreenshots.length)
                   }
                   aria-label="Next screenshot"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={15} />
                 </button>
 
-                {/* Real High-Res Screenshot Image (Pure, no overlay text) */}
+                {/* Real High-Res Screenshot Image */}
                 <div className="relative w-full h-full overflow-hidden">
                   <img
                     key={currentHero.image}
@@ -251,7 +260,7 @@ export default function Home() {
               </div>
 
               {/* Minimal Dot Indicators */}
-              <div className="mt-5 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-1.5">
                 {safeScreenshots.map((_, i) => (
                   <button
                     key={i}
@@ -259,8 +268,8 @@ export default function Home() {
                     aria-label={`Slide ${i + 1}`}
                     className={`rounded-full transition-all ${
                       currentIdx === i
-                        ? "w-6 h-2 bg-[#34d399] shadow-[0_0_10px_rgba(52,211,153,0.5)]"
-                        : "w-2 h-2 bg-white/20 hover:bg-white/40"
+                        ? "w-5 h-1.5 bg-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+                        : "w-1.5 h-1.5 bg-white/25 hover:bg-white/45"
                     }`}
                   />
                 ))}
