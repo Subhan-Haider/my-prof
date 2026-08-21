@@ -290,17 +290,37 @@ export function Reveal({
   children,
   delay = 0,
   className = "",
+  direction = "up", // New prop: "up" | "down" | "left" | "right" | "none"
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  direction?: "up" | "down" | "left" | "right" | "none";
 }) {
+  // Determine initial coordinates based on direction
+  const getInitialPosition = () => {
+    switch (direction) {
+      case "up":
+        return { opacity: 0, y: 50 };
+      case "down":
+        return { opacity: 0, y: -50 };
+      case "left":
+        return { opacity: 0, x: -50 };
+      case "right":
+        return { opacity: 0, x: 50 };
+      case "none":
+        return { opacity: 0 };
+      default:
+        return { opacity: 0, y: 50 };
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={getInitialPosition()}
+      whileInView={{ opacity: 1, x: 0, y: 0 }} // Animate to original position
       viewport={{ once: true, margin: "-8%" }}
-      transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      transition={{ type: "spring", stiffness: 100, damping: 20, delay }} // Dynamic spring effect
       className={className}
     >
       {children}

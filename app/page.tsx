@@ -281,7 +281,7 @@ export default function Home() {
       {/* ================= CORE PHILOSOPHY ================= */}
       <section className="relative border-y border-white/[0.08] bg-[#0c0e18] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-6xl">
-          <Reveal>
+          <Reveal direction="left">
             <h2 className="display-title mt-4 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white">
               I LEARN BEST <br />
               <span className="gradient-text-mint">BY BUILDING REAL THINGS.</span>
@@ -295,7 +295,7 @@ export default function Home() {
 
           {/* 4 Bento Highlights */}
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <Reveal delay={0.1}>
+            <Reveal direction="up" delay={0.1}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#34d399]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Smartphone size={20} />
@@ -307,7 +307,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal delay={0.2}>
+            <Reveal direction="up" delay={0.2}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#818cf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#6366f1]/10 text-[#818cf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Globe size={20} />
@@ -319,7 +319,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal delay={0.3}>
+            <Reveal direction="up" delay={0.3}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#38bdf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={20} />
@@ -331,7 +331,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal delay={0.4}>
+            <Reveal direction="up" delay={0.4}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#ec4899]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#ec4899]/10 text-[#ec4899] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <FolderGit2 size={20} />
@@ -349,7 +349,7 @@ export default function Home() {
       {/* ================= SELECTED WORK ================= */}
       <section id="work" className="relative px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
-          <Reveal>
+          <Reveal direction="right">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-white/[0.08]">
               <div>
                 <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
@@ -369,7 +369,7 @@ export default function Home() {
           {/* Project Cards */}
           <div className="mt-12 space-y-8">
             {projects.map((project, idx) => (
-              <Reveal key={project.slug} delay={idx * 0.1}>
+              <Reveal key={project.slug} direction="up" delay={idx * 0.1}>
                 <div className="project-card rounded-3xl border border-white/[0.08] bg-[#0f111d]/80 p-6 sm:p-10 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
                   <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
                     <div>
@@ -551,7 +551,7 @@ export default function Home() {
         <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl grid gap-12 lg:grid-cols-[1fr_1.1fr] items-center">
-          <Reveal>
+          <Reveal direction="left">
             <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
               BUILT FOR <br />
               <span className="gradient-text-mint">THE ANDROID OS.</span>
@@ -614,7 +614,7 @@ export default function Home() {
           </Reveal>
 
           {/* Right Side: Code / Architecture Card */}
-          <Reveal delay={0.2}>
+          <Reveal direction="right" delay={0.2}>
             <div className="rounded-3xl border border-white/10 bg-[#090a12]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl font-mono">
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs">
                 <div className="flex items-center gap-2">
@@ -652,7 +652,7 @@ export default function Home() {
       {/* ================= TECH STACK MATRIX ================= */}
       <section id="stack" className="px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
-          <Reveal>
+          <Reveal direction="down">
             <div className="text-center max-w-3xl mx-auto">
               <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 TOOLS I USE <br />
@@ -681,7 +681,7 @@ export default function Home() {
           {/* Categorized Tech Grid */}
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {techCategories.map((cat, idx) => (
-              <Reveal key={cat.category} delay={idx * 0.1}>
+              <Reveal key={cat.category} direction="up" delay={idx * 0.1}>
                 <div className="h-full rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-6 backdrop-blur-md">
                   <h3 className="font-display text-base font-bold text-white pb-3 border-b border-white/[0.08] flex items-center justify-between">
                     <span>{cat.category}</span>
@@ -711,7 +711,7 @@ export default function Home() {
       {/* ================= FEATURED EXTENSIONS ================= */}
       <section className="border-t border-white/[0.08] bg-[#07080e] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
-          <Reveal>
+          <Reveal direction="left">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
               <div>
                 <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
@@ -735,7 +735,7 @@ export default function Home() {
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {extensions.map((ext, i) => (
-              <Reveal key={ext.name} delay={i * 0.07}>
+              <Reveal key={ext.name} direction="up" delay={i * 0.07}>
                 <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 backdrop-blur-md hover:border-white/20 hover:bg-[#15192c]/80 transition-all">
                   {/* Accent glow */}
                   <div
@@ -800,7 +800,7 @@ export default function Home() {
       {/* ================= LIVE GITHUB REPOS ================= */}
       <section className="border-t border-white/[0.08] bg-[#090a12] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
-          <Reveal>
+          <Reveal direction="right">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
               <div>
                 <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
@@ -823,7 +823,7 @@ export default function Home() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {repos.length > 0
               ? repos.map((repo, i) => (
-                <Reveal key={repo.name} delay={i * 0.1}>
+                <Reveal key={repo.name} direction="up" delay={i * 0.1}>
                   <a
                     href={repo.url}
                     target="_blank"
@@ -860,7 +860,7 @@ export default function Home() {
                 { name: "android-compose-canvas", desc: "Custom reactive graphing components.", lang: "Kotlin" },
                 { name: "subhan-portfolio", desc: "Next.js 15 personal developer platform.", lang: "TypeScript" },
               ].map((item, i) => (
-                <Reveal key={item.name} delay={i * 0.1}>
+                <Reveal key={item.name} direction="up" delay={i * 0.1}>
                   <a
                     href="https://github.com/Subhan-Haider"
                     target="_blank"
@@ -891,7 +891,7 @@ export default function Home() {
       {/* ================= JOURNEY TIMELINE ================= */}
       <section id="journey" className="border-t border-white/[0.08] bg-[#0c0e18] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-5xl">
-          <Reveal>
+          <Reveal direction="down">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 THE JOURNEY SO FAR<span className="text-[#34d399]">.</span>
@@ -905,7 +905,7 @@ export default function Home() {
           {/* Timeline Nodes */}
           <div className="relative pl-6 sm:pl-8 border-l border-white/10 space-y-12">
             {journey.map((node, i) => (
-              <Reveal key={node.title} delay={i * 0.1}>
+              <Reveal key={node.title} direction="left" delay={i * 0.1}>
                 <div className="relative group">
                   {/* Node Dot */}
                   <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-[#090a12] border-2 border-[#34d399] flex items-center justify-center group-hover:scale-125 transition-transform shadow-[0_0_10px_rgba(52,211,153,0.5)]">
