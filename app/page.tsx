@@ -689,24 +689,35 @@ export default function Home() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {techCategories.map((cat, idx) => (
               <Reveal key={cat.category} direction="up" delay={idx * 0.1}>
-                <div className="h-full rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-6 backdrop-blur-md">
-                  <h3 className="font-display text-base font-bold text-white pb-3 border-b border-white/[0.08] flex items-center justify-between">
+                <div className="h-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-md shadow-sm dark:shadow-none hover:border-[var(--border-active)] hover:shadow-md transition-all">
+                  <h3 className="font-display text-base font-bold text-[var(--text-primary)] pb-3 border-b border-[var(--border-subtle)] flex items-center justify-between">
                     <span>{cat.category}</span>
-                    <span className="text-xs font-mono text-[#34d399]">{cat.items.length} skills</span>
+                    <span className="text-xs font-mono text-emerald-600 dark:text-[#34d399] bg-emerald-500/10 px-2.5 py-0.5 rounded-full font-medium">
+                      {cat.items.length} skills
+                    </span>
                   </h3>
 
                   <div className="mt-4 space-y-2.5">
-                    {cat.items.map((item) => (
-                      <div
-                        key={item.name}
-                        className="flex items-center justify-between py-1 text-sm text-[#94a3b8]"
-                      >
-                        <span className="text-white/90">{item.name}</span>
-                        <span className="text-[11px] font-mono text-[#64748b] bg-white/5 px-2 py-0.5 rounded">
-                          {item.level}
-                        </span>
-                      </div>
-                    ))}
+                    {cat.items.map((item) => {
+                      const levelStyle =
+                        item.level === "Primary"
+                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                          : item.level === "Advanced"
+                          ? "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20"
+                          : "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+
+                      return (
+                        <div
+                          key={item.name}
+                          className="flex items-center justify-between py-1 text-sm"
+                        >
+                          <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
+                          <span className={`text-[11px] font-mono border px-2 py-0.5 rounded-md ${levelStyle}`}>
+                            {item.level}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </Reveal>
