@@ -308,11 +308,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Bottom Interactive Feature Label */}
-              <p className="mt-4 text-center text-xs text-[#94a3b8] font-mono flex items-center justify-center gap-2">
-                <Sparkles size={13} className="text-[#34d399]" />
-                <span>{currentHero.desc}</span>
-              </p>
             </motion.div>
           </motion.div>
         </div>

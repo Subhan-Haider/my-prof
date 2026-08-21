@@ -303,7 +303,7 @@ export type HeroScreenshot = {
   tag: string;
   image: string;
   badge: string;
-  desc: string;
+  desc?: string;
 };
 
 export const heroScreenshots: HeroScreenshot[] = [
@@ -314,7 +314,7 @@ export const heroScreenshots: HeroScreenshot[] = [
     tag: "Native Compose",
     image: "/images/daily-finance-dashboard.jpg",
     badge: "Android App",
-    desc: "Jetpack Compose Dashboard with dynamic budget breakdown & transactions",
+    desc: "",
   },
   {
     id: "analytics",

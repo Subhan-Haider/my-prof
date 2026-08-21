@@ -1814,7 +1814,7 @@ export default function AdminPage() {
                                 type="text"
                                 value={item.desc}
                                 onChange={(e) => handleUpdateHero(item.id, { desc: e.target.value })}
-                                placeholder="Jetpack Compose Dashboard with dynamic budget breakdown & transactions"
+                                placeholder="Optional feature highlight or description..."
                                 className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white focus:border-[#34d399] focus:outline-none"
                               />
                             </div>
