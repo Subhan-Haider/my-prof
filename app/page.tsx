@@ -146,9 +146,9 @@ export default function Home() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 max-w-xl text-base sm:text-xl text-[#94a3b8] leading-relaxed"
+              className="mt-6 max-w-xl text-base sm:text-xl text-[var(--text-secondary)] leading-relaxed"
             >
-              Hi, I&apos;m <span className="text-white font-medium">Subhan Haider</span>. A high school student turning curiosity into
+              Hi, I&apos;m <span className="text-[var(--text-primary)] font-bold">Subhan Haider</span>. A high school student turning curiosity into
               functional Android applications, clean web experiences, and open-source experiments.
             </motion.p>
 
@@ -161,7 +161,7 @@ export default function Home() {
             >
               <a
                 href="#work"
-                className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-white via-[#f1f5f9] to-[#e2e8f0] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
+                className="flex items-center justify-center gap-2 rounded-full bg-slate-900 text-white dark:bg-gradient-to-r dark:from-white dark:via-[#f1f5f9] dark:to-[#e2e8f0] dark:text-[#090a12] px-6 py-3.5 text-sm font-bold shadow-md hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <span>Explore My Work</span>
                 <ArrowUpRight size={16} />
@@ -171,7 +171,7 @@ export default function Home() {
                 href="https://github.com/Subhan-Haider"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/10 hover:border-white/30 active:scale-98 transition-all text-center min-h-[44px]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-6 py-3.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] hover:border-[var(--border-active)] active:scale-98 transition-all text-center min-h-[44px] shadow-sm"
               >
                 <Github size={16} />
                 <span>GitHub Profile</span>
@@ -179,7 +179,7 @@ export default function Home() {
 
               <Link
                 href="/resume"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3.5 text-sm font-medium text-[#cbd5e1] hover:text-white hover:border-white/30 active:scale-98 transition-all text-center min-h-[44px]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-5 py-3.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] hover:border-[var(--border-active)] active:scale-98 transition-all text-center min-h-[44px] shadow-sm"
               >
                 <span>Resume</span>
                 <ArrowUpRight size={14} />
@@ -191,14 +191,14 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t border-white/[0.08]"
+              className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t border-[var(--border-subtle)]"
             >
               {stats.map((item) => (
                 <div key={item.label} className="p-1">
-                  <div className="font-display text-2xl sm:text-4xl font-extrabold text-white">
+                  <div className="font-display text-2xl sm:text-4xl font-extrabold text-[var(--text-primary)]">
                     {item.number}
                   </div>
-                  <div className="mt-1 text-xs text-[#94a3b8]">{item.label}</div>
+                  <div className="mt-1 text-xs text-[var(--text-secondary)] font-medium">{item.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -286,14 +286,14 @@ export default function Home() {
       </section>
 
       {/* ================= CORE PHILOSOPHY ================= */}
-      <section className="relative border-y border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
+      <section className="relative border-y border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="left">
-            <h2 className="display-title mt-4 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white">
+            <h2 className="display-title mt-4 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-[var(--text-primary)]">
               I LEARN BEST <br />
               <span className="gradient-text-mint">BY BUILDING REAL THINGS.</span>
             </h2>
-            <p className="mt-6 max-w-2xl text-lg text-[#94a3b8] leading-relaxed">
+            <p className="mt-6 max-w-2xl text-lg text-[var(--text-secondary)] leading-relaxed">
               Instead of getting stuck in endless tutorial loops, I learn by building actual applications.
               Every project is an opportunity to explore software architecture, database design, animations,
               and real-world problem solving.
@@ -303,48 +303,48 @@ export default function Home() {
           {/* 4 Bento Highlights */}
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <Reveal direction="up" scale delay={0.1}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#34d399]/40 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <div className="h-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-sm shadow-sm dark:shadow-none hover:border-[var(--accent-emerald)]/50 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-[#34d399] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Smartphone size={20} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">Android Native</h3>
-                <p className="mt-2 text-sm text-[#94a3b8] leading-relaxed">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Android Native</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
                   Crafting native Android experiences with Kotlin, Jetpack Compose, Room, and modern MVVM patterns.
                 </p>
               </div>
             </Reveal>
 
             <Reveal direction="up" scale delay={0.2}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#818cf8]/40 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#6366f1]/10 text-[#818cf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <div className="h-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-sm shadow-sm dark:shadow-none hover:border-[var(--accent-indigo)]/50 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-[#818cf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Globe size={20} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">Modern Web</h3>
-                <p className="mt-2 text-sm text-[#94a3b8] leading-relaxed">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Modern Web</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
                   Building responsive, high-performance web applications using React, Next.js, and TypeScript.
                 </p>
               </div>
             </Reveal>
 
             <Reveal direction="up" scale delay={0.3}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#38bdf8]/40 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <div className="h-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-sm shadow-sm dark:shadow-none hover:border-[var(--accent-sky)]/50 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-[#38bdf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={20} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">Offline &amp; Private</h3>
-                <p className="mt-2 text-sm text-[#94a3b8] leading-relaxed">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Offline &amp; Private</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
                   Designing offline-first systems where user data stays private, encrypted, and accessible at lightspeed.
                 </p>
               </div>
             </Reveal>
 
             <Reveal direction="up" scale delay={0.4}>
-              <div className="h-full rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-sm hover:border-[#ec4899]/40 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#ec4899]/10 text-[#ec4899] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <div className="h-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-sm shadow-sm dark:shadow-none hover:border-pink-500/50 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-600 dark:text-[#ec4899] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <FolderGit2 size={20} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">Open Source</h3>
-                <p className="mt-2 text-sm text-[#94a3b8] leading-relaxed">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Open Source</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
                   Sharing templates, modules, and code publicly on GitHub to support and collaborate with the developer community.
                 </p>
               </div>
@@ -357,15 +357,15 @@ export default function Home() {
       <section id="work" className="relative px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Reveal direction="right">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-white/[0.08]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-[var(--border-subtle)]">
               <div>
-                <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
+                <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-[var(--text-primary)]">
                   SELECTED WORK<span className="text-[#34d399]">.</span>
                 </h2>
               </div>
               <Link
                 href="/projects"
-                className="flex items-center gap-1.5 text-sm font-mono text-[#34d399] hover:underline"
+                className="flex items-center gap-1.5 text-sm font-mono text-emerald-600 dark:text-[#34d399] hover:underline font-medium"
               >
                 <span>View Full Project Archive</span>
                 <ArrowUpRight size={16} />
@@ -377,7 +377,7 @@ export default function Home() {
           <div className="mt-12 space-y-8">
             {projects.map((project, idx) => (
               <Reveal key={project.slug} direction={idx % 2 === 0 ? "left" : "right"} scale delay={idx * 0.1}>
-                <div className="project-card rounded-3xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 sm:p-10 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
+                <div className="project-card rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-10 backdrop-blur-xl hover:border-[var(--border-active)] shadow-sm dark:shadow-none hover:shadow-xl transition-all">
                   <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
@@ -390,11 +390,11 @@ export default function Home() {
                         )}
                       </div>
 
-                      <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4">
+                      <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mt-4">
                         {project.title}
                       </h3>
 
-                      <p className="mt-4 text-base sm:text-lg text-[#94a3b8] leading-relaxed max-w-xl">
+                      <p className="mt-4 text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl">
                         {project.summary}
                       </p>
 
@@ -404,10 +404,10 @@ export default function Home() {
                           {project.metrics.map((m) => (
                             <div
                               key={m.label}
-                              className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center"
+                              className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-3 text-center"
                             >
                               <div className="text-xs font-mono text-[#64748b]">{m.label}</div>
-                              <div className="font-display text-sm font-bold text-white mt-1">
+                              <div className="font-display text-sm font-bold text-[var(--text-primary)] mt-1">
                                 {m.value}
                               </div>
                             </div>
@@ -420,7 +420,7 @@ export default function Home() {
                         {project.stack.map((tech) => (
                           <span
                             key={tech}
-                            className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-[#cbd5e1]"
+                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-3 py-1 text-xs font-mono text-[var(--text-secondary)]"
                           >
                             {tech}
                           </span>
@@ -431,7 +431,7 @@ export default function Home() {
                       <div className="mt-8 flex flex-wrap items-center gap-4">
                         <Link
                           href={`/projects/${project.slug}`}
-                          className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-5 py-2.5 text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-colors"
+                          className="flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] px-5 py-2.5 text-xs font-bold transition-all shadow-sm"
                         >
                           <span>Read Case Study</span>
                           <ArrowUpRight size={14} />
@@ -442,7 +442,7 @@ export default function Home() {
                             href={project.liveUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+                            className="flex items-center gap-1.5 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors shadow-sm"
                           >
                             <span>Live Demo</span>
                             <ExternalLink size={13} />
@@ -454,7 +454,7 @@ export default function Home() {
                             href={project.githubUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+                            className="flex items-center gap-1.5 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors shadow-sm"
                           >
                             <Github size={13} />
                             <span>GitHub</span>
@@ -464,59 +464,59 @@ export default function Home() {
                     </div>
 
                     {/* Visual Card Artwork */}
-                    <div className="relative min-h-[260px] sm:min-h-[320px] rounded-2xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0a1816] p-6 flex flex-col justify-between overflow-hidden shadow-inner">
-                      <div className="flex items-center justify-between text-xs font-mono text-[#64748b]">
+                    <div className="relative min-h-[260px] sm:min-h-[320px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] dark:bg-gradient-to-br dark:from-[#161a30] dark:via-[#0f111d] dark:to-[#0a1816] p-6 flex flex-col justify-between overflow-hidden shadow-sm dark:shadow-inner">
+                      <div className="flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
                         <span>PROJECT PREVIEW</span>
-                        <span className="text-[#34d399]">{project.type}</span>
+                        <span className="text-emerald-600 dark:text-[#34d399] font-medium">{project.type}</span>
                       </div>
 
                       {project.slug === "daily-finance" ? (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4">
+                          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
                             <div className="flex justify-between items-center text-xs">
-                              <span className="text-[#94a3b8]">Budget Health</span>
-                              <span className="text-[#34d399] font-bold">Optimal (94%)</span>
+                              <span className="text-[var(--text-secondary)] font-medium">Budget Health</span>
+                              <span className="text-emerald-600 dark:text-[#34d399] font-bold">Optimal (94%)</span>
                             </div>
-                            <div className="mt-2 h-2 rounded-full bg-white/10 overflow-hidden">
-                              <div className="h-full w-[85%] bg-gradient-to-r from-[#34d399] to-[#38bdf8]" />
+                            <div className="mt-2 h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                              <div className="h-full w-[85%] bg-gradient-to-r from-emerald-500 to-sky-400 dark:from-[#34d399] dark:to-[#38bdf8]" />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="rounded-lg bg-white/5 p-3 text-center">
-                              <span className="text-[#64748b] block text-[10px]">INCOME</span>
-                              <span className="font-bold text-[#34d399] text-sm">+$4,200</span>
+                            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 text-center shadow-sm">
+                              <span className="text-[var(--text-muted)] block text-[10px] font-mono">INCOME</span>
+                              <span className="font-bold text-emerald-600 dark:text-[#34d399] text-sm">+$4,200</span>
                             </div>
-                            <div className="rounded-lg bg-white/5 p-3 text-center">
-                              <span className="text-[#64748b] block text-[10px]">EXPENSES</span>
-                              <span className="font-bold text-[#ef4444] text-sm">-$1,840</span>
+                            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 text-center shadow-sm">
+                              <span className="text-[var(--text-muted)] block text-[10px] font-mono">EXPENSES</span>
+                              <span className="font-bold text-rose-600 dark:text-[#ef4444] text-sm">-$1,840</span>
                             </div>
                           </div>
                         </div>
                       ) : project.slug === "app-tester" ? (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4">
+                          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                               {project.logoUrl ? (
                                 <img 
                                   src={project.logoUrl} 
                                   alt="Logo" 
-                                  className="w-8 h-8 rounded-lg object-contain bg-white/5"
+                                  className="w-8 h-8 rounded-lg object-contain bg-black/5 dark:bg-white/5"
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-lg bg-[#6366f1]/20 text-[#818cf8] flex items-center justify-center font-mono font-bold">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-[#818cf8] flex items-center justify-center font-mono font-bold">
                                   APK
                                 </div>
                               )}
                               <div>
-                                <h4 className="text-xs font-bold text-white">DailyFinance_v1.2.apk</h4>
-                                <span className="text-[10px] text-[#64748b]">Build #42 • 14.8 MB</span>
+                                <h4 className="text-xs font-bold text-[var(--text-primary)]">DailyFinance_v1.2.apk</h4>
+                                <span className="text-[10px] text-[var(--text-muted)]">Build #42 • 14.8 MB</span>
                               </div>
                             </div>
                             <div className="mt-3 flex gap-2">
-                              <span className="text-[10px] bg-[#34d399]/20 text-[#34d399] px-2 py-0.5 rounded">
+                              <span className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-[#34d399] px-2 py-0.5 rounded font-medium">
                                 Ready for Testing
                               </span>
-                              <span className="text-[10px] bg-white/10 text-white/70 px-2 py-0.5 rounded">
+                              <span className="text-[10px] bg-slate-200/80 dark:bg-white/10 text-[var(--text-secondary)] px-2 py-0.5 rounded">
                                 Release Notes Added
                               </span>
                             </div>
@@ -527,21 +527,21 @@ export default function Home() {
                           <img 
                             src={project.logoUrl} 
                             alt={project.title} 
-                            className="w-20 h-20 rounded-2xl object-contain bg-white/5 p-2 shadow-lg mx-auto"
+                            className="w-20 h-20 rounded-2xl object-contain bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-2 shadow-md mx-auto"
                           />
-                          <h4 className="text-sm font-bold text-white mt-2">{project.title}</h4>
+                          <h4 className="text-sm font-bold text-[var(--text-primary)] mt-2">{project.title}</h4>
                         </div>
                       ) : (
                         <div className="space-y-3 my-auto">
-                          <div className="rounded-xl border border-white/10 bg-[var(--bg-surface)] p-4 font-mono text-xs text-[#94a3b8]">
-                            <div className="text-[#34d399]">$ git clone github.com/Subhan-Haider</div>
-                            <div className="text-white/70 mt-1">&gt; 100% Free &amp; Open Source Modules</div>
-                            <div className="text-[#64748b] mt-1">&gt; Jetpack Compose canvas charts included</div>
+                          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 font-mono text-xs text-[var(--text-secondary)] shadow-sm">
+                            <div className="text-emerald-600 dark:text-[#34d399] font-medium">$ git clone github.com/Subhan-Haider</div>
+                            <div className="text-[var(--text-primary)] mt-1">&gt; 100% Free &amp; Open Source Modules</div>
+                            <div className="text-[var(--text-muted)] mt-1">&gt; Jetpack Compose canvas charts included</div>
                           </div>
                         </div>
                       )}
 
-                      <div className="text-[11px] font-mono text-[#64748b] text-right">
+                      <div className="text-[11px] font-mono text-[var(--text-muted)] text-right">
                         Click to view architecture breakdown →
                       </div>
                     </div>
@@ -554,16 +554,16 @@ export default function Home() {
       </section>
 
       {/* ================= ANDROID SPOTLIGHT ================= */}
-      <section id="android" className="relative border-y border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-28 md:px-12 overflow-hidden">
+      <section id="android" className="relative border-y border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-6 py-28 md:px-12 overflow-hidden">
         <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl grid gap-12 lg:grid-cols-[1fr_1.1fr] items-center">
           <Reveal direction="left">
-            <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
+            <h2 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-[var(--text-primary)]">
               BUILT FOR <br />
               <span className="gradient-text-mint">THE ANDROID OS.</span>
             </h2>
-            <p className="mt-6 text-lg text-[#94a3b8] leading-relaxed">
+            <p className="mt-6 text-lg text-[var(--text-secondary)] leading-relaxed">
               Android development is where my passion for software engineering truly began.
               I focus on creating fluid, native applications leveraging the full power of modern Android toolchains.
             </p>
@@ -571,36 +571,36 @@ export default function Home() {
             {/* Android Architecture Highlights */}
             <div className="mt-8 space-y-4">
               <div className="flex items-start gap-3.5">
-                <div className="mt-1 w-5 h-5 rounded-full bg-[#34d399]/20 text-[#34d399] flex items-center justify-center shrink-0">
+                <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-[#34d399] flex items-center justify-center shrink-0">
                   <CheckCircle2 size={14} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Declarative UI with Jetpack Compose</h4>
-                  <p className="text-xs text-[#94a3b8] mt-0.5">
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Declarative UI with Jetpack Compose</h4>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                     100% reactive state management, seamless dark/light Material 3 theming, and hardware-accelerated animations.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="mt-1 w-5 h-5 rounded-full bg-[#34d399]/20 text-[#34d399] flex items-center justify-center shrink-0">
+                <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-[#34d399] flex items-center justify-center shrink-0">
                   <CheckCircle2 size={14} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Clean Architecture &amp; MVVM</h4>
-                  <p className="text-xs text-[#94a3b8] mt-0.5">
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Clean Architecture &amp; MVVM</h4>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                     Separation of concerns across UI layer, domain use cases, and repository data sources with Kotlin Flows.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="mt-1 w-5 h-5 rounded-full bg-[#34d399]/20 text-[#34d399] flex items-center justify-center shrink-0">
+                <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-[#34d399] flex items-center justify-center shrink-0">
                   <CheckCircle2 size={14} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Offline-First Room SQLite Database</h4>
-                  <p className="text-xs text-[#94a3b8] mt-0.5">
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Offline-First Room SQLite Database</h4>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                     Fast, secure, on-device data persistence ensuring zero network latency and complete user privacy.
                   </p>
                 </div>
@@ -612,7 +612,7 @@ export default function Home() {
                 href="https://tester.subhan.tech/"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#34d399] px-6 py-3 text-xs font-bold text-[#090a12] shadow-lg hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] px-6 py-3 text-xs font-bold shadow-lg hover:scale-105 transition-all"
               >
                 <span>Visit Android Tester Hub</span>
                 <ArrowUpRight size={14} />
@@ -622,34 +622,34 @@ export default function Home() {
 
           {/* Right Side: Code / Architecture Card */}
           <Reveal direction="right" delay={0.2}>
-            <div className="rounded-3xl border border-white/10 bg-[var(--bg-surface)] p-6 sm:p-8 backdrop-blur-xl shadow-2xl font-mono">
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs">
+            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 backdrop-blur-xl shadow-lg dark:shadow-2xl font-mono">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--border-subtle)] text-xs">
                 <div className="flex items-center gap-2">
-                  <Terminal size={14} className="text-[#34d399]" />
-                  <span className="text-white font-bold">DailyFinanceViewModel.kt</span>
+                  <Terminal size={14} className="text-emerald-600 dark:text-[#34d399]" />
+                  <span className="text-[var(--text-primary)] font-bold">DailyFinanceViewModel.kt</span>
                 </div>
-                <span className="text-[#64748b]">Kotlin 2.0</span>
+                <span className="text-[var(--text-muted)]">Kotlin 2.0</span>
               </div>
 
-              <div className="space-y-1.5 text-xs text-[#cbd5e1] leading-relaxed overflow-x-auto">
-                <p><span className="text-[#6366f1]">class</span> <span className="text-[#38bdf8]">FinanceViewModel</span>(</p>
-                <p className="pl-4"><span className="text-[#6366f1]">private val</span> repository: FinanceRepository</p>
+              <div className="space-y-1.5 text-xs text-[var(--text-secondary)] leading-relaxed overflow-x-auto">
+                <p><span className="text-indigo-600 dark:text-[#818cf8] font-bold">class</span> <span className="text-sky-600 dark:text-[#38bdf8] font-bold">FinanceViewModel</span>(</p>
+                <p className="pl-4"><span className="text-indigo-600 dark:text-[#818cf8] font-bold">private val</span> repository: FinanceRepository</p>
                 <p>) : ViewModel() &#123;</p>
-                <p className="pl-4 text-[#64748b]">// Reactive UI state stream</p>
-                <p className="pl-4"><span className="text-[#6366f1]">val</span> uiState: StateFlow&lt;FinanceUiState&gt; =</p>
+                <p className="pl-4 text-[var(--text-muted)]">// Reactive UI state stream</p>
+                <p className="pl-4"><span className="text-indigo-600 dark:text-[#818cf8] font-bold">val</span> uiState: StateFlow&lt;FinanceUiState&gt; =</p>
                 <p className="pl-8">repository.observeTransactions()</p>
                 <p className="pl-8">.map &#123; list -&gt; FinanceUiState.Success(list) &#125;</p>
                 <p className="pl-8">.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)</p>
-                <p className="mt-2 pl-4"><span className="text-[#6366f1]">fun</span> <span className="text-[#34d399]">addTransaction</span>(entry: Transaction) =</p>
+                <p className="mt-2 pl-4"><span className="text-indigo-600 dark:text-[#818cf8] font-bold">fun</span> <span className="text-emerald-600 dark:text-[#34d399] font-bold">addTransaction</span>(entry: Transaction) =</p>
                 <p className="pl-8">viewModelScope.launch(Dispatchers.IO) &#123;</p>
                 <p className="pl-12">repository.insert(entry)</p>
                 <p className="pl-8">&#125;</p>
                 <p>&#125;</p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-[#94a3b8]">
+              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
                 <span>✓ Verified Type Safe</span>
-                <span className="text-[#34d399]">60 FPS Compose Rendering</span>
+                <span className="text-emerald-600 dark:text-[#34d399] font-medium">60 FPS Compose Rendering</span>
               </div>
             </div>
           </Reveal>

@@ -88,12 +88,12 @@ export default function ContactPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
 
-              <h1 className="display-title mt-4 text-3xl sm:text-6xl font-extrabold text-white break-words">
+              <h1 className="display-title mt-4 text-3xl sm:text-6xl font-extrabold text-[var(--text-primary)] break-words">
                 START A <br />
                 <span className="gradient-text-mint">CONVERSATION.</span>
               </h1>
 
-              <p className="mt-5 sm:mt-6 text-base sm:text-lg text-[#94a3b8] leading-relaxed">
+              <p className="mt-5 sm:mt-6 text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
                 Have a question about an Android project, want to discuss software engineering,
                 or have an idea you&apos;d like to build together? Drop a message below.
               </p>
@@ -104,14 +104,14 @@ export default function ContactPage() {
                   href="https://github.com/Subhan-Haider"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-[#34d399]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-[var(--border-active)] hover:bg-[var(--bg-surface-elevated)] active:scale-98 transition-all group shadow-sm"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-110 transition-transform">
                     <Github size={20} />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-[#64748b] block">GITHUB</span>
-                    <span className="text-sm font-bold text-white group-hover:text-[#34d399] transition-colors break-all">
+                    <span className="text-xs font-mono text-[var(--text-muted)] block">GITHUB</span>
+                    <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-emerald-600 dark:group-hover:text-[#34d399] transition-colors break-all">
                       github.com/Subhan-Haider
                     </span>
                   </div>
@@ -121,14 +121,14 @@ export default function ContactPage() {
                   href="https://tester.subhan.tech/"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-[#38bdf8]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3.5 sm:p-4 hover:border-sky-500/40 hover:bg-[var(--bg-surface-elevated)] active:scale-98 transition-all group shadow-sm"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 flex items-center justify-center text-[#38bdf8] group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-[#38bdf8] group-hover:scale-110 transition-transform">
                     <Smartphone size={20} />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-[#64748b] block">TESTER PORTAL</span>
-                    <span className="text-sm font-bold text-white group-hover:text-[#38bdf8] transition-colors break-all">
+                    <span className="text-xs font-mono text-[var(--text-muted)] block">TESTER PORTAL</span>
+                    <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-sky-600 dark:group-hover:text-[#38bdf8] transition-colors break-all">
                       tester.subhan.tech
                     </span>
                   </div>
@@ -141,27 +141,27 @@ export default function ContactPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="rounded-3xl border border-white/10 bg-[var(--bg-surface)] p-5 sm:p-8 sm:p-10 backdrop-blur-2xl shadow-2xl"
+              className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 sm:p-8 sm:p-10 backdrop-blur-2xl shadow-lg dark:shadow-2xl"
             >
-              <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] pb-4 mb-6 border-b border-white/10">
+              <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-[#34d399] font-medium pb-4 mb-6 border-b border-[var(--border-subtle)]">
                 <MessageSquare size={15} />
                 <span>DIRECT MESSAGE FORM</span>
               </div>
 
               {state === "done" ? (
                 <div className="py-12 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-[#34d399]/20 text-[#34d399] flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-[#34d399] flex items-center justify-center mx-auto shadow-md">
                     <CheckCircle2 size={28} />
                   </div>
-                  <h3 className="font-display text-2xl font-bold text-white">
+                  <h3 className="font-display text-2xl font-bold text-[var(--text-primary)]">
                     Message Received!
                   </h3>
-                  <p className="text-sm text-[#94a3b8] max-w-sm mx-auto">
+                  <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
                     Thank you for reaching out. I will get back to you as soon as possible.
                   </p>
                   <button
                     onClick={() => setState("idle")}
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/15 transition-colors"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-5 py-2.5 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors shadow-sm"
                   >
                     <span>Send Another Message</span>
                   </button>
@@ -170,7 +170,7 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Topic Selector */}
                   <div>
-                    <label className="block text-xs font-mono text-[#94a3b8] mb-2.5">
+                    <label className="block text-xs font-mono text-[var(--text-secondary)] font-medium mb-2.5">
                       Select Topic
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -184,8 +184,8 @@ export default function ContactPage() {
                           }}
                           className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all ${
                             selectedTopic === t
-                              ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_12px_rgba(52,211,153,0.3)]"
-                              : "bg-white/[0.04] text-[#94a3b8] border border-white/5 hover:bg-white/10 hover:text-white"
+                              ? "bg-emerald-600 text-white dark:bg-[#34d399] dark:text-[#090a12] font-bold shadow-md"
+                              : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] hover:text-[var(--text-primary)]"
                           }`}
                         >
                           {t}
@@ -197,7 +197,7 @@ export default function ContactPage() {
                   {/* Name & Email Row */}
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-mono text-[#94a3b8] mb-2">
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] font-medium mb-2">
                         Your Name *
                       </label>
                       <input
@@ -208,12 +208,12 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                        className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-mono text-[#94a3b8] mb-2">
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] font-medium mb-2">
                         Email Address *
                       </label>
                       <input
@@ -224,14 +224,14 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                        className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
 
                   {/* Subject Input */}
                   <div>
-                    <label className="block text-xs font-mono text-[#94a3b8] mb-2">
+                    <label className="block text-xs font-mono text-[var(--text-secondary)] font-medium mb-2">
                       Subject
                     </label>
                     <input
@@ -241,13 +241,13 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
                       }
-                      className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                      className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none transition-colors"
                     />
                   </div>
 
                   {/* Message Input */}
                   <div>
-                    <label className="block text-xs font-mono text-[#94a3b8] mb-2">
+                    <label className="block text-xs font-mono text-[var(--text-secondary)] font-medium mb-2">
                       Message *
                     </label>
                     <textarea
@@ -258,12 +258,12 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      className="w-full rounded-xl border border-white/10 bg-[var(--bg-surface)] px-4 py-3 text-sm text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors resize-none"
+                      className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none transition-colors resize-none"
                     />
                   </div>
 
                   {state === "error" && (
-                    <div className="flex items-center gap-2 rounded-xl bg-[#ef4444]/10 border border-[#ef4444]/20 p-3 text-xs text-[#fca5a5]">
+                    <div className="flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-[#fca5a5]">
                       <AlertCircle size={15} />
                       <span>
                         Something went wrong while sending your message. Please try again.
@@ -274,7 +274,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={state === "sending"}
-                    className="w-full flex items-center justify-center gap-2 rounded-full bg-[#34d399] py-3.5 text-xs font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] disabled:opacity-50 transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] py-3.5 text-xs font-bold shadow-lg disabled:opacity-50 transition-all cursor-pointer"
                   >
                     {state === "sending" ? (
                       <span>Transmitting message...</span>

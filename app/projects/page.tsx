@@ -54,24 +54,20 @@ export default function ProjectsPage() {
 
         <div className="mx-auto max-w-7xl">
           <Reveal>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#34d399]">
-              <Layers size={14} />
-              <span>THE COMPLETE ARCHIVE</span>
-            </div>
 
-            <h1 className="display-title mt-4 text-3xl sm:text-7xl lg:text-8xl font-extrabold text-white break-words">
+            <h1 className="display-title mt-4 text-3xl sm:text-7xl lg:text-8xl font-extrabold text-[var(--text-primary)] break-words">
               EVERYTHING <br />
               <span className="gradient-text-mint">I&apos;VE BUILT.</span>
             </h1>
 
-            <p className="mt-5 sm:mt-6 max-w-2xl text-sm sm:text-lg text-[#94a3b8] leading-relaxed">
+            <p className="mt-5 sm:mt-6 max-w-2xl text-sm sm:text-lg text-[var(--text-secondary)] leading-relaxed">
               A comprehensive showcase of native Android apps, web experiences, developer tools,
               and open-source experiments built from scratch.
             </p>
           </Reveal>
 
           {/* Controls Bar: Filters, Search, View Mode */}
-          <div className="mt-10 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-3.5 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="mt-10 sm:mt-12 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3.5 sm:p-5 backdrop-blur-xl shadow-sm dark:shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Filter Category Chips - scrollable on mobile */}
             <div className="flex flex-row overflow-x-auto scrollbar-none items-center gap-2 pb-1.5 -mx-1 px-1">
               {categories.map((cat) => {
@@ -84,19 +80,17 @@ export default function ProjectsPage() {
                   <button
                     key={cat}
                     onClick={() => setActiveFilter(cat)}
-                    className={`flex-shrink-0 flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 text-xs font-mono transition-all min-h-[36px] ${
-                      activeFilter === cat
-                        ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_15px_rgba(52,211,153,0.3)]"
-                        : "bg-white/[0.04] text-[#94a3b8] border border-white/5 hover:bg-white/10 hover:text-white"
-                    }`}
+                    className={`flex-shrink-0 flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 text-xs font-mono transition-all min-h-[36px] ${activeFilter === cat
+                        ? "bg-emerald-600 text-white dark:bg-[#34d399] dark:text-[#090a12] font-bold shadow-md dark:shadow-[0_0_15px_rgba(52,211,153,0.3)]"
+                        : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                      }`}
                   >
                     <span>{cat}</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                        activeFilter === cat
-                          ? "bg-black/20 text-[#090a12]"
-                          : "bg-white/10 text-[#64748b]"
-                      }`}
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${activeFilter === cat
+                          ? "bg-black/20 text-white dark:text-[#090a12]"
+                          : "bg-black/5 dark:bg-white/10 text-[var(--text-muted)]"
+                        }`}
                     >
                       {count}
                     </span>
@@ -110,19 +104,19 @@ export default function ProjectsPage() {
               <div className="relative flex-1 sm:w-64">
                 <Search
                   size={15}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748b]"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
                 />
                 <input
                   type="text"
                   placeholder="Search projects or stack..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-full border border-white/10 bg-[var(--bg-surface)] pl-9 pr-8 py-2 text-xs text-white placeholder:text-[#64748b] focus:border-[#34d399] focus:outline-none transition-colors"
+                  className="w-full rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] pl-9 pr-8 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none transition-colors shadow-inner"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748b] hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   >
                     <X size={13} />
                   </button>
@@ -130,26 +124,24 @@ export default function ProjectsPage() {
               </div>
 
               {/* View Toggle */}
-              <div className="hidden sm:flex items-center rounded-full border border-white/10 bg-[var(--bg-surface)] p-1">
+              <div className="hidden sm:flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-1 shadow-sm">
                 <button
                   onClick={() => setViewMode("grid")}
                   aria-label="Grid view"
-                  className={`p-1.5 rounded-full transition-colors ${
-                    viewMode === "grid"
-                      ? "bg-[#34d399] text-[#090a12]"
-                      : "text-[#64748b] hover:text-white"
-                  }`}
+                  className={`p-1.5 rounded-full transition-colors ${viewMode === "grid"
+                      ? "bg-emerald-600 text-white dark:bg-[#34d399] dark:text-[#090a12]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    }`}
                 >
                   <LayoutGrid size={15} />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
                   aria-label="List view"
-                  className={`p-1.5 rounded-full transition-colors ${
-                    viewMode === "list"
-                      ? "bg-[#34d399] text-[#090a12]"
-                      : "text-[#64748b] hover:text-white"
-                  }`}
+                  className={`p-1.5 rounded-full transition-colors ${viewMode === "list"
+                      ? "bg-emerald-600 text-white dark:bg-[#34d399] dark:text-[#090a12]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    }`}
                 >
                   <List size={15} />
                 </button>
@@ -167,7 +159,7 @@ export default function ProjectsPage() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProjects.map((project, idx) => (
                   <Reveal key={project.slug} direction="up" scale delay={idx * 0.06}>
-                    <div className="project-card flex flex-col justify-between h-full rounded-3xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
+                    <div className="project-card flex flex-col justify-between h-full rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[var(--border-active)] shadow-sm dark:shadow-none hover:shadow-xl transition-all">
                       <div>
                         <div className="flex items-center justify-between">
                           <GlowBadge
@@ -175,8 +167,8 @@ export default function ProjectsPage() {
                               project.type === "Android"
                                 ? "emerald"
                                 : project.type === "Open Source"
-                                ? "sky"
-                                : "indigo"
+                                  ? "sky"
+                                  : "indigo"
                             }
                           >
                             <span>{project.type.toUpperCase()}</span>
@@ -188,11 +180,11 @@ export default function ProjectsPage() {
                           )}
                         </div>
 
-                        <h2 className="font-display text-2xl font-bold text-white mt-5">
+                        <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mt-5">
                           {project.title}
                         </h2>
 
-                        <p className="mt-3 text-sm text-[#94a3b8] leading-relaxed line-clamp-3">
+                        <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3">
                           {project.summary}
                         </p>
 
@@ -200,7 +192,7 @@ export default function ProjectsPage() {
                           {project.stack.map((tech) => (
                             <span
                               key={tech}
-                              className="rounded-full border border-white/5 bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-mono text-[#cbd5e1]"
+                              className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-2.5 py-0.5 text-[11px] font-mono text-[var(--text-secondary)]"
                             >
                               {tech}
                             </span>
@@ -208,10 +200,10 @@ export default function ProjectsPage() {
                         </div>
                       </div>
 
-                      <div className="mt-8 pt-5 border-t border-white/[0.08] flex items-center justify-between">
+                      <div className="mt-8 pt-5 border-t border-[var(--border-subtle)] flex items-center justify-between">
                         <Link
                           href={`/projects/${project.slug}`}
-                          className="flex items-center gap-1 text-xs font-bold text-[#34d399] hover:underline"
+                          className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-[#34d399] hover:underline"
                         >
                           <span>Case Study</span>
                           <ArrowUpRight size={14} className="project-arrow" />
@@ -223,7 +215,7 @@ export default function ProjectsPage() {
                               href={project.liveUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2 rounded-full bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                              className="p-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] hover:border-[var(--border-active)] hover:bg-[var(--bg-surface)] transition-all shadow-sm"
                               title="Live Demo"
                             >
                               <ExternalLink size={13} />
@@ -234,7 +226,7 @@ export default function ProjectsPage() {
                               href={project.githubUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2 rounded-full bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                              className="p-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] hover:border-[var(--border-active)] hover:bg-[var(--bg-surface)] transition-all shadow-sm"
                               title="GitHub Repo"
                             >
                               <Github size={13} />
@@ -250,7 +242,7 @@ export default function ProjectsPage() {
               <div className="space-y-4">
                 {filteredProjects.map((project, idx) => (
                   <Reveal key={project.slug} direction="up" delay={idx * 0.04}>
-                    <div className="project-card rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="project-card rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-xl hover:border-[var(--border-active)] shadow-sm dark:shadow-none hover:shadow-lg transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <GlowBadge
@@ -258,17 +250,17 @@ export default function ProjectsPage() {
                               project.type === "Android"
                                 ? "emerald"
                                 : project.type === "Open Source"
-                                ? "sky"
-                                : "indigo"
+                                  ? "sky"
+                                  : "indigo"
                             }
                           >
                             <span>{project.type.toUpperCase()}</span>
                           </GlowBadge>
-                          <h2 className="font-display text-xl font-bold text-white">
+                          <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">
                             {project.title}
                           </h2>
                         </div>
-                        <p className="mt-2 text-sm text-[#94a3b8] line-clamp-2 max-w-3xl">
+                        <p className="mt-2 text-sm text-[var(--text-secondary)] line-clamp-2 max-w-3xl">
                           {project.summary}
                         </p>
                       </div>
@@ -277,7 +269,7 @@ export default function ProjectsPage() {
                         {project.stack.map((tech) => (
                           <span
                             key={tech}
-                            className="rounded-full border border-white/5 bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-mono text-[#cbd5e1]"
+                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-2.5 py-0.5 text-[11px] font-mono text-[var(--text-secondary)]"
                           >
                             {tech}
                           </span>
@@ -287,7 +279,7 @@ export default function ProjectsPage() {
                       <div className="flex items-center gap-3 shrink-0">
                         <Link
                           href={`/projects/${project.slug}`}
-                          className="flex items-center gap-1 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-colors"
+                          className="flex items-center gap-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] px-4 py-2 text-xs font-bold transition-colors shadow-sm"
                         >
                           <span>Case Study</span>
                           <ArrowUpRight size={13} />
@@ -299,14 +291,14 @@ export default function ProjectsPage() {
               </div>
             )
           ) : (
-            <div className="rounded-3xl border border-dashed border-white/10 p-16 text-center">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-[#64748b]">
+            <div className="rounded-3xl border border-dashed border-[var(--border-medium)] p-16 text-center">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg-surface-elevated)] flex items-center justify-center mx-auto text-[var(--text-muted)] shadow-sm">
                 <Search size={22} />
               </div>
-              <h3 className="font-display text-xl font-bold text-white mt-4">
+              <h3 className="font-display text-xl font-bold text-[var(--text-primary)] mt-4">
                 No projects matched your criteria
               </h3>
-              <p className="mt-2 text-sm text-[#94a3b8]">
+              <p className="mt-2 text-sm text-[var(--text-secondary)]">
                 Try adjusting your search query or filter tags.
               </p>
               <button
@@ -314,7 +306,7 @@ export default function ProjectsPage() {
                   setActiveFilter("All");
                   setSearchQuery("");
                 }}
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/15 transition-colors"
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-5 py-2.5 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all shadow-sm"
               >
                 <span>Reset Filters</span>
               </button>

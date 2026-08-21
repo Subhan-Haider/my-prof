@@ -76,22 +76,22 @@ export default async function CaseStudy({
             )}
           </div>
 
-          <h1 className="display-title text-3xl sm:text-6xl lg:text-7xl font-extrabold text-white break-words">
+          <h1 className="display-title text-3xl sm:text-6xl lg:text-7xl font-extrabold text-[var(--text-primary)] break-words">
             {project.title}
           </h1>
 
-          <p className="mt-5 sm:mt-6 text-base sm:text-2xl text-[#cbd5e1] font-light leading-relaxed">
+          <p className="mt-5 sm:mt-6 text-base sm:text-2xl text-[var(--text-secondary)] font-light leading-relaxed">
             {project.tagline || project.summary}
           </p>
 
           {/* Action Links */}
-          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pb-12 border-b border-white/[0.08]">
+          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pb-12 border-b border-[var(--border-subtle)]">
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-xs font-bold text-[#090a12] shadow-lg hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
+                className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#34d399] dark:text-[#090a12] dark:hover:bg-[#6ee7b7] px-6 py-3.5 text-xs font-bold shadow-lg hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <span>Live Project Hub</span>
                 <ExternalLink size={14} />
@@ -103,7 +103,7 @@ export default async function CaseStudy({
                 href={project.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-xs font-medium text-white hover:bg-white/10 active:scale-98 transition-all text-center min-h-[44px]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-6 py-3.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] active:scale-98 transition-all text-center min-h-[44px] shadow-sm"
               >
                 <Github size={15} />
                 <span>Source Repository</span>
@@ -117,10 +117,10 @@ export default async function CaseStudy({
               {project.metrics.map((m) => (
                 <div
                   key={m.label}
-                  className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-4 sm:p-5 text-center backdrop-blur-md"
+                  className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 sm:p-5 text-center backdrop-blur-md shadow-sm dark:shadow-none"
                 >
                   <div className="text-xs font-mono text-[#64748b]">{m.label}</div>
-                  <div className="font-display text-base sm:text-xl font-bold text-white mt-1">
+                  <div className="font-display text-base sm:text-xl font-bold text-[var(--text-primary)] mt-1">
                     {m.value}
                   </div>
                 </div>
@@ -129,41 +129,41 @@ export default async function CaseStudy({
           )}
 
           {/* Interface Visual Showcase Banner */}
-          <div className="mt-10 sm:mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0c1815] p-4 sm:p-8 sm:p-10 shadow-2xl overflow-hidden relative">
-            <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-white/10 text-xs font-mono text-[#64748b] gap-2">
+          <div className="mt-10 sm:mt-12 rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-emerald-50/40 via-[var(--bg-surface)] to-indigo-50/40 dark:from-[#161a30] dark:via-[#0f111d] dark:to-[#0c1815] p-4 sm:p-8 sm:p-10 shadow-lg dark:shadow-2xl overflow-hidden relative">
+            <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-[var(--border-subtle)] text-xs font-mono text-[var(--text-muted)] gap-2">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
                 <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
-                <span className="ml-2 text-white/80 font-mono text-[11px] truncate">{project.slug}.spec</span>
+                <span className="ml-2 text-[var(--text-primary)] font-mono text-[11px] truncate font-medium">{project.slug}.spec</span>
               </div>
-              <span className="text-[#34d399] font-bold text-[10px] sm:text-xs">SCREENSHOT &amp; ARCHITECTURE</span>
+              <span className="text-emerald-600 dark:text-[#34d399] font-bold text-[10px] sm:text-xs">SCREENSHOT &amp; ARCHITECTURE</span>
             </div>
 
             <div className="py-6 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-center">
               <div>
-                <span className="text-xs font-mono text-[#34d399] uppercase tracking-wider">
+                <span className="text-xs font-mono text-emerald-600 dark:text-[#34d399] uppercase tracking-wider font-semibold">
                   Product Overview
                 </span>
-                <p className="mt-3 text-base sm:text-lg text-[#cbd5e1] leading-relaxed">
+                <p className="mt-3 text-base sm:text-lg text-[var(--text-primary)] leading-relaxed font-normal">
                   {project.summary}
                 </p>
 
-                <div className="mt-6 rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-5 space-y-3 font-mono text-xs text-[#94a3b8]">
-                  <div className="flex justify-between items-center text-[#34d399]">
+                <div className="mt-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 space-y-3 font-mono text-xs shadow-sm">
+                  <div className="flex justify-between items-center text-emerald-600 dark:text-[#34d399] font-bold">
                     <span>BUILD STATUS</span>
                     <span>VERIFIED PASS</span>
                   </div>
-                  <div className="text-white/80">&gt; Target: {project.type} Platform</div>
-                  <div className="text-white/80">&gt; Architecture: Clean Architecture + MVVM</div>
-                  <div className="text-[#64748b]">&gt; Local Security: 100% On-Device Persistence</div>
+                  <div className="text-[var(--text-primary)] font-medium">&gt; Target: {project.type} Platform</div>
+                  <div className="text-[var(--text-primary)] font-medium">&gt; Architecture: Clean Architecture + MVVM</div>
+                  <div className="text-[var(--text-muted)]">&gt; Local Security: 100% On-Device Persistence</div>
                 </div>
               </div>
 
               {/* Real Project Screenshot / Mockup Preview */}
               <div className="flex justify-center">
                 {project.slug === "daily-finance" ? (
-                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-slate-300 dark:border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
                     <img
                       src="/images/daily-finance-dashboard.jpg"
                       alt="Daily Finance Dashboard Screenshot"
@@ -171,7 +171,7 @@ export default async function CaseStudy({
                     />
                   </div>
                 ) : project.slug === "app-tester" ? (
-                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
+                  <div className="relative w-full max-w-[260px] aspect-[9/18] rounded-[2rem] border-[6px] border-slate-300 dark:border-[#1e2238] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden group">
                     <img
                       src="/images/app-tester-hub.jpg"
                       alt="App Tester Hub Screenshot"
@@ -179,10 +179,10 @@ export default async function CaseStudy({
                     />
                   </div>
                 ) : (
-                  <div className="w-full rounded-2xl border border-white/10 bg-[var(--bg-surface)] p-6 font-mono text-xs text-[#94a3b8] space-y-2">
-                    <div className="text-[#34d399]">$ git status --short</div>
-                    <div className="text-white">&gt; 100% Free &amp; Open Source</div>
-                    <div className="text-[#64748b]">&gt; Modular architecture patterns</div>
+                  <div className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-6 font-mono text-xs space-y-2 shadow-sm">
+                    <div className="text-emerald-600 dark:text-[#34d399] font-bold">$ git status --short</div>
+                    <div className="text-[var(--text-primary)] font-medium">&gt; 100% Free &amp; Open Source</div>
+                    <div className="text-[var(--text-muted)]">&gt; Modular architecture patterns</div>
                   </div>
                 )}
               </div>
@@ -191,15 +191,15 @@ export default async function CaseStudy({
 
           {/* Deep Dive: Idea & Problem */}
           {project.idea && (
-            <section className="mt-16 pt-12 border-t border-white/[0.08]">
-              <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] mb-3">
+            <section className="mt-16 pt-12 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-[#34d399] mb-3 font-semibold">
                 <Sparkles size={14} />
                 <span>THE INSPIRATION</span>
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
                 Why I Built This
               </h2>
-              <p className="mt-4 text-base sm:text-lg text-[#94a3b8] leading-relaxed">
+              <p className="mt-4 text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
                 {project.idea}
               </p>
             </section>
@@ -207,27 +207,27 @@ export default async function CaseStudy({
 
           {/* Deep Dive: Challenge & Solution */}
           {project.challenge && project.solution && (
-            <section className="mt-16 pt-12 border-t border-white/[0.08] grid gap-8 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-md">
-                <div className="w-9 h-9 rounded-xl bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center mb-4">
+            <section className="mt-16 pt-12 border-t border-[var(--border-subtle)] grid gap-8 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-md shadow-sm">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 dark:text-[#ef4444] flex items-center justify-center mb-4">
                   <Cpu size={18} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">
                   Technical Challenge
                 </h3>
-                <p className="mt-3 text-sm text-[#94a3b8] leading-relaxed">
+                <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {project.challenge}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-6 backdrop-blur-md">
-                <div className="w-9 h-9 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-4">
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-md shadow-sm">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-[#34d399] flex items-center justify-center mb-4">
                   <CheckCircle2 size={18} />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white">
+                <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">
                   Engineering Solution
                 </h3>
-                <p className="mt-3 text-sm text-[#94a3b8] leading-relaxed">
+                <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {project.solution}
                 </p>
               </div>
@@ -236,12 +236,12 @@ export default async function CaseStudy({
 
           {/* Features Breakdown */}
           {project.features && (
-            <section className="mt-16 pt-12 border-t border-white/[0.08]">
-              <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] mb-3">
+            <section className="mt-16 pt-12 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-[#34d399] mb-3 font-semibold">
                 <Layers size={14} />
                 <span>CORE CAPABILITIES</span>
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
                 Key Features &amp; Modules
               </h2>
 
@@ -249,12 +249,12 @@ export default async function CaseStudy({
                 {project.features.map((feature, idx) => (
                   <div
                     key={feature}
-                    className="rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[#34d399]/30 transition-all"
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[var(--border-active)] transition-all shadow-sm"
                   >
-                    <span className="font-mono text-xs text-[#34d399] font-bold">
+                    <span className="font-mono text-xs text-emerald-600 dark:text-[#34d399] font-bold">
                       0{idx + 1}
                     </span>
-                    <p className="mt-3 text-sm text-[#cbd5e1] font-medium leading-relaxed">
+                    <p className="mt-3 text-sm text-[var(--text-primary)] font-medium leading-relaxed">
                       {feature}
                     </p>
                   </div>
@@ -264,12 +264,12 @@ export default async function CaseStudy({
           )}
 
           {/* Technology Stack Grid */}
-          <section className="mt-16 pt-12 border-t border-white/[0.08]">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] mb-3">
+          <section className="mt-16 pt-12 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-[#34d399] mb-3 font-semibold">
               <Code2 size={14} />
               <span>STACK &amp; LIBRARIES</span>
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
               Technologies Used
             </h2>
 
@@ -277,7 +277,7 @@ export default async function CaseStudy({
               {project.stack.map((tech) => (
                 <span
                   key={tech}
-                  className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-mono text-white"
+                  className="rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-mono text-[var(--text-primary)] hover:border-[var(--border-active)] transition-colors shadow-sm"
                 >
                   {tech}
                 </span>
@@ -286,23 +286,23 @@ export default async function CaseStudy({
           </section>
 
           {/* Navigation between Projects */}
-          <nav className="mt-20 pt-12 border-t border-white/[0.08] grid gap-4 sm:grid-cols-2">
+          <nav className="mt-20 pt-12 border-t border-[var(--border-subtle)] grid gap-4 sm:grid-cols-2">
             <Link
               href={`/projects/${prevProject.slug}`}
-              className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-6 backdrop-blur-md hover:border-white/20 transition-all group"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-md hover:border-[var(--border-active)] hover:bg-[var(--bg-surface-elevated)] transition-all group shadow-sm"
             >
-              <span className="text-xs font-mono text-[#64748b]">← PREVIOUS PROJECT</span>
-              <div className="font-display text-lg font-bold text-white mt-1 group-hover:text-[#34d399] transition-colors">
+              <span className="text-xs font-mono text-[var(--text-muted)]">← PREVIOUS PROJECT</span>
+              <div className="font-display text-lg font-bold text-[var(--text-primary)] mt-1 group-hover:text-emerald-600 dark:group-hover:text-[#34d399] transition-colors">
                 {prevProject.title}
               </div>
             </Link>
 
             <Link
               href={`/projects/${nextProject.slug}`}
-              className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-6 backdrop-blur-md hover:border-white/20 transition-all text-right group"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 backdrop-blur-md hover:border-[var(--border-active)] hover:bg-[var(--bg-surface-elevated)] transition-all text-right group shadow-sm"
             >
-              <span className="text-xs font-mono text-[#64748b]">NEXT PROJECT →</span>
-              <div className="font-display text-lg font-bold text-white mt-1 group-hover:text-[#34d399] transition-colors">
+              <span className="text-xs font-mono text-[var(--text-muted)]">NEXT PROJECT →</span>
+              <div className="font-display text-lg font-bold text-[var(--text-primary)] mt-1 group-hover:text-emerald-600 dark:group-hover:text-[#34d399] transition-colors">
                 {nextProject.title}
               </div>
             </Link>
