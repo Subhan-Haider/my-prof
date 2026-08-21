@@ -50,6 +50,12 @@ export const metadata: Metadata = {
     "Student Developer",
   ],
   authors: [{ name: "Subhan Haider", url: "https://github.com/Subhan-Haider" }],
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon",
+  },
   openGraph: {
     type: "website",
     title: "Subhan Haider",
