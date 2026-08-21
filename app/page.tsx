@@ -727,15 +727,15 @@ export default function Home() {
       </section>
 
       {/* ================= FEATURED EXTENSIONS ================= */}
-      <section className="border-t border-white/[0.08] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
+      <section className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Reveal direction="left">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[var(--border-subtle)]">
               <div>
-                <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
-                  FEATURED EXTENSIONS<span className="text-[#34d399]">.</span>
+                <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-[var(--text-primary)]">
+                  FEATURED EXTENSIONS<span className="text-emerald-600 dark:text-[#34d399]">.</span>
                 </h2>
-                <p className="mt-4 max-w-lg text-base text-[#94a3b8] leading-relaxed">
+                <p className="mt-4 max-w-lg text-base text-[var(--text-secondary)] leading-relaxed">
                   Cross-browser tools and apps published on the Chrome Web Store, Edge Add-ons, Firefox AMO, and Microsoft Store.
                 </p>
               </div>
@@ -743,7 +743,7 @@ export default function Home() {
                 href="https://chromewebstore.google.com/u/0/search/Subhan%20Haider"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs font-mono text-[#34d399] hover:underline whitespace-nowrap"
+                className="flex items-center gap-1.5 text-xs font-mono text-emerald-600 dark:text-[#34d399] hover:underline whitespace-nowrap font-medium"
               >
                 <span>View on Chrome Store</span>
                 <ArrowUpRight size={14} />
@@ -754,7 +754,7 @@ export default function Home() {
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {extensions.map((ext, i) => (
               <Reveal key={ext.name} direction="up" delay={i * 0.07}>
-                <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-white/20 hover:bg-[#15192c]/80 transition-all">
+                <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 backdrop-blur-md hover:border-[var(--border-active)] hover:bg-[var(--bg-surface-elevated)] shadow-sm dark:shadow-none transition-all">
                   {/* Accent glow */}
                   <div
                     className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -766,12 +766,12 @@ export default function Home() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span
-                          className="text-[10px] font-mono uppercase tracking-widest"
+                          className="text-[10px] font-mono uppercase tracking-widest font-semibold"
                           style={{ color: ext.color }}
                         >
                           {ext.role}
                         </span>
-                        <h3 className="mt-1 font-display text-lg font-bold text-white group-hover:text-white transition-colors">
+                        <h3 className="mt-1 font-display text-lg font-bold text-[var(--text-primary)] transition-colors">
                           {ext.name}
                         </h3>
                       </div>
@@ -780,13 +780,13 @@ export default function Home() {
                         target="_blank"
                         rel="noreferrer"
                         aria-label={`Visit ${ext.name}`}
-                        className="shrink-0 mt-1 w-7 h-7 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center text-[#64748b] hover:text-white hover:border-white/30 transition-colors"
+                        className="shrink-0 mt-1 w-7 h-7 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] transition-colors shadow-sm"
                       >
                         <ExternalLink size={12} />
                       </a>
                     </div>
 
-                    <p className="mt-3 text-xs text-[#94a3b8] leading-relaxed">{ext.desc}</p>
+                    <p className="mt-3 text-xs text-[var(--text-secondary)] leading-relaxed">{ext.desc}</p>
                   </div>
 
                   {/* Platform badges */}
@@ -797,7 +797,7 @@ export default function Home() {
                         href={p.href}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono text-[#94a3b8] hover:text-white hover:border-white/25 hover:bg-white/[0.08] transition-all"
+                        className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] px-2.5 py-1 text-[10px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] transition-all shadow-sm"
                         style={{ borderColor: `${p.color}30` }}
                       >
                         <span
@@ -816,13 +816,13 @@ export default function Home() {
       </section>
 
       {/* ================= LIVE GITHUB REPOS ================= */}
-      <section className="border-t border-white/[0.08] bg-[var(--bg-surface)] px-6 py-24 md:px-12">
+      <section className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-24 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Reveal direction="right">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-white/[0.08]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[var(--border-subtle)]">
               <div>
-                <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-white">
-                  LIVE GITHUB ACTIVITY<span className="text-[#34d399]">.</span>
+                <h2 className="display-title mt-4 text-3xl sm:text-5xl font-extrabold text-[var(--text-primary)]">
+                  LIVE GITHUB ACTIVITY<span className="text-emerald-600 dark:text-[#34d399]">.</span>
                 </h2>
               </div>
 
@@ -830,7 +830,7 @@ export default function Home() {
                 href="https://github.com/Subhan-Haider"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs font-mono text-[#34d399] hover:underline"
+                className="flex items-center gap-1.5 text-xs font-mono text-emerald-600 dark:text-[#34d399] hover:underline font-medium"
               >
                 <span>github.com/Subhan-Haider</span>
                 <ArrowUpRight size={14} />
