@@ -22,12 +22,23 @@ export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
 }
 
-export default async function CaseStudy({
-  params,
-}: {
+export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const params = await props.params;
+  const project = projects.find((x) => x.slug === params.slug);
+  if (!project) return { title: "Project Not Found" };
+  return {
+    title: `${project.title} — Subhan Haider`,
+    description: project.summary,
+  };
+}
+
+export default async function CaseStudy(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const slug = params.slug;
   const project = projects.find((x) => x.slug === slug);
   if (!project) return notFound();
 
