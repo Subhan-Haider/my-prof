@@ -133,7 +133,7 @@ export default function AdminPage() {
   const [authStatus, setAuthStatus] = useState<"checking" | "authenticated" | "unauthenticated">("checking");
   const [adminUser, setAdminUser] = useState<{ email: string; role?: string } | null>(null);
   const [loginMode, setLoginMode] = useState<"otp" | "password">("otp");
-  const [loginEmail, setLoginEmail] = useState("setupg98@gmail.com");
+  const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -1104,34 +1104,12 @@ export default function AdminPage() {
                 PORTFOLIO STUDIO<span className="text-[#34d399]">.</span>
               </h1>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                Single administrator authentication. Only authorized account is permitted.
+                Single administrator authentication portal.
               </p>
             </div>
 
-            {/* Authorized Email Pill */}
-            <div className="mt-5 flex items-center justify-between gap-2 p-2.5 rounded-2xl border border-[#34d399]/25 bg-[#34d399]/5">
-              <div className="flex items-center gap-2 min-w-0">
-                <ShieldCheck size={16} className="text-[#34d399] shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Authorized Account</p>
-                  <p className="text-xs font-mono font-bold text-[#34d399] truncate">setupg98@gmail.com</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginEmail("setupg98@gmail.com");
-                  setOtpSent(false);
-                }}
-                className="shrink-0 px-2.5 py-1 rounded-lg bg-[#34d399]/15 text-[#34d399] text-[10px] font-mono hover:bg-[#34d399]/25 transition-colors cursor-pointer"
-                title="Fill authorized email"
-              >
-                Auto-fill
-              </button>
-            </div>
-
             {/* Mode Switcher: Email OTP vs Password */}
-            <div className="mt-5 grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+            <div className="mt-6 grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
               <button
                 type="button"
                 onClick={() => {
@@ -1178,33 +1156,19 @@ export default function AdminPage() {
                 {!otpSent ? (
                   <form onSubmit={handleSendOtp} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
-                        <span>Administrator Email</span>
-                        {!isAuthorizedEmail && loginEmail.length > 0 && (
-                          <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com</span>
-                        )}
+                      <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                        Administrator Email
                       </label>
-                      <div className="relative">
-                        <input
-                          required
-                          type="email"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          placeholder="setupg98@gmail.com"
-                          className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
-                            !isAuthorizedEmail && loginEmail.length > 0
-                              ? "border-amber-500/60 focus:border-amber-400"
-                              : "border-[var(--border-medium)] focus:border-[#34d399]"
-                          }`}
-                        />
-                        {isAuthorizedEmail && (
-                          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
-                            <CheckCircle2 size={16} />
-                          </div>
-                        )}
-                      </div>
+                      <input
+                        required
+                        type="email"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        placeholder="Enter administrator email"
+                        className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:border-[#34d399] focus:outline-none"
+                      />
                       <p className="text-[11px] text-[var(--text-muted)] mt-1.5">
-                        A secure 6-digit verification code will be sent via SMTP to this inbox.
+                        A secure 6-digit verification code will be sent via SMTP to your email inbox.
                       </p>
                     </div>
 
@@ -1308,31 +1272,17 @@ export default function AdminPage() {
             {loginMode === "password" && (
               <form onSubmit={handleLogin} className="mt-5 space-y-4">
                 <div>
-                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5 flex items-center justify-between">
-                    <span>Administrator Email</span>
-                    {!isAuthorizedEmail && loginEmail.length > 0 && (
-                      <span className="text-[10px] text-amber-400 font-sans">⚠️ Only setupg98@gmail.com authorized</span>
-                    )}
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                    Administrator Email
                   </label>
-                  <div className="relative">
-                    <input
-                      required
-                      type="email"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="setupg98@gmail.com"
-                      className={`w-full rounded-2xl border bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:outline-none ${
-                        !isAuthorizedEmail && loginEmail.length > 0
-                          ? "border-amber-500/60 focus:border-amber-400"
-                          : "border-[var(--border-medium)] focus:border-[#34d399]"
-                      }`}
-                    />
-                    {isAuthorizedEmail && (
-                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#34d399]">
-                        <CheckCircle2 size={16} />
-                      </div>
-                    )}
-                  </div>
+                  <input
+                    required
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="Enter administrator email"
+                    className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-4 py-3 text-xs text-[var(--text-primary)] font-mono transition-colors focus:border-[#34d399] focus:outline-none"
+                  />
                 </div>
 
                 <div>
