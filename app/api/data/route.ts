@@ -4,11 +4,17 @@ import path from 'path';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'data.json');
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const fileContents = await fs.readFile(DATA_FILE_PATH, 'utf8');
     const data = JSON.parse(fileContents);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0'
+      }
+    });
   } catch (error) {
     console.error('Error reading data:', error);
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
