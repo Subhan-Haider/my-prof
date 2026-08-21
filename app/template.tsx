@@ -4,16 +4,17 @@ import { motion } from "framer-motion";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   return (
-    // motion.div acts as a wrapper that animates on mount
     <motion.div
-      // Start state: hidden and slightly shifted to the right
-      initial={{ opacity: 0, x: 20 }}
-      // End state: fully visible and at its original position
-      animate={{ opacity: 1, x: 0 }}
-      // Transition settings: smooth sliding effect
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       {children}
     </motion.div>
   );
 }
+
+

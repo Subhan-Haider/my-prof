@@ -100,9 +100,9 @@ export default function Home() {
 
 
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 35 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
               className="display-title text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight"
             >
               I BUILD <br />
@@ -111,9 +111,9 @@ export default function Home() {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
+              transition={{ duration: 0.85, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 max-w-xl text-base sm:text-xl text-[#94a3b8] leading-relaxed"
             >
               Hi, I&apos;m <span className="text-white font-medium">Subhan Haider</span>. A high school student turning curiosity into
@@ -124,7 +124,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.25 }}
+              transition={{ duration: 0.85, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto"
             >
               <a
@@ -158,7 +158,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.35 }}
+              transition={{ duration: 0.85, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t border-white/[0.08]"
             >
               {stats.map((item) => (
@@ -174,13 +174,17 @@ export default function Home() {
 
           {/* Right Column: Interactive App & Code Mockup Showcase */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2 }}
+            transition={{ duration: 0.95, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="relative lg:h-[580px] flex items-center justify-center"
           >
             {/* Ambient Background Box with Glass border */}
-            <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/80 to-[#0c0e17]/90 p-6 backdrop-blur-2xl shadow-2xl overflow-hidden">
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/80 to-[#0c0e17]/90 p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
+            >
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs font-mono text-[#94a3b8]">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
@@ -267,7 +271,7 @@ export default function Home() {
               </div>
 
 
-            </div>
+            </motion.div>
           </motion.div>
         </div>
 
@@ -295,7 +299,7 @@ export default function Home() {
 
           {/* 4 Bento Highlights */}
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <Reveal direction="up" delay={0.1}>
+            <Reveal direction="up" scale delay={0.1}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#34d399]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 text-[#34d399] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Smartphone size={20} />
@@ -307,7 +311,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal direction="up" delay={0.2}>
+            <Reveal direction="up" scale delay={0.2}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#818cf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#6366f1]/10 text-[#818cf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <Globe size={20} />
@@ -319,7 +323,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal direction="up" delay={0.3}>
+            <Reveal direction="up" scale delay={0.3}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#38bdf8]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={20} />
@@ -331,7 +335,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal direction="up" delay={0.4}>
+            <Reveal direction="up" scale delay={0.4}>
               <div className="h-full rounded-2xl border border-white/[0.08] bg-[#111424]/60 p-6 backdrop-blur-sm hover:border-[#ec4899]/40 transition-all group">
                 <div className="w-10 h-10 rounded-xl bg-[#ec4899]/10 text-[#ec4899] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <FolderGit2 size={20} />
@@ -369,7 +373,7 @@ export default function Home() {
           {/* Project Cards */}
           <div className="mt-12 space-y-8">
             {projects.map((project, idx) => (
-              <Reveal key={project.slug} direction="up" delay={idx * 0.1}>
+              <Reveal key={project.slug} direction={idx % 2 === 0 ? "left" : "right"} scale delay={idx * 0.1}>
                 <div className="project-card rounded-3xl border border-white/[0.08] bg-[#0f111d]/80 p-6 sm:p-10 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
                   <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
                     <div>

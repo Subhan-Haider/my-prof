@@ -290,37 +290,69 @@ export function Reveal({
   children,
   delay = 0,
   className = "",
-  direction = "up", // New prop: "up" | "down" | "left" | "right" | "none"
+  direction = "up", // "up" | "down" | "left" | "right" | "zoom" | "none"
+  distance = 45,
+  scale = false,
+  duration,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  direction?: "up" | "down" | "left" | "right" | "none";
+  direction?: "up" | "down" | "left" | "right" | "zoom" | "none";
+  distance?: number;
+  scale?: boolean;
+  duration?: number;
 }) {
-  // Determine initial coordinates based on direction
   const getInitialPosition = () => {
+    const base: Record<string, any> = { opacity: 0 };
+    if (scale) base.scale = 0.94;
+
     switch (direction) {
       case "up":
-        return { opacity: 0, y: 50 };
+        base.y = distance;
+        break;
       case "down":
-        return { opacity: 0, y: -50 };
+        base.y = -distance;
+        break;
       case "left":
-        return { opacity: 0, x: -50 };
+        base.x = -distance;
+        break;
       case "right":
-        return { opacity: 0, x: 50 };
+        base.x = distance;
+        break;
+      case "zoom":
+        base.scale = 0.9;
+        break;
       case "none":
-        return { opacity: 0 };
+        break;
       default:
-        return { opacity: 0, y: 50 };
+        base.y = distance;
     }
+    return base;
+  };
+
+  const getAnimateTarget = () => {
+    const target: Record<string, any> = { opacity: 1, x: 0, y: 0 };
+    if (scale || direction === "zoom") target.scale = 1;
+    return target;
   };
 
   return (
     <motion.div
       initial={getInitialPosition()}
-      whileInView={{ opacity: 1, x: 0, y: 0 }} // Animate to original position
-      viewport={{ once: true, margin: "-8%" }}
-      transition={{ type: "spring", stiffness: 100, damping: 20, delay }} // Dynamic spring effect
+      whileInView={getAnimateTarget()}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={
+        duration
+          ? { duration, ease: [0.22, 1, 0.36, 1], delay }
+          : {
+              type: "spring",
+              stiffness: 85,
+              damping: 18,
+              mass: 0.8,
+              delay,
+            }
+      }
       className={className}
     >
       {children}

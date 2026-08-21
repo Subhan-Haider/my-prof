@@ -166,7 +166,7 @@ export default function ProjectsPage() {
             viewMode === "grid" ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProjects.map((project, idx) => (
-                  <Reveal key={project.slug} delay={idx * 0.08}>
+                  <Reveal key={project.slug} direction="up" scale delay={idx * 0.06}>
                     <div className="project-card flex flex-col justify-between h-full rounded-3xl border border-white/[0.08] bg-[#0f111d]/75 p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all">
                       <div>
                         <div className="flex items-center justify-between">
@@ -249,7 +249,7 @@ export default function ProjectsPage() {
             ) : (
               <div className="space-y-4">
                 {filteredProjects.map((project, idx) => (
-                  <Reveal key={project.slug} delay={idx * 0.05}>
+                  <Reveal key={project.slug} direction="up" delay={idx * 0.04}>
                     <div className="project-card rounded-2xl border border-white/[0.08] bg-[#0f111d]/75 p-6 backdrop-blur-xl hover:border-[#34d399]/40 transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
