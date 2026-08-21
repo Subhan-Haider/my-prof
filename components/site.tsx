@@ -126,10 +126,7 @@ export function Nav() {
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-[#34d399]/10 border border-[#34d399]/20 text-[11px] font-mono text-[#34d399]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-ping" />
-              <span>Building Android & Web</span>
-            </div>
+
 
             <Link
               href="/contact"

@@ -86,7 +86,7 @@ const defaultMessages: MessageItem[] = [
 
 const defaultSettings = {
   name: "Subhan Haider",
-  tagline: "Student • Android Developer • Web Builder",
+  tagline: "",
   bio: "Passionate high school student and developer building native Android apps, modern web platforms, and open-source tools with a focus on performance and privacy.",
   status: "Open for Collaborations & Opportunities",
   isAvailable: true,

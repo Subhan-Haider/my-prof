@@ -32,7 +32,6 @@ export const projects: Project[] = [
       "Dynamic category budgets with visual threshold warnings",
       "Interactive weekly/monthly spending analytics and breakdown charts",
       "Multi-currency support with offline exchange conversions",
-      "100% private local storage using encrypted SQLite/Room database",
       "Material 3 dynamic theming with dark & light modes",
     ],
     idea: "Most personal finance apps require intrusive cloud accounts, show ads, or charge monthly subscriptions. Daily Finance was built with the conviction that personal finance should be fast, private, offline, and beautifully intuitive.",
@@ -40,7 +39,6 @@ export const projects: Project[] = [
     solution: "Architected using Clean Architecture & MVVM with Room DAO reactive Flows, repository caching, and immutable UI state reducers.",
     metrics: [
       { label: "Architecture", value: "Clean MVVM" },
-      { label: "Storage", value: "100% Offline" },
       { label: "UI Framework", value: "Compose" },
       { label: "Performance", value: "60 FPS" },
     ],
