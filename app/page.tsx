@@ -68,11 +68,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl w-full grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
           {/* Left Column: Intro */}
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <GlowBadge variant="emerald">
-                <span>STUDENT • ANDROID DEVELOPER • BUILDER</span>
-              </GlowBadge>
-            </div>
+
 
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
@@ -241,11 +237,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Floating Tech Pill */}
-              <div className="hidden sm:flex absolute -bottom-2 right-4 rounded-xl border border-[#34d399]/30 bg-[#0f111d]/90 px-3.5 py-2 backdrop-blur-md text-xs font-mono text-[#34d399] items-center gap-2 shadow-xl">
-                <ShieldCheck size={14} />
-                <span>100% Offline SQLite Storage</span>
-              </div>
+
             </div>
           </motion.div>
         </div>
