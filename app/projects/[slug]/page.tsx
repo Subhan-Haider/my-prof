@@ -41,7 +41,7 @@ export default async function CaseStudy({
       <Nav />
 
       {/* Case Study Hero */}
-      <article className="relative pt-36 pb-24 px-6 md:px-12 grid-pattern">
+      <article className="relative pt-32 sm:pt-36 pb-20 sm:pb-24 px-4 sm:px-6 md:px-12 grid-pattern">
         {/* Glow Spheres */}
         <div className="absolute top-24 left-1/4 w-[600px] h-[350px] bg-[#6366f1]/10 rounded-full blur-[130px] pointer-events-none" />
         <div className="absolute top-48 right-1/4 w-[500px] h-[300px] bg-[#34d399]/10 rounded-full blur-[130px] pointer-events-none" />
@@ -76,11 +76,11 @@ export default async function CaseStudy({
             )}
           </div>
 
-          <h1 className="display-title text-3xl sm:text-6xl lg:text-7xl font-extrabold text-white">
+          <h1 className="display-title text-3xl sm:text-6xl lg:text-7xl font-extrabold text-white break-words">
             {project.title}
           </h1>
 
-          <p className="mt-6 text-lg sm:text-2xl text-[#cbd5e1] font-light leading-relaxed">
+          <p className="mt-5 sm:mt-6 text-base sm:text-2xl text-[#cbd5e1] font-light leading-relaxed">
             {project.tagline || project.summary}
           </p>
 
@@ -91,7 +91,7 @@ export default async function CaseStudy({
                 href={project.liveUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-6 py-3 text-xs font-bold text-[#090a12] shadow-lg hover:scale-105 transition-all text-center"
+                className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-xs font-bold text-[#090a12] shadow-lg hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <span>Live Project Hub</span>
                 <ExternalLink size={14} />
@@ -103,7 +103,7 @@ export default async function CaseStudy({
                 href={project.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-xs font-medium text-white hover:bg-white/10 transition-all text-center"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-xs font-medium text-white hover:bg-white/10 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <Github size={15} />
                 <span>Source Repository</span>
@@ -113,14 +113,14 @@ export default async function CaseStudy({
 
           {/* Key Metrics Grid */}
           {project.metrics && (
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {project.metrics.map((m) => (
                 <div
                   key={m.label}
-                  className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 text-center backdrop-blur-md"
+                  className="rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 sm:p-5 text-center backdrop-blur-md"
                 >
                   <div className="text-xs font-mono text-[#64748b]">{m.label}</div>
-                  <div className="font-display text-lg sm:text-xl font-bold text-white mt-1">
+                  <div className="font-display text-base sm:text-xl font-bold text-white mt-1">
                     {m.value}
                   </div>
                 </div>
@@ -129,15 +129,15 @@ export default async function CaseStudy({
           )}
 
           {/* Interface Visual Showcase Banner */}
-          <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0c1815] p-6 sm:p-10 shadow-2xl overflow-hidden relative">
-            <div className="flex items-center justify-between pb-6 border-b border-white/10 text-xs font-mono text-[#64748b]">
+          <div className="mt-10 sm:mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#161a30] via-[#0f111d] to-[#0c1815] p-4 sm:p-8 sm:p-10 shadow-2xl overflow-hidden relative">
+            <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-white/10 text-xs font-mono text-[#64748b] gap-2">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
                 <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
-                <span className="ml-2 text-white/80">{project.slug}.spec</span>
+                <span className="ml-2 text-white/80 font-mono text-[11px] truncate">{project.slug}.spec</span>
               </div>
-              <span className="text-[#34d399] font-bold">SCREENSHOT &amp; ARCHITECTURE</span>
+              <span className="text-[#34d399] font-bold text-[10px] sm:text-xs">SCREENSHOT &amp; ARCHITECTURE</span>
             </div>
 
             <div className="py-6 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-center">

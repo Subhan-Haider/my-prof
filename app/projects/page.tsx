@@ -48,7 +48,7 @@ export default function ProjectsPage() {
       <Nav />
 
       {/* Header Section */}
-      <section className="relative pt-40 pb-16 px-6 md:px-12 grid-pattern">
+      <section className="relative pt-32 sm:pt-40 pb-12 sm:pb-16 px-4 sm:px-6 md:px-12 grid-pattern">
         {/* Glow Spheres */}
         <div className="absolute top-20 left-1/3 w-[500px] h-[300px] bg-[#6366f1]/10 rounded-full blur-[120px] pointer-events-none" />
 
@@ -59,21 +59,21 @@ export default function ProjectsPage() {
               <span>THE COMPLETE ARCHIVE</span>
             </div>
 
-            <h1 className="display-title mt-4 text-3xl sm:text-7xl lg:text-8xl font-extrabold text-white">
+            <h1 className="display-title mt-4 text-3xl sm:text-7xl lg:text-8xl font-extrabold text-white break-words">
               EVERYTHING <br />
               <span className="gradient-text-mint">I&apos;VE BUILT.</span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-base sm:text-lg text-[#94a3b8] leading-relaxed">
+            <p className="mt-5 sm:mt-6 max-w-2xl text-sm sm:text-lg text-[#94a3b8] leading-relaxed">
               A comprehensive showcase of native Android apps, web experiences, developer tools,
               and open-source experiments built from scratch.
             </p>
           </Reveal>
 
           {/* Controls Bar: Filters, Search, View Mode */}
-          <div className="mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="mt-10 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Filter Category Chips - scrollable on mobile */}
-            <div className="flex flex-row overflow-x-auto scrollbar-none items-center gap-2 pb-1">
+            <div className="flex flex-row overflow-x-auto scrollbar-none items-center gap-2 pb-1.5 -mx-1 px-1">
               {categories.map((cat) => {
                 const count =
                   cat === "All"
@@ -84,7 +84,7 @@ export default function ProjectsPage() {
                   <button
                     key={cat}
                     onClick={() => setActiveFilter(cat)}
-                    className={`flex-shrink-0 flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-mono transition-all ${
+                    className={`flex-shrink-0 flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 text-xs font-mono transition-all min-h-[36px] ${
                       activeFilter === cat
                         ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_15px_rgba(52,211,153,0.3)]"
                         : "bg-white/[0.04] text-[#94a3b8] border border-white/5 hover:bg-white/10 hover:text-white"

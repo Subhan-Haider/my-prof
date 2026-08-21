@@ -26,7 +26,7 @@ export default function ResumePage() {
     <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
       <Nav />
 
-      <article className="relative pt-36 pb-24 px-6 md:px-12 grid-pattern">
+      <article className="relative pt-32 sm:pt-36 pb-20 sm:pb-24 px-4 sm:px-6 md:px-12 grid-pattern">
         {/* Glow Sphere */}
         <div className="absolute top-28 left-1/3 w-[600px] h-[350px] bg-[#6366f1]/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -41,7 +41,7 @@ export default function ResumePage() {
           </Link>
 
           {/* Resume Header Card */}
-          <header className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#15192c] via-[#0f111d] to-[#0c1815] p-6 sm:p-12 backdrop-blur-xl shadow-2xl">
+          <header className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#15192c] via-[#0f111d] to-[#0c1815] p-5 sm:p-8 sm:p-12 backdrop-blur-xl shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <GlowBadge variant="emerald">
                 <span>CURRICULUM VITAE</span>
@@ -51,7 +51,7 @@ export default function ResumePage() {
                 <a
                   href="/resume-subhan-haider.pdf"
                   download
-                  className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-5 py-2.5 text-xs font-bold text-[#090a12] shadow-md hover:scale-105 transition-all text-center"
+                  className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-5 py-3 text-xs font-bold text-[#090a12] shadow-md hover:scale-105 active:scale-98 transition-all text-center min-h-[42px]"
                 >
                   <Download size={14} />
                   <span>Download PDF</span>
@@ -61,7 +61,7 @@ export default function ResumePage() {
                   href="/resume-subhan-haider.pdf"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white hover:bg-white/10 transition-all text-center"
+                  className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs font-medium text-white hover:bg-white/10 active:scale-98 transition-all text-center min-h-[42px]"
                 >
                   <span>Open PDF</span>
                   <ExternalLink size={13} />
@@ -69,17 +69,17 @@ export default function ResumePage() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <h1 className="display-title text-3xl sm:text-6xl font-black text-white">
+            <div className="mt-6 sm:mt-8">
+              <h1 className="display-title text-3xl sm:text-6xl font-black text-white break-words">
                 SUBHAN HAIDER<span className="text-[#34d399]">.</span>
               </h1>
-              <p className="mt-3 text-base sm:text-xl text-[#94a3b8]">
+              <p className="mt-2.5 sm:mt-3 text-base sm:text-xl text-[#94a3b8]">
                 Student • Android Developer • Web Builder
               </p>
             </div>
 
             {/* Quick Contact Bar */}
-            <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-4 sm:gap-6 text-xs font-mono text-[#cbd5e1]">
+            <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-white/10 flex flex-wrap gap-3.5 sm:gap-6 text-xs font-mono text-[#cbd5e1]">
               <a
                 href="https://github.com/Subhan-Haider"
                 target="_blank"
@@ -111,7 +111,7 @@ export default function ResumePage() {
           </header>
 
           {/* Section: Profile Summary */}
-          <section className="mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-8 backdrop-blur-xl">
+          <section className="mt-8 sm:mt-12 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-5 sm:p-8 backdrop-blur-xl">
             <h2 className="font-display text-xl font-bold text-white flex items-center gap-2 pb-4 border-b border-white/[0.08]">
               <Sparkles size={18} className="text-[#34d399]" />
               <span>Professional Summary</span>

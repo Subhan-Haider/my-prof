@@ -65,7 +65,7 @@ export default function ContactPage() {
     <main className="relative min-h-screen bg-[#090a12] text-[#f8fafc] overflow-hidden">
       <Nav />
 
-      <section className="relative pt-40 pb-28 px-6 md:px-12 grid-pattern">
+      <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 px-4 sm:px-6 md:px-12 grid-pattern">
         {/* Glow Spheres */}
         <div className="absolute top-28 left-1/4 w-[600px] h-[350px] bg-[#6366f1]/10 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute top-48 right-1/4 w-[500px] h-[300px] bg-[#34d399]/10 rounded-full blur-[140px] pointer-events-none" />
@@ -80,7 +80,7 @@ export default function ContactPage() {
             <span>Back to Home</span>
           </Link>
 
-          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] items-start">
+          <div className="grid gap-10 lg:gap-12 lg:grid-cols-[1fr_1.3fr] items-start">
             {/* Left Column: Direct Info */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -88,30 +88,30 @@ export default function ContactPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
 
-              <h1 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
+              <h1 className="display-title mt-4 text-3xl sm:text-6xl font-extrabold text-white break-words">
                 START A <br />
                 <span className="gradient-text-mint">CONVERSATION.</span>
               </h1>
 
-              <p className="mt-6 text-base sm:text-lg text-[#94a3b8] leading-relaxed">
+              <p className="mt-5 sm:mt-6 text-base sm:text-lg text-[#94a3b8] leading-relaxed">
                 Have a question about an Android project, want to discuss software engineering,
                 or have an idea you&apos;d like to build together? Drop a message below.
               </p>
 
               {/* Direct channels */}
-              <div className="mt-10 space-y-4">
+              <div className="mt-8 sm:mt-10 space-y-3 sm:space-y-4">
                 <a
                   href="https://github.com/Subhan-Haider"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 hover:border-[#34d399]/40 hover:bg-[#15192c]/80 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-4 hover:border-[#34d399]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     <Github size={20} />
                   </div>
                   <div>
                     <span className="text-xs font-mono text-[#64748b] block">GITHUB</span>
-                    <span className="text-sm font-bold text-white group-hover:text-[#34d399] transition-colors">
+                    <span className="text-sm font-bold text-white group-hover:text-[#34d399] transition-colors break-all">
                       github.com/Subhan-Haider
                     </span>
                   </div>
@@ -121,14 +121,14 @@ export default function ContactPage() {
                   href="https://tester.subhan.tech/"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-4 hover:border-[#38bdf8]/40 hover:bg-[#15192c]/80 transition-all group"
+                  className="flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/[0.08] bg-[#0f111d]/80 p-3.5 sm:p-4 hover:border-[#38bdf8]/40 hover:bg-[#15192c]/80 active:scale-98 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-[#38bdf8]/10 flex items-center justify-center text-[#38bdf8] group-hover:scale-110 transition-transform">
                     <Smartphone size={20} />
                   </div>
                   <div>
                     <span className="text-xs font-mono text-[#64748b] block">TESTER PORTAL</span>
-                    <span className="text-sm font-bold text-white group-hover:text-[#38bdf8] transition-colors">
+                    <span className="text-sm font-bold text-white group-hover:text-[#38bdf8] transition-colors break-all">
                       tester.subhan.tech
                     </span>
                   </div>
@@ -141,7 +141,7 @@ export default function ContactPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="rounded-3xl border border-white/10 bg-[#0f111d]/90 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl"
+              className="rounded-3xl border border-white/10 bg-[#0f111d]/90 p-5 sm:p-8 sm:p-10 backdrop-blur-2xl shadow-2xl"
             >
               <div className="flex items-center gap-2 text-xs font-mono text-[#34d399] pb-4 mb-6 border-b border-white/10">
                 <MessageSquare size={15} />

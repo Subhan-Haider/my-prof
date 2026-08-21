@@ -23,6 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const viewport: Viewport = {
   themeColor: "#090a12",
   colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export const metadata: Metadata = {

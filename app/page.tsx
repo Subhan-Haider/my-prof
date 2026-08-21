@@ -112,21 +112,19 @@ export default function Home() {
       <Nav />
 
       {/* ================= HERO SECTION ================= */}
-      <section className="relative min-h-[92vh] pt-32 pb-20 px-6 md:px-12 flex flex-col justify-center grid-pattern">
+      <section className="relative min-h-[90vh] pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 flex flex-col justify-center grid-pattern">
         {/* Glow Spheres */}
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#6366f1]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-[#34d399]/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="mx-auto max-w-7xl w-full grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+        <div className="mx-auto max-w-7xl w-full grid gap-10 lg:gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
           {/* Left Column: Intro */}
           <div>
-
-
             <motion.h1
               initial={{ opacity: 0, y: 35 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-              className="display-title text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight"
+              className="display-title text-3xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight break-words"
             >
               I BUILD <br />
               <span className="gradient-text-mint">APPS, WEBSITES</span> <br />
@@ -148,11 +146,11 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto"
+              className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto"
             >
               <a
                 href="#work"
-                className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-white via-[#f1f5f9] to-[#e2e8f0] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-105 transition-all text-center"
+                className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-white via-[#f1f5f9] to-[#e2e8f0] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <span>Explore My Work</span>
                 <ArrowUpRight size={16} />
@@ -162,7 +160,7 @@ export default function Home() {
                 href="https://github.com/Subhan-Haider"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/10 hover:border-white/30 transition-all text-center"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/10 hover:border-white/30 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <Github size={16} />
                 <span>GitHub Profile</span>
@@ -170,7 +168,7 @@ export default function Home() {
 
               <Link
                 href="/resume"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3.5 text-sm font-medium text-[#cbd5e1] hover:text-white hover:border-white/30 transition-all text-center"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3.5 text-sm font-medium text-[#cbd5e1] hover:text-white hover:border-white/30 active:scale-98 transition-all text-center min-h-[44px]"
               >
                 <span>Resume</span>
                 <ArrowUpRight size={14} />
@@ -182,10 +180,10 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t border-white/[0.08]"
+              className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t border-white/[0.08]"
             >
               {stats.map((item) => (
-                <div key={item.label}>
+                <div key={item.label} className="p-1">
                   <div className="font-display text-2xl sm:text-4xl font-extrabold text-white">
                     {item.number}
                   </div>
@@ -200,21 +198,21 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.95, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative lg:h-[620px] flex items-center justify-center"
+            className="relative lg:h-[620px] flex items-center justify-center w-full"
           >
             {/* Ambient Background Box with Glass border */}
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/85 to-[#0c0e17]/95 p-5 sm:p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
+              className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-gradient-to-b from-[#15192c]/85 to-[#0c0e17]/95 p-4 sm:p-6 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-[#34d399]/30 transition-colors"
             >
               {/* Window Bar & Screen Tabs */}
-              <div className="flex flex-wrap items-center justify-between pb-3.5 mb-4 border-b border-white/10 text-xs font-mono gap-2">
+              <div className="flex flex-wrap items-center justify-between pb-3.5 mb-3 sm:mb-4 border-b border-white/10 text-xs font-mono gap-2">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#eab308]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
-                  <span className="ml-2 text-white/80 font-semibold font-mono text-[11px]">
+                  <span className="ml-2 text-white/80 font-semibold font-mono text-[11px] truncate max-w-[140px] sm:max-w-none">
                     {currentHero.file}
                   </span>
                 </div>
@@ -225,12 +223,12 @@ export default function Home() {
               </div>
 
               {/* Screenshots Carousel Selector Tabs */}
-              <div className="flex items-center justify-center gap-1.5 mb-4 p-1 bg-black/40 border border-white/5 rounded-full">
+              <div className="flex items-center gap-1.5 mb-3 sm:mb-4 p-1 bg-black/40 border border-white/5 rounded-full overflow-x-auto scrollbar-none">
                 {safeScreenshots.map((item, idx) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveHeroIndex(idx)}
-                    className={`flex-1 py-1.5 px-3 rounded-full text-[11px] font-mono transition-all text-center truncate ${
+                    className={`flex-1 min-w-[70px] py-1.5 px-2.5 rounded-full text-[11px] font-mono transition-all text-center truncate ${
                       currentIdx === idx
                         ? "bg-[#34d399] text-[#090a12] font-bold shadow-[0_0_12px_rgba(52,211,153,0.35)]"
                         : "text-[#94a3b8] hover:text-white hover:bg-white/5"
@@ -242,33 +240,32 @@ export default function Home() {
               </div>
 
               {/* Smartphone Simulator with Real Screenshot */}
-              <div className="relative mx-auto w-full max-w-[290px] sm:max-w-[310px] aspect-[9/18.5] rounded-[2.2rem] border-[7px] border-[#1e2238] bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between group">
+              <div className="relative mx-auto w-full max-w-[270px] sm:max-w-[310px] aspect-[9/18.5] rounded-[2.2rem] border-[6px] sm:border-[7px] border-[#1e2238] bg-[#07080e] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between group">
                 {/* Speaker Notch & Camera */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
-                  <div className="w-5 h-1 rounded-full bg-[#0d0f1a]" />
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 h-3.5 sm:h-4 w-20 sm:w-24 rounded-full bg-[#1e2238] z-30 flex items-center justify-center">
+                  <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#0d0f1a] mr-2" />
+                  <div className="w-4 sm:w-5 h-1 rounded-full bg-[#0d0f1a]" />
                 </div>
 
                 {/* Left/Right Quick Navigation Arrows */}
                 <button
                   onClick={() =>
                     setActiveHeroIndex((prev) =>
-                      prev === 0 ? safeScreenshots.length - 1 : prev - 1
+                      (prev - 1 + safeScreenshots.length) % safeScreenshots.length
                     )
                   }
-                  aria-label="Previous Screenshot"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-md hover:bg-black/80 hover:scale-110"
+                  aria-label="Previous screenshot"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
                   <ChevronLeft size={16} />
                 </button>
+
                 <button
                   onClick={() =>
-                    setActiveHeroIndex((prev) =>
-                      prev === safeScreenshots.length - 1 ? 0 : prev + 1
-                    )
+                    setActiveHeroIndex((prev) => (prev + 1) % safeScreenshots.length)
                   }
-                  aria-label="Next Screenshot"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-md hover:bg-black/80 hover:scale-110"
+                  aria-label="Next screenshot"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#34d399] hover:text-[#090a12] active:scale-95 transition-all"
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -1001,10 +998,10 @@ export default function Home() {
                   or simply want to connect, my inbox is always open.
                 </p>
 
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
                   <Link
                     href="/contact"
-                    className="flex items-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] hover:scale-105 transition-all"
+                    className="flex items-center justify-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] hover:scale-105 active:scale-98 transition-all text-center min-h-[44px]"
                   >
                     <span>Get in Touch</span>
                     <ArrowUpRight size={16} />
@@ -1012,7 +1009,7 @@ export default function Home() {
 
                   <Link
                     href="/resume"
-                    className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition-all"
+                    className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 active:scale-98 transition-all text-center min-h-[44px]"
                   >
                     <span>View Complete Resume</span>
                     <ArrowUpRight size={14} />
