@@ -961,7 +961,7 @@ export default function Home() {
                     href="/contact"
                     className="flex items-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] hover:scale-105 transition-all"
                   >
-                    <span></span>
+                    <span>Get in Touch</span>
                     <ArrowUpRight size={16} />
                   </Link>
 
