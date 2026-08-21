@@ -82,9 +82,6 @@ export default function ContactPage() {
           <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] items-start">
             {/* Left Column: Direct Info */}
             <div>
-              <GlowBadge variant="emerald">
-                <span>GET IN TOUCH</span>
-              </GlowBadge>
 
               <h1 className="display-title mt-4 text-4xl sm:text-6xl font-extrabold text-white">
                 START A <br />

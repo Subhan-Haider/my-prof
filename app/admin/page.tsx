@@ -227,6 +227,7 @@ export default function AdminPage() {
     solution: "",
     liveUrl: "",
     githubUrl: "",
+    logoUrl: "",
   });
   const [stackInput, setStackInput] = useState("");
   const [featuresInput, setFeaturesInput] = useState("");
@@ -280,6 +281,7 @@ export default function AdminPage() {
       solution: "",
       liveUrl: "",
       githubUrl: "https://github.com/Subhan-Haider",
+      logoUrl: "",
     });
     setStackInput("Kotlin, Jetpack Compose, Room DB");
     setFeaturesInput("Real-time logging\nOffline first\nMaterial 3 theming");
@@ -315,6 +317,7 @@ export default function AdminPage() {
       solution: projectForm.solution,
       liveUrl: projectForm.liveUrl,
       githubUrl: projectForm.githubUrl,
+      logoUrl: projectForm.logoUrl,
     };
 
     if (isCreatingProject) {
@@ -1637,7 +1640,20 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
+                    Logo / Icon URL
+                  </label>
+                  <input
+                    type="text"
+                    value={projectForm.logoUrl || ""}
+                    onChange={(e) => setProjectForm({ ...projectForm, logoUrl: e.target.value })}
+                    placeholder="/images/logo.png"
+                    className="w-full rounded-xl border border-white/10 bg-[#090a12]/80 px-3.5 py-2 text-xs text-white font-mono focus:border-[#34d399] focus:outline-none"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-xs font-mono text-[#94a3b8] mb-1.5">
                     Live Demo / Tester URL

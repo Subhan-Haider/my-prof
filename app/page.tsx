@@ -68,7 +68,7 @@ export default function Home() {
           setRepos(data.slice(0, 4));
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingRepos(false));
 
     fetch("/api/data")
@@ -489,9 +489,17 @@ export default function Home() {
                         <div className="space-y-3 my-auto">
                           <div className="rounded-xl border border-white/10 bg-[#090a12]/80 p-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-[#6366f1]/20 text-[#818cf8] flex items-center justify-center font-mono font-bold">
-                                APK
-                              </div>
+                              {project.logoUrl ? (
+                                <img 
+                                  src={project.logoUrl} 
+                                  alt="Logo" 
+                                  className="w-8 h-8 rounded-lg object-contain bg-white/5"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-lg bg-[#6366f1]/20 text-[#818cf8] flex items-center justify-center font-mono font-bold">
+                                  APK
+                                </div>
+                              )}
                               <div>
                                 <h4 className="text-xs font-bold text-white">DailyFinance_v1.2.apk</h4>
                                 <span className="text-[10px] text-[#64748b]">Build #42 • 14.8 MB</span>
@@ -506,6 +514,15 @@ export default function Home() {
                               </span>
                             </div>
                           </div>
+                        </div>
+                      ) : project.logoUrl ? (
+                        <div className="space-y-3 my-auto flex flex-col items-center justify-center text-center">
+                          <img 
+                            src={project.logoUrl} 
+                            alt={project.title} 
+                            className="w-20 h-20 rounded-2xl object-contain bg-white/5 p-2 shadow-lg mx-auto"
+                          />
+                          <h4 className="text-sm font-bold text-white mt-2">{project.title}</h4>
                         </div>
                       ) : (
                         <div className="space-y-3 my-auto">
@@ -806,67 +823,67 @@ export default function Home() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {repos.length > 0
               ? repos.map((repo, i) => (
-                  <Reveal key={repo.name} delay={i * 0.1}>
-                    <a
-                      href={repo.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 hover:bg-[#15192c]/80 transition-all"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between text-[#64748b] group-hover:text-white transition-colors">
-                          <FolderGit2 size={16} />
-                          <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <h4 className="mt-3 font-display font-bold text-white text-base truncate">
-                          {repo.name}
-                        </h4>
-                        <p className="mt-2 text-xs text-[#94a3b8] line-clamp-2 leading-relaxed">
-                          {repo.description || "Open source experiment and code shared on GitHub."}
-                        </p>
+                <Reveal key={repo.name} delay={i * 0.1}>
+                  <a
+                    href={repo.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 hover:bg-[#15192c]/80 transition-all"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-[#64748b] group-hover:text-white transition-colors">
+                        <FolderGit2 size={16} />
+                        <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
+                      <h4 className="mt-3 font-display font-bold text-white text-base truncate">
+                        {repo.name}
+                      </h4>
+                      <p className="mt-2 text-xs text-[#94a3b8] line-clamp-2 leading-relaxed">
+                        {repo.description || "Open source experiment and code shared on GitHub."}
+                      </p>
+                    </div>
 
-                      <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
-                        <span className="text-[#34d399]">{repo.language || "Code"}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1">
-                            <Star size={11} /> {repo.stars}
-                          </span>
-                        </div>
+                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
+                      <span className="text-[#34d399]">{repo.language || "Code"}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <Star size={11} /> {repo.stars}
+                        </span>
                       </div>
-                    </a>
-                  </Reveal>
-                ))
+                    </div>
+                  </a>
+                </Reveal>
+              ))
               : [
-                  { name: "Daily-Finance-Android", desc: "Native Jetpack Compose finance manager.", lang: "Kotlin" },
-                  { name: "app-tester-platform", desc: "Web platform for Android APK distribution.", lang: "TypeScript" },
-                  { name: "android-compose-canvas", desc: "Custom reactive graphing components.", lang: "Kotlin" },
-                  { name: "subhan-portfolio", desc: "Next.js 15 personal developer platform.", lang: "TypeScript" },
-                ].map((item, i) => (
-                  <Reveal key={item.name} delay={i * 0.1}>
-                    <a
-                      href="https://github.com/Subhan-Haider"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 transition-all"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between text-[#64748b]">
-                          <FolderGit2 size={16} />
-                          <ArrowUpRight size={14} />
-                        </div>
-                        <h4 className="mt-3 font-display font-bold text-white text-base">
-                          {item.name}
-                        </h4>
-                        <p className="mt-2 text-xs text-[#94a3b8] leading-relaxed">{item.desc}</p>
+                { name: "Daily-Finance-Android", desc: "Native Jetpack Compose finance manager.", lang: "Kotlin" },
+                { name: "app-tester-platform", desc: "Web platform for Android APK distribution.", lang: "TypeScript" },
+                { name: "android-compose-canvas", desc: "Custom reactive graphing components.", lang: "Kotlin" },
+                { name: "subhan-portfolio", desc: "Next.js 15 personal developer platform.", lang: "TypeScript" },
+              ].map((item, i) => (
+                <Reveal key={item.name} delay={i * 0.1}>
+                  <a
+                    href="https://github.com/Subhan-Haider"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0f111d]/70 p-5 backdrop-blur-md hover:border-[#34d399]/40 transition-all"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-[#64748b]">
+                        <FolderGit2 size={16} />
+                        <ArrowUpRight size={14} />
                       </div>
-                      <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
-                        <span className="text-[#34d399]">{item.lang}</span>
-                        <span>Open Source</span>
-                      </div>
-                    </a>
-                  </Reveal>
-                ))}
+                      <h4 className="mt-3 font-display font-bold text-white text-base">
+                        {item.name}
+                      </h4>
+                      <p className="mt-2 text-xs text-[#94a3b8] leading-relaxed">{item.desc}</p>
+                    </div>
+                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5 text-[11px] font-mono text-[#64748b]">
+                      <span className="text-[#34d399]">{item.lang}</span>
+                      <span>Open Source</span>
+                    </div>
+                  </a>
+                </Reveal>
+              ))}
           </div>
         </div>
       </section>
@@ -940,7 +957,7 @@ export default function Home() {
                     href="/contact"
                     className="flex items-center gap-2 rounded-full bg-[#34d399] px-6 py-3.5 text-sm font-bold text-[#090a12] shadow-lg hover:bg-[#6ee7b7] hover:scale-105 transition-all"
                   >
-                    <span>Get In Touch</span>
+                    <span></span>
                     <ArrowUpRight size={16} />
                   </Link>
 

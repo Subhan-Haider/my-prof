@@ -14,6 +14,7 @@ export type Project = {
   liveUrl?: string;
   githubUrl?: string;
   year?: string;
+  logoUrl?: string;
 };
 
 export const projects: Project[] = [
