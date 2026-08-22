@@ -57,6 +57,9 @@ import {
   ArrowRight,
   FolderGit2,
   GitBranch,
+  GitFork,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -190,6 +193,14 @@ export default function AdminPage() {
     stars: 0,
   });
   const [isSyncingGithub, setIsSyncingGithub] = useState(false);
+
+  // GitHub Explorer & Repo Picker State
+  const [isBrowsingGithubRepos, setIsBrowsingGithubRepos] = useState(false);
+  const [githubBrowserLoading, setGithubBrowserLoading] = useState(false);
+  const [availableGithubRepos, setAvailableGithubRepos] = useState<any[]>([]);
+  const [githubSearchFilter, setGithubSearchFilter] = useState("");
+  const [githubLanguageFilter, setGithubLanguageFilter] = useState("all");
+  const [selectedRepoNames, setSelectedRepoNames] = useState<string[]>([]);
 
   const [activeHeroPreview, setActiveHeroPreview] = useState(0);
   const [uploadingHeroId, setUploadingHeroId] = useState<string | null>(null);
@@ -1084,6 +1095,119 @@ export default function AdminPage() {
     } finally {
       setIsSyncingGithub(false);
     }
+  };
+
+  const handleOpenGithubBrowser = async () => {
+    setIsBrowsingGithubRepos(true);
+    setGithubSearchFilter("");
+    setGithubLanguageFilter("all");
+    setSelectedRepoNames([]);
+
+    if (availableGithubRepos.length === 0) {
+      setGithubBrowserLoading(true);
+      try {
+        const res = await fetch("/api/github?action=browse");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.repos && Array.isArray(data.repos)) {
+            setAvailableGithubRepos(data.repos);
+          }
+        }
+      } catch {
+        showToast("Error loading GitHub repositories", "error");
+      } finally {
+        setGithubBrowserLoading(false);
+      }
+    }
+  };
+
+  const handleRefreshAvailableRepos = async () => {
+    setGithubBrowserLoading(true);
+    try {
+      const res = await fetch("/api/github?action=browse");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.repos && Array.isArray(data.repos)) {
+          setAvailableGithubRepos(data.repos);
+          showToast(`Refreshed ${data.repos.length} repositories from GitHub!`);
+        }
+      }
+    } catch {
+      showToast("Error fetching from GitHub", "error");
+    } finally {
+      setGithubBrowserLoading(false);
+    }
+  };
+
+  const handleImportSingleRepo = async (repo: any) => {
+    const cleanRepo: GitHubActivityRepo = {
+      name: repo.name,
+      description: repo.description || "Open source experiment and code shared on GitHub.",
+      url: repo.url,
+      language: repo.language || "TypeScript",
+      stars: Number(repo.stars) || 0,
+      updatedAt: repo.updatedAt,
+    };
+
+    let updated: GitHubActivityRepo[];
+    const exists = githubList.some((r) => r.name.toLowerCase() === cleanRepo.name.toLowerCase());
+    if (exists) {
+      updated = githubList.map((r) =>
+        r.name.toLowerCase() === cleanRepo.name.toLowerCase() ? cleanRepo : r
+      );
+      showToast(`Updated "${cleanRepo.name}" in Live GitHub Activity!`);
+    } else {
+      updated = [...githubList, cleanRepo];
+      showToast(`Added "${cleanRepo.name}" to Live GitHub Activity!`);
+    }
+
+    setGithubList(updated);
+    await persistData({ githubRepos: updated });
+  };
+
+  const handleImportSelectedRepos = async () => {
+    if (selectedRepoNames.length === 0) {
+      showToast("Please select at least one repository to import", "error");
+      return;
+    }
+
+    const reposToImport = availableGithubRepos.filter((r) => selectedRepoNames.includes(r.name));
+    let updated = [...githubList];
+
+    for (const r of reposToImport) {
+      const cleanRepo: GitHubActivityRepo = {
+        name: r.name,
+        description: r.description || "Open source experiment and code shared on GitHub.",
+        url: r.url,
+        language: r.language || "TypeScript",
+        stars: Number(r.stars) || 0,
+        updatedAt: r.updatedAt,
+      };
+
+      const existingIndex = updated.findIndex((x) => x.name.toLowerCase() === cleanRepo.name.toLowerCase());
+      if (existingIndex >= 0) {
+        updated[existingIndex] = cleanRepo;
+      } else {
+        updated.push(cleanRepo);
+      }
+    }
+
+    setGithubList(updated);
+    await persistData({ githubRepos: updated });
+    setIsBrowsingGithubRepos(false);
+    setSelectedRepoNames([]);
+    showToast(`Imported ${reposToImport.length} repositories into Live GitHub Activity!`);
+  };
+
+  const handleSelectRepoForForm = (repo: any) => {
+    setGithubForm({
+      name: repo.name,
+      description: repo.description || "Open source experiment and code shared on GitHub.",
+      url: repo.url,
+      language: repo.language || "TypeScript",
+      stars: Number(repo.stars) || 0,
+    });
+    showToast(`Auto-filled details from "${repo.name}"`);
   };
 
   // Export JSON Backup
@@ -2166,6 +2290,15 @@ export default function AdminPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        onClick={handleOpenGithubBrowser}
+                        className="flex items-center gap-1.5 rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 px-3.5 py-2 text-xs font-mono text-[#38bdf8] hover:bg-[#38bdf8]/20 transition-all cursor-pointer shadow-sm"
+                        title="Browse and select any repositories from your GitHub account"
+                      >
+                        <FolderGit2 size={14} />
+                        <span>Browse & Select Repos</span>
+                      </button>
+
                       <button
                         onClick={handleSyncGithubFromAPI}
                         disabled={isSyncingGithub}
@@ -3715,7 +3848,63 @@ export default function AdminPage() {
               Configure name, description, primary language, and star metrics.
             </p>
 
-            <form onSubmit={handleSaveGithubRepo} className="mt-6 space-y-4">
+            {/* Quick Auto-Fill Dropdown from GitHub */}
+            {isCreatingGithubRepo && (
+              <div className="mt-4 p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-medium)]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-mono font-bold text-[#38bdf8] flex items-center gap-1.5">
+                    <Sparkles size={13} /> Quick Select from My GitHub
+                  </span>
+                  {availableGithubRepos.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={handleRefreshAvailableRepos}
+                      disabled={githubBrowserLoading}
+                      className="text-[10px] font-mono text-[var(--text-muted)] hover:text-[#38bdf8] underline cursor-pointer"
+                    >
+                      {githubBrowserLoading ? "Loading..." : "Load Repositories"}
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                      {availableGithubRepos.length} Repos available
+                    </span>
+                  )}
+                </div>
+                {availableGithubRepos.length > 0 ? (
+                  <select
+                    onChange={(e) => {
+                      const found = availableGithubRepos.find((r) => r.name === e.target.value);
+                      if (found) handleSelectRepoForForm(found);
+                    }}
+                    defaultValue=""
+                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                  >
+                    <option value="" disabled>-- Pick a repository to auto-fill fields --</option>
+                    {availableGithubRepos.map((r) => (
+                      <option key={r.name} value={r.name}>
+                        {r.name} ({r.language || "Code"}) {r.stars > 0 ? `⭐ ${r.stars}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] text-[var(--text-muted)]">
+                      Want to auto-fill from your GitHub account?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRefreshAvailableRepos}
+                      disabled={githubBrowserLoading}
+                      className="px-2.5 py-1 rounded-lg bg-[#38bdf8]/15 text-[#38bdf8] text-[10px] font-mono hover:bg-[#38bdf8]/25 cursor-pointer transition-colors"
+                    >
+                      {githubBrowserLoading ? "Fetching..." : "Fetch My Repos"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveGithubRepo} className="mt-4 space-y-4">
               <div>
                 <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
                   Repository Name *
@@ -3856,6 +4045,321 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* GITHUB REPOSITORY EXPLORER & SELECTOR MODAL */}
+      {isBrowsingGithubRepos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-hidden">
+          <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]">
+              <div>
+                <div className="flex items-center gap-2 text-[#38bdf8] mb-1">
+                  <FolderGit2 size={18} />
+                  <span className="text-xs font-mono font-bold tracking-wide uppercase">
+                    GitHub App Explorer
+                  </span>
+                  <span className="text-[10px] font-mono bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 px-2 py-0.5 rounded-full font-bold">
+                    @Subhan-Haider
+                  </span>
+                </div>
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
+                  Select & Add Repositories
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRefreshAvailableRepos}
+                  disabled={githubBrowserLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface)] text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[#38bdf8] transition-all cursor-pointer disabled:opacity-50"
+                  title="Reload repositories from GitHub API"
+                >
+                  <RefreshCw size={13} className={githubBrowserLoading ? "animate-spin text-[#38bdf8]" : ""} />
+                  <span className="hidden sm:inline">{githubBrowserLoading ? "Loading..." : "Refresh"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsBrowsingGithubRepos(false)}
+                  className="p-2 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="p-4 sm:p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                <div className="relative flex-1">
+                  <Search size={15} className="absolute left-3.5 top-3 text-[var(--text-muted)]" />
+                  <input
+                    type="text"
+                    placeholder="Search repositories by name, language, or topic..."
+                    value={githubSearchFilter}
+                    onChange={(e) => setGithubSearchFilter(e.target.value)}
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] pl-10 pr-4 py-2 text-xs text-[var(--text-primary)] focus:border-[#38bdf8] focus:outline-none"
+                  />
+                  {githubSearchFilter && (
+                    <button
+                      onClick={() => setGithubSearchFilter("")}
+                      className="absolute right-3 top-2.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Selection Counter & Batch Action */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {selectedRepoNames.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleImportSelectedRepos}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#34d399] text-[#090a12] text-xs font-bold shadow-md hover:bg-[#6ee7b7] cursor-pointer transition-all"
+                    >
+                      <Check size={14} />
+                      <span>Import Selected ({selectedRepoNames.length})</span>
+                    </button>
+                  )}
+                  {availableGithubRepos.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filteredNames = availableGithubRepos
+                          .filter((r) => {
+                            const matchSearch =
+                              r.name.toLowerCase().includes(githubSearchFilter.toLowerCase()) ||
+                              r.description.toLowerCase().includes(githubSearchFilter.toLowerCase()) ||
+                              (r.language && r.language.toLowerCase().includes(githubSearchFilter.toLowerCase()));
+                            const matchLang =
+                              githubLanguageFilter === "all" ||
+                              (r.language && r.language.toLowerCase() === githubLanguageFilter.toLowerCase());
+                            return matchSearch && matchLang;
+                          })
+                          .map((r) => r.name);
+
+                        if (selectedRepoNames.length === filteredNames.length && filteredNames.length > 0) {
+                          setSelectedRepoNames([]);
+                        } else {
+                          setSelectedRepoNames(filteredNames);
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                    >
+                      {selectedRepoNames.length > 0 ? "Clear Selection" : "Select All Filtered"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Language Filter Pills */}
+              {availableGithubRepos.length > 0 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                  <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase shrink-0 mr-1">
+                    Lang:
+                  </span>
+                  {["all", ...Array.from(new Set(availableGithubRepos.map((r) => r.language).filter(Boolean)))].map(
+                    (lang: any) => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => setGithubLanguageFilter(lang)}
+                        className={`text-[10px] font-mono px-2.5 py-1 rounded-lg shrink-0 transition-colors cursor-pointer ${
+                          githubLanguageFilter.toLowerCase() === lang.toLowerCase()
+                            ? "bg-[#38bdf8] text-[#090a12] font-bold shadow-sm"
+                            : "bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        {lang === "all" ? "All Languages" : lang}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Repositories Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 divide-y divide-[var(--border-subtle)]">
+              {githubBrowserLoading ? (
+                <div className="py-16 text-center">
+                  <RefreshCw size={28} className="animate-spin text-[#38bdf8] mx-auto mb-3" />
+                  <p className="text-sm font-mono text-[var(--text-primary)] font-bold">
+                    Fetching repositories from GitHub...
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    Connecting to GitHub API using your GitHub App credentials.
+                  </p>
+                </div>
+              ) : availableGithubRepos.length === 0 ? (
+                <div className="py-16 text-center">
+                  <FolderGit2 size={36} className="text-[var(--text-muted)] mx-auto mb-3 opacity-60" />
+                  <p className="text-sm font-bold text-[var(--text-primary)]">
+                    No repositories loaded yet
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-sm mx-auto">
+                    Click refresh to pull all public and accessible repositories from your GitHub account.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRefreshAvailableRepos}
+                    className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#38bdf8] text-[#090a12] text-xs font-bold hover:bg-[#7dd3fc] cursor-pointer transition-all"
+                  >
+                    <RefreshCw size={13} />
+                    <span>Load My GitHub Repositories</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {availableGithubRepos
+                    .filter((r) => {
+                      const matchSearch =
+                        r.name.toLowerCase().includes(githubSearchFilter.toLowerCase()) ||
+                        r.description.toLowerCase().includes(githubSearchFilter.toLowerCase()) ||
+                        (r.language && r.language.toLowerCase().includes(githubSearchFilter.toLowerCase()));
+                      const matchLang =
+                        githubLanguageFilter === "all" ||
+                        (r.language && r.language.toLowerCase() === githubLanguageFilter.toLowerCase());
+                      return matchSearch && matchLang;
+                    })
+                    .map((repo) => {
+                      const isSelected = selectedRepoNames.includes(repo.name);
+                      const isAlreadyInShowcase = githubList.some(
+                        (g) => g.name.toLowerCase() === repo.name.toLowerCase()
+                      );
+
+                      return (
+                        <div
+                          key={repo.name}
+                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border transition-all ${
+                            isSelected
+                              ? "border-[#38bdf8] bg-[#38bdf8]/5 shadow-sm"
+                              : isAlreadyInShowcase
+                              ? "border-[var(--border-medium)] bg-[var(--bg-surface-elevated)]"
+                              : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-medium)] hover:bg-[var(--bg-surface-elevated)]"
+                          }`}
+                        >
+                          {/* Selection Checkbox & Info */}
+                          <div className="flex items-start gap-3.5 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (isSelected) {
+                                  setSelectedRepoNames(selectedRepoNames.filter((n) => n !== repo.name));
+                                } else {
+                                  setSelectedRepoNames([...selectedRepoNames, repo.name]);
+                                }
+                              }}
+                              className="mt-1 text-[var(--text-muted)] hover:text-[#38bdf8] transition-colors cursor-pointer shrink-0"
+                            >
+                              {isSelected ? (
+                                <CheckSquare size={18} className="text-[#38bdf8]" />
+                              ) : (
+                                <Square size={18} />
+                              )}
+                            </button>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <a
+                                  href={repo.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="font-display font-bold text-sm text-[var(--text-primary)] hover:text-[#38bdf8] transition-colors flex items-center gap-1"
+                                >
+                                  <span>{repo.name}</span>
+                                  <ExternalLink size={12} className="opacity-60" />
+                                </a>
+
+                                {isAlreadyInShowcase && (
+                                  <span className="text-[10px] font-mono font-bold bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <Check size={10} /> Active in Showcase
+                                  </span>
+                                )}
+
+                                {repo.isFork && (
+                                  <span className="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-md">
+                                    Fork
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
+                                {repo.description || "No description provided on GitHub."}
+                              </p>
+
+                              {/* Repo Meta Metrics */}
+                              <div className="flex items-center gap-3.5 mt-2 text-[11px] font-mono text-[var(--text-muted)] flex-wrap">
+                                <span className="text-emerald-500 dark:text-[#34d399] font-medium">
+                                  {repo.language || "Code"}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Star size={11} className="text-amber-400" /> {repo.stars || 0}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <GitFork size={11} /> {repo.forks || 0}
+                                </span>
+                                {repo.updatedAt && (
+                                  <span className="text-[10px] opacity-75">
+                                    Updated: {new Date(repo.updatedAt).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quick Add / Auto-Fill Buttons */}
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <button
+                              type="button"
+                              onClick={() => handleImportSingleRepo(repo)}
+                              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                                isAlreadyInShowcase
+                                  ? "bg-[var(--bg-surface)] border border-[var(--border-medium)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[#34d399]"
+                                  : "bg-[#34d399] text-[#090a12] hover:bg-[#6ee7b7] shadow-sm"
+                              }`}
+                            >
+                              <Check size={12} />
+                              <span>{isAlreadyInShowcase ? "Update Card" : "+ Add to Showcase"}</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]">
+              <span className="text-xs font-mono text-[var(--text-secondary)]">
+                {availableGithubRepos.length} Total Repositories available
+              </span>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsBrowsingGithubRepos(false)}
+                  className="px-4 py-2 rounded-full bg-[var(--bg-surface)] border border-[var(--border-medium)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  Close
+                </button>
+                {selectedRepoNames.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleImportSelectedRepos}
+                    className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-all cursor-pointer shadow-md"
+                  >
+                    Import ({selectedRepoNames.length}) Repositories
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       )}
