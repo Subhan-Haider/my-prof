@@ -1,21 +1,25 @@
 import nodemailer from "nodemailer";
 
-const host = process.env.EMAIL_HOST || "smtp.gmail.com";
-const port = Number(process.env.EMAIL_PORT) || 587;
-const user = process.env.EMAIL_USER || "ssuuu3031@gmail.com";
-const pass = process.env.EMAIL_PASS || "ehtzwcwblwhpcflo";
-const from = process.env.EMAIL_FROM || `LootOps Command <${user}>`;
-
 export function getEmailTransporter() {
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass,
-    },
-  });
+  const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+  const port = Number(process.env.EMAIL_PORT) || 587;
+  const user = (process.env.EMAIL_USER || process.env.SMTP_USER || "subhansyed500@gmail.com").trim();
+  const rawPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || "hjqfqvsofomikmli").trim();
+  const pass = rawPass.replace(/\s+/g, "");
+  const from = process.env.EMAIL_FROM || `LootOps Command <${user}>`;
+
+  return {
+    transporter: nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: {
+        user,
+        pass,
+      },
+    }),
+    from,
+  };
 }
 
 export async function sendAdminVerificationEmail(
@@ -23,7 +27,7 @@ export async function sendAdminVerificationEmail(
   verificationCode: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const transporter = getEmailTransporter();
+    const { transporter, from } = getEmailTransporter();
 
     const htmlContent = `
     <!DOCTYPE html>
