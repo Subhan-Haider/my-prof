@@ -55,6 +55,8 @@ import {
   Send,
   MailCheck,
   ArrowRight,
+  FolderGit2,
+  GitBranch,
 } from "lucide-react";
 import { Nav, GlowBadge } from "@/components/site";
 import {
@@ -63,10 +65,12 @@ import {
   journey as initialJourney,
   extensions as initialExtensions,
   heroScreenshots as initialHeroScreenshots,
+  githubRepos as initialGithubRepos,
   HeroScreenshot,
   Project,
   TechCategory,
   Extension,
+  GitHubActivityRepo,
 } from "@/lib/data";
 
 interface MessageItem {
@@ -121,6 +125,7 @@ const defaultSettings = {
 type AdminTab =
   | "Projects"
   | "Hero"
+  | "GitHub"
   | "Extensions"
   | "Skills"
   | "Journey"
@@ -174,6 +179,18 @@ export default function AdminPage() {
   const [settings, setSettings] = useState(defaultSettings);
   const [extensionList, setExtensionList] = useState<Extension[]>(initialExtensions);
   const [heroList, setHeroList] = useState<HeroScreenshot[]>(initialHeroScreenshots);
+  const [githubList, setGithubList] = useState<GitHubActivityRepo[]>(initialGithubRepos);
+  const [isCreatingGithubRepo, setIsCreatingGithubRepo] = useState(false);
+  const [editingGithubRepo, setEditingGithubRepo] = useState<GitHubActivityRepo | null>(null);
+  const [githubForm, setGithubForm] = useState<GitHubActivityRepo>({
+    name: "",
+    description: "",
+    url: "",
+    language: "TypeScript",
+    stars: 0,
+  });
+  const [isSyncingGithub, setIsSyncingGithub] = useState(false);
+
   const [activeHeroPreview, setActiveHeroPreview] = useState(0);
   const [uploadingHeroId, setUploadingHeroId] = useState<string | null>(null);
   const [uploadingResume, setUploadingResume] = useState(false);
@@ -194,6 +211,9 @@ export default function AdminPage() {
         if (data.messages && Array.isArray(data.messages)) setMessages(data.messages);
         if (data.heroScreenshots && Array.isArray(data.heroScreenshots) && data.heroScreenshots.length > 0) {
           setHeroList(data.heroScreenshots);
+        }
+        if (data.githubRepos && Array.isArray(data.githubRepos) && data.githubRepos.length > 0) {
+          setGithubList(data.githubRepos);
         }
         setExtraData({ stats: data.stats, technologies: data.technologies });
       }
@@ -445,6 +465,7 @@ export default function AdminPage() {
       settings: overrides.settings ?? settings,
       messages: overrides.messages ?? messages,
       heroScreenshots: overrides.heroScreenshots ?? heroList,
+      githubRepos: overrides.githubRepos ?? githubList,
       ...extraData,
       ...overrides,
     };
@@ -973,6 +994,98 @@ export default function AdminPage() {
     }
   };
 
+  // GitHub Activity Handlers
+  const handleOpenCreateGithubRepo = () => {
+    setGithubForm({
+      name: "",
+      description: "Open source experiment and code shared on GitHub.",
+      url: "https://github.com/Subhan-Haider/",
+      language: "TypeScript",
+      stars: 0,
+    });
+    setIsCreatingGithubRepo(true);
+    setEditingGithubRepo(null);
+  };
+
+  const handleOpenEditGithubRepo = (repo: GitHubActivityRepo) => {
+    setGithubForm({ ...repo });
+    setEditingGithubRepo(repo);
+    setIsCreatingGithubRepo(false);
+  };
+
+  const handleSaveGithubRepo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!githubForm.name.trim()) {
+      showToast("Repository name is required", "error");
+      return;
+    }
+    const cleanRepo: GitHubActivityRepo = {
+      name: githubForm.name.trim(),
+      description: githubForm.description.trim() || "Open source experiment and code shared on GitHub.",
+      url: githubForm.url.trim() || `https://github.com/Subhan-Haider/${githubForm.name.trim()}`,
+      language: githubForm.language.trim() || "TypeScript",
+      stars: Number(githubForm.stars) || 0,
+    };
+
+    let updated: GitHubActivityRepo[] = [];
+    if (isCreatingGithubRepo) {
+      updated = [...githubList, cleanRepo];
+      setGithubList(updated);
+      showToast(`Added "${cleanRepo.name}" to Live GitHub Activity!`);
+    } else if (editingGithubRepo) {
+      updated = githubList.map((r) => (r.name === editingGithubRepo.name ? cleanRepo : r));
+      setGithubList(updated);
+      showToast(`Updated "${cleanRepo.name}" repository!`);
+    }
+
+    await persistData({ githubRepos: updated });
+    setIsCreatingGithubRepo(false);
+    setEditingGithubRepo(null);
+  };
+
+  const handleDeleteGithubRepo = async (name: string) => {
+    if (confirm(`Remove "${name}" from Live GitHub Activity?`)) {
+      const updated = githubList.filter((r) => r.name !== name);
+      setGithubList(updated);
+      await persistData({ githubRepos: updated });
+      showToast(`Removed "${name}"`);
+    }
+  };
+
+  const handleMoveGithubRepo = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= githubList.length) return;
+    const updated = [...githubList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    setGithubList(updated);
+    await persistData({ githubRepos: updated });
+    showToast("Reordered GitHub repositories");
+  };
+
+  const handleSyncGithubFromAPI = async () => {
+    try {
+      setIsSyncingGithub(true);
+      const res = await fetch("/api/github?sync=live");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setGithubList(data);
+          await persistData({ githubRepos: data });
+          showToast(`Synced ${data.length} latest repositories from GitHub!`);
+        } else {
+          showToast("No repositories returned from GitHub API", "error");
+        }
+      } else {
+        showToast("Failed to fetch repositories from GitHub", "error");
+      }
+    } catch {
+      showToast("Network error syncing from GitHub", "error");
+    } finally {
+      setIsSyncingGithub(false);
+    }
+  };
+
   // Export JSON Backup
   const handleExportJSON = () => {
     const backup = {
@@ -983,6 +1096,7 @@ export default function AdminPage() {
       journey: journeyList,
       extensions: extensionList,
       heroScreenshots: heroList,
+      githubRepos: githubList,
       messages,
       ...extraData,
     };
@@ -1008,6 +1122,7 @@ export default function AdminPage() {
       setSettings(defaultSettings);
       setExtensionList(initialExtensions);
       setHeroList(initialHeroScreenshots);
+      setGithubList(initialGithubRepos);
       await persistData({
         projects: initialProjects,
         techCategories: initialTechCategories,
@@ -1016,6 +1131,7 @@ export default function AdminPage() {
         settings: defaultSettings,
         extensions: initialExtensions,
         heroScreenshots: initialHeroScreenshots,
+        githubRepos: initialGithubRepos,
       });
       showToast("Reset all collections to initial defaults");
     }
@@ -1518,6 +1634,7 @@ export default function AdminPage() {
                   [
                     { id: "Projects", label: "Projects & Apps", icon: Smartphone, count: projectList.length },
                     { id: "Hero", label: "Hero Showcase", icon: ImageIcon, count: heroList.length },
+                    { id: "GitHub", label: "GitHub Activity", icon: FolderGit2, count: githubList.length },
                     { id: "Extensions", label: "Extensions & Tools", icon: Globe, count: extensionList.length },
                     { id: "Skills", label: "Skills Matrix", icon: Code, count: totalSkillsCount },
                     { id: "Journey", label: "Journey Milestones", icon: GraduationCap, count: journeyList.length },
@@ -2027,6 +2144,187 @@ export default function AdminPage() {
                       ))}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* TAB: GITHUB REPOSITORIES */}
+              {activeTab === "GitHub" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+                          Live GitHub Activity
+                        </h2>
+                        <span className="text-xs font-mono bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-2.5 py-0.5 rounded-full font-bold">
+                          {githubList.length} Repos
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        Customize repositories, descriptions, primary languages, and star badges displayed in the Live GitHub Activity showcase on the homepage.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        onClick={handleSyncGithubFromAPI}
+                        disabled={isSyncingGithub}
+                        className="flex items-center gap-1.5 rounded-full border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] transition-all cursor-pointer disabled:opacity-50"
+                        title="Fetch latest public repositories from github.com/Subhan-Haider"
+                      >
+                        <RefreshCw size={13} className={isSyncingGithub ? "animate-spin text-[#34d399]" : ""} />
+                        <span>{isSyncingGithub ? "Syncing..." : "Sync from GitHub"}</span>
+                      </button>
+
+                      <button
+                        onClick={handleOpenCreateGithubRepo}
+                        className="flex items-center gap-1.5 rounded-full bg-[#34d399] px-4 py-2 text-xs font-bold text-[#090a12] shadow-md hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                      >
+                        <Plus size={15} />
+                        <span>Add Repo Card</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Search / Filter */}
+                  <div className="mt-6 relative">
+                    <Search size={15} className="absolute left-4 top-3.5 text-[var(--text-muted)]" />
+                    <input
+                      type="text"
+                      placeholder="Filter GitHub repositories by name, language, or description..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] pl-11 pr-4 py-2.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[#34d399] focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Grid of Repository Cards */}
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    {githubList
+                      .filter(
+                        (repo) =>
+                          repo.name.toLowerCase().includes(search.toLowerCase()) ||
+                          repo.language.toLowerCase().includes(search.toLowerCase()) ||
+                          repo.description.toLowerCase().includes(search.toLowerCase())
+                      )
+                      .map((repo, index) => {
+                        return (
+                          <div
+                            key={repo.name + index}
+                            className="group flex flex-col justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] p-5 hover:border-[var(--border-active)] transition-all relative overflow-hidden shadow-sm"
+                          >
+                            <div>
+                              {/* Top Bar */}
+                              <div className="flex items-center justify-between text-[#64748b]">
+                                <div className="flex items-center gap-2 text-emerald-600 dark:text-[#34d399]">
+                                  <FolderGit2 size={16} />
+                                  <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                                    Card #{index + 1}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleMoveGithubRepo(index, "up")}
+                                    disabled={index === 0}
+                                    className="p-1 rounded-lg hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-20 cursor-pointer"
+                                    title="Move Left / Up"
+                                  >
+                                    <ArrowUp size={13} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleMoveGithubRepo(index, "down")}
+                                    disabled={index === githubList.length - 1}
+                                    className="p-1 rounded-lg hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-20 cursor-pointer"
+                                    title="Move Right / Down"
+                                  >
+                                    <ArrowDown size={13} />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Title & Link */}
+                              <div className="mt-3 flex items-baseline justify-between gap-2">
+                                <h4 className="font-display font-bold text-[var(--text-primary)] text-base truncate">
+                                  {repo.name}
+                                </h4>
+                                <a
+                                  href={repo.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[var(--text-muted)] hover:text-[#34d399] transition-colors shrink-0"
+                                  title="Open in GitHub"
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              </div>
+
+                              {/* Description */}
+                              <p className="mt-2 text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                                {repo.description || "Open source experiment and code shared on GitHub."}
+                              </p>
+                            </div>
+
+                            {/* Bottom Info & Action buttons */}
+                            <div className="mt-5 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
+                              <div className="flex items-center gap-3 text-[11px] font-mono">
+                                <span className="text-emerald-600 dark:text-[#34d399] font-medium flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-full bg-[#34d399]" />
+                                  {repo.language || "Code"}
+                                </span>
+                                <span className="flex items-center gap-1 text-[#64748b]">
+                                  <Star size={11} /> {repo.stars}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleOpenEditGithubRepo(repo)}
+                                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] text-xs font-mono text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer"
+                                  title="Edit Repository Details"
+                                >
+                                  <Edit2 size={11} />
+                                  <span>Edit</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleDeleteGithubRepo(repo.name)}
+                                  className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors cursor-pointer"
+                                  title="Delete Repository Card"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {githubList.length === 0 && (
+                    <div className="mt-8 rounded-2xl border border-dashed border-[var(--border-medium)] p-12 text-center">
+                      <FolderGit2 size={36} className="mx-auto text-[var(--text-muted)] opacity-50 mb-3" />
+                      <h3 className="font-display font-bold text-[var(--text-primary)] text-sm">
+                        No GitHub Repositories Configured
+                      </h3>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-sm mx-auto">
+                        Add repository cards manually or sync the latest public repos from your GitHub profile.
+                      </p>
+                      <div className="mt-4 flex items-center justify-center gap-3">
+                        <button
+                          onClick={handleSyncGithubFromAPI}
+                          className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-medium)] text-xs font-mono text-[var(--text-primary)] hover:border-[var(--border-active)] transition-all cursor-pointer"
+                        >
+                          Sync from GitHub
+                        </button>
+                        <button
+                          onClick={handleOpenCreateGithubRepo}
+                          className="px-4 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                        >
+                          + Add Repo Card
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -3385,6 +3683,176 @@ export default function AdminPage() {
                 <button type="submit"
                   className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] cursor-pointer">
                   {isCreatingExtension ? "Add Extension" : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE / EDIT GITHUB REPOSITORY MODAL */}
+      {(isCreatingGithubRepo || editingGithubRepo) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => {
+                setIsCreatingGithubRepo(false);
+                setEditingGithubRepo(null);
+              }}
+              className="absolute right-6 top-6 p-2 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-[#34d399] mb-1">
+              <FolderGit2 size={18} />
+              <span className="text-xs font-mono font-bold tracking-wide uppercase">GitHub Repository Card</span>
+            </div>
+            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+              {isCreatingGithubRepo ? "Add Repository Card" : `Edit: ${editingGithubRepo?.name}`}
+            </h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
+              Configure name, description, primary language, and star metrics.
+            </p>
+
+            <form onSubmit={handleSaveGithubRepo} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                  Repository Name *
+                </label>
+                <input
+                  required
+                  type="text"
+                  placeholder="e.g. my-prof or Daily-Finance-Android"
+                  value={githubForm.name}
+                  onChange={(e) => setGithubForm({ ...githubForm, name: e.target.value })}
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                  GitHub Target URL *
+                </label>
+                <input
+                  required
+                  type="url"
+                  placeholder="https://github.com/Subhan-Haider/..."
+                  value={githubForm.url}
+                  onChange={(e) => setGithubForm({ ...githubForm, url: e.target.value })}
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                    Primary Language
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="TypeScript"
+                    value={githubForm.language}
+                    onChange={(e) => setGithubForm({ ...githubForm, language: e.target.value })}
+                    className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none"
+                  />
+                  {/* Language Presets */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {["TypeScript", "JavaScript", "Kotlin", "Python", "GDScript", "HTML", "Rust", "Go", "C++"].map(
+                      (lang) => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => setGithubForm({ ...githubForm, language: lang })}
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                            githubForm.language.toLowerCase() === lang.toLowerCase()
+                              ? "bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40"
+                              : "bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {lang}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                    Stars Count
+                  </label>
+                  <div className="relative">
+                    <Star size={13} className="absolute left-3.5 top-3 text-[var(--text-muted)]" />
+                    <input
+                      type="number"
+                      min="0"
+                      value={githubForm.stars}
+                      onChange={(e) => setGithubForm({ ...githubForm, stars: Math.max(0, parseInt(e.target.value) || 0) })}
+                      className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] pl-9 pr-3.5 py-2 text-xs text-[var(--text-primary)] font-mono focus:border-[#34d399] focus:outline-none"
+                    />
+                  </div>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-1.5">
+                    Displayed with star badge on the card
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-[var(--text-secondary)] mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Open source experiment and code shared on GitHub."
+                  value={githubForm.description}
+                  onChange={(e) => setGithubForm({ ...githubForm, description: e.target.value })}
+                  className="w-full rounded-xl border border-[var(--border-medium)] bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs text-[var(--text-primary)] focus:border-[#34d399] focus:outline-none resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* LIVE CARD PREVIEW */}
+              <div className="pt-2">
+                <label className="block text-[11px] font-mono text-[var(--text-muted)] uppercase mb-2">
+                  Live Card Preview
+                </label>
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4">
+                  <div className="flex items-center justify-between text-[#64748b]">
+                    <FolderGit2 size={16} />
+                    <ArrowRight size={14} className="rotate-[-45deg]" />
+                  </div>
+                  <h4 className="mt-2 font-display font-bold text-[var(--text-primary)] text-sm truncate">
+                    {githubForm.name || "repository-name"}
+                  </h4>
+                  <p className="mt-1.5 text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                    {githubForm.description || "Open source experiment and code shared on GitHub."}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between pt-3 border-t border-[var(--border-subtle)] text-[11px] font-mono text-[#64748b]">
+                    <span className="text-emerald-600 dark:text-[#34d399] font-medium">
+                      {githubForm.language || "Code"}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star size={11} /> {githubForm.stars}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreatingGithubRepo(false);
+                    setEditingGithubRepo(null);
+                  }}
+                  className="px-4 py-2 rounded-full bg-[var(--bg-surface-elevated)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-full bg-[#34d399] text-xs font-bold text-[#090a12] hover:bg-[#6ee7b7] transition-all cursor-pointer"
+                >
+                  {isCreatingGithubRepo ? "Add Repository" : "Save Changes"}
                 </button>
               </div>
             </form>

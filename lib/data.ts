@@ -354,4 +354,45 @@ export const heroScreenshots: HeroScreenshot[] = [
   },
 ];
 
+export type GitHubActivityRepo = {
+  name: string;
+  description: string;
+  url: string;
+  language: string;
+  stars: number;
+  updatedAt?: string;
+};
+
+export const githubRepos: GitHubActivityRepo[] = [
+  {
+    name: "my-prof",
+    description: "Open source experiment and code shared on GitHub.",
+    url: "https://github.com/Subhan-Haider/my-prof",
+    language: "TypeScript",
+    stars: 0,
+  },
+  {
+    name: "Storage-server-v4-Backend",
+    description: "Open source experiment and code shared on GitHub.",
+    url: "https://github.com/Subhan-Haider/Storage-server-v4-Backend",
+    language: "JavaScript",
+    stars: 0,
+  },
+  {
+    name: "Media-Downloader",
+    description: "A modern, high-performance web application to download media from YouTube, Instagram, and more.",
+    url: "https://github.com/Subhan-Haider/Media-Downloader",
+    language: "HTML",
+    stars: 0,
+  },
+  {
+    name: "Godot-Fighting-game",
+    description: "Open source experiment and code shared on GitHub.",
+    url: "https://github.com/Subhan-Haider/Godot-Fighting-game",
+    language: "GDScript",
+    stars: 1,
+  },
+];
+
+
 

@@ -63,6 +63,19 @@ export default function Home() {
     stats: typeof _stats;
     extensions: typeof _extensions;
     heroScreenshots: HeroScreenshot[];
+    githubRepos?: GitHubRepo[];
+    settings?: {
+      name?: string;
+      tagline?: string;
+      bio?: string;
+      status?: string;
+      isAvailable?: boolean;
+      email?: string;
+      github?: string;
+      testerUrl?: string;
+      resumeUrl?: string;
+      resumeFileName?: string;
+    };
   }>({
     projects: [],
     technologies: [],
@@ -79,14 +92,20 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setRepos(data.slice(0, 4));
+          setRepos(data);
         }
       })
+      .catch(console.error)
+      .finally(() => setLoadingRepos(false));
+
     fetch("/api/data")
       .then((res) => res.json())
       .then((resData) => {
         if (resData) {
           setData(resData);
+          if (Array.isArray(resData.githubRepos) && resData.githubRepos.length > 0) {
+            setRepos(resData.githubRepos);
+          }
         }
       })
       .catch(console.error)
@@ -827,12 +846,16 @@ export default function Home() {
               </div>
 
               <a
-                href="https://github.com/Subhan-Haider"
+                href={data?.settings?.github || "https://github.com/Subhan-Haider"}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-xs font-mono text-emerald-600 dark:text-[#34d399] hover:underline font-medium"
               >
-                <span>github.com/Subhan-Haider</span>
+                <span>
+                  {data?.settings?.github
+                    ? data.settings.github.replace(/^https?:\/\//, "")
+                    : "github.com/Subhan-Haider"}
+                </span>
                 <ArrowUpRight size={14} />
               </a>
             </div>
